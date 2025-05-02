@@ -1,0 +1,73 @@
+body {
+    background: #f9f9f9;
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  .auth-container {
+    width: 100%;
+    max-width: 450px;
+    background: #fff;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 0 25px rgba(0,0,0,0.1);
+    text-align: center;
+  }
+  .auth-tabs .nav-link {
+    color: #333;
+    font-weight: 600;
+  }
+  .auth-tabs .nav-link.active {
+    background: #333;
+    color: #fff;
+    border-radius: 10px;
+  }
+  .form-control {
+    border-radius: 8px;
+  }
+  .btn-dark {
+    width: 100%;
+    border-radius: 10px;
+  }
+  .form-icon {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 10px;
+    color: #aaa;
+  }
+  .form-group {
+    position: relative;
+  }
+  .form-group input {
+    padding-left: 35px;
+  }
+  .brand-title {
+    font-weight: bold;
+    font-size: 1.7rem;
+    color: #333;
+    margin-bottom: 15px;
+  }
+  .btn-google {
+    background: #fff;
+    border: 1px solid #ccc;
+    color: #333;
+    width: 100%;
+    margin-bottom: 15px;
+  }
+  .btn-google i {
+    margin-right: 8px;
+  }
+  .forgot-password {
+    display: block;
+    margin-top: 8px;
+    font-size: 0.9rem;
+  }
+
+  .error-message{
+    color:red;
+    font-size: 0.75rem;
+    display: none;
+  }
