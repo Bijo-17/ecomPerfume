@@ -4,6 +4,7 @@ const env = require("dotenv").config();
 const bcrypt = require("bcrypt")
 const nodemailer = require("nodemailer")
 const session = require("express-session")
+const Address = require("../../models/addressSchema")
 
 
 function generateOtp(){
@@ -116,6 +117,10 @@ const  verifyOtp = async (req,res)=>{
         if(!otp || !email){
            return res.render("forgotPassword",{message:"session expired"})
         } 
+
+        if (Date.now() > otpExpiry) {
+            return res.status(400).json({ success: false, message: "OTP expired. Please resend OTP." });
+          }
         
         if(otp !== enteredOtp ){ 
          return res.json({success:false,message:"otp donot match"})
@@ -158,7 +163,7 @@ const SaveNewPassword = async (req,res)=>{
             return res.render("forgotPassword", { message: "Unable to reset password" });
            }
 
-           req.session.email = null;
+           
 
            return res.render("login", { message: "Password updated successfully", activeTab: "login" });
 
@@ -176,10 +181,92 @@ const SaveNewPassword = async (req,res)=>{
 
 }
 
+    const loadAccount =  async (req,res)=>{
+            
+        const email = req.session.email;
+
+        console.log("acc",req.session.user)
+        try {
+
+            if(!req.session.user || !email) {
+                return res.redirect("/login")       
+            }
+                const user = await User.findOne({email})
+                
+                if(!user){
+                return res.redirect("/login")       
+                } else {
+                console.log(user)
+
+                const [firstName = "" , lastName = "" ] = (user.fullName || "" ).split(' ')
+
+                res.render("account",{layout:"../layout/userAccount", active:"account", user, firstName , lastName})
+                }
+
+        } catch (error) {
+            
+            res.status(500).json("error")
+
+        }
+
+    
+    }
+
+
+const editAccount = async (req,res)=>{
+ 
+      try {
+
+        const email = req.session.email;
+        if (!email) return res.redirect("/login");
+
+        const user = await User.findOne({ email });
+        if (!user) return res.redirect("/login");
+
+        const { firstName, lastName, dob, gender, city, state, houseName, pincode } = req.body;
+
+        console.log("edited details: ",req.body)
+
+      
+        user.fullName = `${firstName} ${lastName}`;
+        user.dob = dob;
+        user.gender = gender;
+        // user.address = address._id;
+
+        if (user.address) {
+            // Address already exists — update it
+            await Address.findByIdAndUpdate(user.address, {
+             houseName, city, state, pincode
+            });
+          } else {
+            // No address yet — create new
+            const newAddress = new Address({ houseName, city, state, pincode });
+            await newAddress.save();
+            user.address = newAddress._id;
+          }
+
+        await user.save()
+
+        res.redirect('/account');
+        
+      } catch (error) {
+        console.error(error);
+        res.status(500).send("Server Error");
+      }
+
+
+
+}
 
 
 
 
 
 
-module.exports = { loadPasswordReset, resetPassword, verifyOtp , SaveNewPassword }
+
+module.exports = { loadPasswordReset, 
+                    resetPassword, 
+                    verifyOtp , 
+                   SaveNewPassword , 
+                   loadAccount , 
+                   editAccount }

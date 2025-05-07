@@ -3,9 +3,10 @@ const mongoose = require("mongoose")
 const {Schema} = mongoose;
 
 const userSchema = new Schema({
-    fullName:{
+    name:{
         type:String,
         required:true
+        
     },
     email:{
         type:String,
@@ -19,6 +20,9 @@ const userSchema = new Schema({
         sparse:true,
         default:null
     },
+    
+ 
+
     googleId:{
         type:String,
         unique:true,
@@ -26,7 +30,7 @@ const userSchema = new Schema({
     },
     password : {
         type:String,
-        required :true
+        required :false
     },
 
 
@@ -38,6 +42,13 @@ const userSchema = new Schema({
         type: Boolean,
         default:false
     },
+
+    address: {
+        
+        type:Schema.Types.ObjectId,
+          ref:"Address",
+       
+ },
     cart: {
         type : Array
     },

@@ -8,7 +8,15 @@ const nocache = require("nocache")
 const session = require("express-session")
 const ejs = require("ejs")
 const path = require("path")
+const expressLayout = require("express-ejs-layouts")
+const methodOverride = require('method-override');
+
+const passport = require("./config/passport")
+
+
 db();
+
+
 
 app.use(nocache())
 app.use(session({
@@ -20,14 +28,23 @@ app.use(session({
    }
 }))
 
+app.use(methodOverride('_method'));
 
 app.use(express.urlencoded({extended:true}))
 app.use(express.json())
 app.use(express.static('public'));
 
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.set("view engine", "ejs")
 app.set("views",[path.join(__dirname,"views/user"),path.join(__dirname,"views/admin")])
 
+
+
+app.set("layout", false);
+//  app.set('layout', '../layout/userAccount');
+app.use(expressLayout)
 
 app.use("/",userRouter)
 app.use("/admin",adminRouter)

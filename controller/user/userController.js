@@ -1,7 +1,8 @@
 
 const User = require("../../models/userSchema")
 const env = require("dotenv").config();
-const bcrypt = require("bcrypt")
+const bcrypt = require("bcrypt");
+const session = require("express-session");
 const nodemailer = require("nodemailer")
 
 
@@ -14,13 +15,22 @@ const pageNotFound = async (req,res)=>{
 }
 
 const loadLogin = async (req,res)=>{
-    
+
+  try{
+    if(!req.session.user){
    
-        res.render("login", {message:"", activeTab: "login" });
-           
+      return  res.render("login", {message:"", activeTab: "login" });
+    } else {
+      res.redirect("/")
+    } 
+  }
+  catch(error){
+     res.redirect("/pageNotFound")
+  } 
 
            
 }
+
 const loadRegister = async (req,res)=>{
     try {
         res.render("login", {message:"", activeTab: "register" });
@@ -71,7 +81,7 @@ async function sendVerificationEmail(email,otp){
 
       const registerUser = async (req,res)=>{
 
-        const {fullName, email, phone, password} = req.body
+        const {name, email, phone, password} = req.body
         let hashedPassword;
 
         try{
@@ -89,15 +99,16 @@ async function sendVerificationEmail(email,otp){
             const otpExpiry = Date.now() + 60 * 1000; // 1 minute expiry
 
     
-            const emailSent = await sendVerificationEmail(email,otp)
+            // const emailSent = await sendVerificationEmail(email,otp)
            
-            if(!emailSent){
-                return res.json("email.error")
-            }
+            // if(!emailSent){
+            //     return res.json("email.error")
+            // }
     
             req.session.userOtp = otp;
             req.session.otpExpiry = otpExpiry;
-            req.session.userData = {  fullName, email, phone, password}
+            req.session.userData = {  name, email, phone, password}
+            req.session.email = email
             
             res.render("verifyOtp"  , { message: "OTP sent to your email. Please verify." })
 
@@ -117,6 +128,7 @@ async function sendVerificationEmail(email,otp){
 
 
             const { otp:enteredOtp } = req.body;
+            const email = req.session.email
 
             const { userOtp, otpExpiry, userData } = req.session;
 
@@ -135,23 +147,26 @@ async function sendVerificationEmail(email,otp){
 
               try{
                          
-                        const {fullName, email, phone, password} = userData
+                        const {name, email, phone, password} = userData
 
                         const saltRounds = 10;
 
                         hashedPassword= await bcrypt.hash(password, saltRounds)
 
                               
-                       const newUser = new User({fullName, email, phone, password:hashedPassword})
+                       const newUser = new User({name, email, phone, password:hashedPassword})
  
-                          console.log(newUser)
+                        
 
                         await newUser.save()
 
-                        req.session.userOtp = null;
-                        req.session.userData = null;
-                        req.session.otpExpiry = null;
+                        
 
+                        req.session.userOtp = null;
+                      
+                        req.session.otpExpiry = null;
+                        req.session.user=newUser._id
+                      // console.log("after registeration",req.session, "end")
                         return res.status(200).json({
                           success: true,
                           message: "User registered successfully",
@@ -170,6 +185,8 @@ async function sendVerificationEmail(email,otp){
            const resendOtp =  async (req, res) => {
             try {
               const { userData } = req.session;
+              // const email = req.session.email
+              console.log("useData", userData)
           
               if(!userData || !userData.email) 
                 {
@@ -180,11 +197,11 @@ async function sendVerificationEmail(email,otp){
               const otp = generateOtp();
               const otpExpiry = Date.now() + 60 * 1000; 
           
-              const emailSent = await sendVerificationEmail(userData.email, otp);
+              // const emailSent = await sendVerificationEmail(userData.email, otp);
           
-              if (!emailSent) {
-                return res.status(500).json({ success: false, message: 'Failed to send OTP. Try again later.' });
-              }
+              // if (!emailSent) {
+              //   return res.status(500).json({ success: false, message: 'Failed to send OTP. Try again later.' });
+              // }
           
               req.session.userOtp = otp;
               req.session.otpExpiry = otpExpiry;
@@ -203,11 +220,17 @@ async function sendVerificationEmail(email,otp){
   const verifyUser = async (req,res)=>{
    
     const {email , password}= req.body
+    
     console.log(email,password)
     try{
           const existingUser = await User.findOne({email})
          
-          if(existingUser){     
+          if(existingUser){ 
+            
+            if(existingUser.isBlocked){
+              return res.render("login" , {message : "User is blocked by admin " , activeTab: "login"})
+            }
+
 
             const pmatch = await bcrypt.compare(password,existingUser.password)
            
@@ -216,7 +239,12 @@ async function sendVerificationEmail(email,otp){
                return res.status(400).render("login" , {message : "Invalid password " , activeTab: "login"})
             }
 
-            res.render("LandingPage")
+           
+            req.session.email = email
+            req.session.user = existingUser._id;  
+            
+
+            res.redirect("/")
 
           }else{
             return res.status(400).render("login" , {message : "user not found", activeTab: "login"})
@@ -225,13 +253,26 @@ async function sendVerificationEmail(email,otp){
     }
     catch(error){
         console.log(error)
+        res.render("login" , {message : "login failed. Please try again later" , activeTab: "login"})
     }
 }
 
 const loadHome = async (req,res)=>{
     try {
+      const user = req.session.user
+      console.log("session user",user)
+     
+      if(user){
 
+        const userData = await User.findOne({_id:user});
+        console.log("userData",userData)
+
+         res.render("landingPage",{user:userData})
+      }else {
         return res.render("landingPage")
+      }
+
+        
         
     } catch (error) {
         console.log("failed to load homePage", error.message)
@@ -239,6 +280,18 @@ const loadHome = async (req,res)=>{
         
     }
 }
+
+const logout = async (req,res)=>{
+   console.log("req.session",req.session.email)
+   
+   
+   req.session.email=null;
+   req.session.user = null;
+  
+ 
+  res.redirect("/")
+}
+
 
 module.exports ={
     loadHome,
@@ -248,7 +301,8 @@ module.exports ={
     verifyUser,
     loadRegister,
     verifyOtp,
-    resendOtp
+    resendOtp,
+    logout
 }
 
 

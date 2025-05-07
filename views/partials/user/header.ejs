@@ -24,6 +24,48 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
+    <style>
+
+          
+
+.dropdown {
+   position:relative;
+   display:inline-block;
+}
+.dropdown-content {
+   display: none;
+   position:absolute;
+   background-color: white;
+   min-width: 160px;
+   box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+   z-index:1000;
+   right:0;
+}
+
+
+.dropdown-content a {
+   color: black;
+   padding: 12px 16px;
+   text-decoration: none;
+   display: block;
+   width: 100%;
+
+
+}
+.dropdown-content a:hover{
+   background-color: #f1f1f1;
+}
+.dropdown:hover .dropdown-content{
+   display: block;
+}
+.header {
+   position: relative;
+   z-index: 500;
+}
+
+
+    </style>
+
   </head>
   <body>
 
@@ -234,7 +276,7 @@
               <a href="index.html" style="text-decoration: none;" class="fw-bolder fs-4">
                Petal & Mist
               </a>
-            </div>
+            </div>  
             <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar"
               aria-controls="offcanvasNavbar">
               <svg width="24" height="24" viewBox="0 0 24 24"><use xlink:href="#menu"></use></svg>
@@ -244,7 +286,7 @@
          
 
 
-          <div class="col-12 col-md-8 col-lg-6 d-flex justify-content-end align-items-center gap-3">
+          <div class="col-12 col-md-8 col-lg-6 d-flex justify-content-end align-items-center gap-3 ">
   
             <!-- Search Bar -->
             <div class="search-bar d-flex align-items-center border border-dark rounded-1 px-2 py-0 w-50 " style="height: 36px;">
@@ -265,11 +307,47 @@
           
             <!-- Icons -->
             <ul class="d-flex align-items-center list-unstyled m-0 gap-3">
+
+              <%if(locals.user){%>
+                <div class="dropdown">
+                    <a href="#" class="sign-in-link"><%=locals.user.fullName%></a>
+                    
+                      <a href="/account" class="p-1">
+                        <svg width="20" height="20"><use xlink:href="#user"></use></svg>
+                      </a>
+                   
+                    <div class="dropdown-content">
+
+
+                        <a href="/account">Profile</a>
+                        <a href="/logout">Logout</a>
+
+
+                    </div>
+
+
+                </div>
+            <%}else {%>
+
               <li>
-                <a href="#" class="p-1">
+                <a href="/login" class="p-1" style="text-decoration: none;">Login</a>
+              </li>
+              <li>
+              <a href="/register" class="p-1" style="text-decoration: none;">Signup</a>
+              </li>
+              <li>
+                <a href="/account" class="p-1">
                   <svg width="20" height="20"><use xlink:href="#user"></use></svg>
                 </a>
               </li>
+
+            <%}%>
+
+
+
+              
+             
+              
               <li>
                 <a href="#" class="p-1">
                   <svg width="20" height="20"><use xlink:href="#wishlist"></use></svg>

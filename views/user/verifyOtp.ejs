@@ -108,7 +108,7 @@
     </form>
 
     <div class="timer-text" id="timer">Resend OTP in 60s</div>
-    <button class="btn-resend" id="resendBtn" style="display: none;">Resend OTP</button>
+    <button class="btn-resend" id="resendBtn" style="display:none ;">Resend OTP</button>
   </div>
    
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -144,6 +144,7 @@
         clearInterval(countdown);
         timerEl.style.display = 'none';
         resendBtn.style.display = 'inline-block';
+         
       }
     }, 1000);
   };
@@ -160,16 +161,20 @@
       });
       const data = await response.json();
 
+
       if (data.success) {
         Swal.fire("OTP Sent!", "A new OTP has been sent to your email.", "success");
         timeLeft = 60;
         timerEl.style.display = 'block';
         resendBtn.style.display = 'none';
         resendBtn.disabled = false;
+       
         startTimer();
       } else {
         Swal.fire("Failed", data.message || "Could not resend OTP", "error");
         resendBtn.disabled = false;
+        resendBtn.style.display= "inline-block"
+      
       }
     } catch (err) {
       console.error(err);
@@ -220,6 +225,6 @@
   });
 </script>
 
-3234
+
 </body>
 </html>
