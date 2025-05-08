@@ -3,7 +3,8 @@ const mongoose = require('mongoose');
 const subCategorySchema = new mongoose.Schema({
   name: {  
           type: String, 
-          required: true 
+          required:true
+       
   },
   status: { 
           type: String, 
@@ -14,7 +15,12 @@ const subCategorySchema = new mongoose.Schema({
             type: mongoose.Schema.Types.ObjectId, 
             ref: 'Category', 
             required: true 
-        }
+        },
+        isDeleted: {
+                type: Boolean,
+                default: false
+              }
+                      
      }, { timestamps: true });
 
 SubCategory = mongoose.model('SubCategory', subCategorySchema);

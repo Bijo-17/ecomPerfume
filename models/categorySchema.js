@@ -8,8 +8,19 @@ const categorySchema = new mongoose.Schema({
   status: 
         { type: String, 
         enum: ['active', 'blocked'], 
-        default: 'active' }
-}, { timestamps: true });
+        default: 'active' },
+
+        isDeleted: {
+            type: Boolean,
+            default: false
+          }
+              
+},
+
+{ timestamps: true });
+
+
+    
 
 const Category = mongoose.model('Category', categorySchema);
 
