@@ -45,9 +45,18 @@ const categoryInfo = async (req, res) => {
 const addCategory = async (req, res) => {
     try {
       const { categoryName, subcategoryName } = req.body;
-  
+
+      
+         
       // Check if category exists
-      let category = await Category.findOne({ name: categoryName.trim(), isDeleted:false });
+      let category = await Category.findOne({ name:  { $regex: `^${categoryName.trim()}$`, $options: 'i' }, isDeleted:false });
+
+      
+
+      if(category){
+       return res.status(400).json("category already exists")
+    
+      }
 
   
       if (!category) {

@@ -62,6 +62,7 @@ const resetPassword = async (req,res)=>{
    try {
       
     const {email} = req.body;
+    
     const user = await User.findOne({email})
     console.log("user",user)
 
@@ -74,7 +75,7 @@ const resetPassword = async (req,res)=>{
         req.session.otpExpiry = otpExpiry;
         req.session.email = email
 
-        console.log(req.session.userOtp)
+      
 
         // if(emailSent){
 
@@ -82,7 +83,7 @@ const resetPassword = async (req,res)=>{
         // req.session.otpExpiry = otpExpiry;
         // req.session.email = email
         
-        res.render("otpForgotPassword"  , { message: "OTP sent to your email. Please verify." })
+        res.render("otpForgotPassword" )
 
         console.log(`Otp send ${otp}`)
 
@@ -91,7 +92,7 @@ const resetPassword = async (req,res)=>{
         // }
     }
     else {
-        return res.render("forgotPassword",{message: "user not found"})
+        return res.render("forgotPassword",{message: "user not found ITS YOU"})
     }
     
    } catch (error) {
@@ -108,9 +109,11 @@ const  verifyOtp = async (req,res)=>{
 
     try {
 
-        const {enteredOtp} = req.body;
+        const {enteredOtp} = (req.body);
+        console.log("req.body",req.body)
         const otp = req.session.userOtp;
         const email = req.session.email;
+        const otpExpiry = req.session.otpExpiry
         console.log(enteredOtp)
         console.log(otp)
 
@@ -123,16 +126,45 @@ const  verifyOtp = async (req,res)=>{
           }
         
         if(otp !== enteredOtp ){ 
-         return res.json({success:false,message:"otp donot match"})
+         return res.status(400).json({success:false,message:"otp donot match"})
        }
         
-       res.render("resetPassword", {message:""})
+       res.status(200).json( {success:true,message:"otp verification sucessfull"})
       
         
     } catch (error) {
         console.log(error)
         res.redirect("/pageNotFound")
     }
+}
+
+const resendOtp = async (req,res)=>{
+ 
+    try{
+    if(!req.session.email){
+        return res.render("forgotPassword",{message:"session expired"})
+    }
+ 
+   const otp = generateOtp();
+    const otpExpiry = Date.now() + 60 * 1000;
+
+    console.log("resend",otp)
+
+    req.session.otp = otp;
+    req.session.otpExpiry = otpExpiry;
+    
+    res.status(200).json({ success:true, message:"OTP send sucessfully" })
+}
+catch(error){
+   res.status(500).json({sucess:false , message:"Unable to send OTP , please try again"})
+   console.log("otp send failed",error)
+}
+
+
+}
+
+const newPasswordPage = async (req,res)=>{
+    res.render("resetPassword",{message:""})
 }
 
 
@@ -183,22 +215,22 @@ const SaveNewPassword = async (req,res)=>{
 
     const loadAccount =  async (req,res)=>{
             
-        const email = req.session.email;
-
-        console.log("acc",req.session.user)
+        
         try {
 
-            if(!req.session.user || !email) {
+            if(!req.session.user ) {
                 return res.redirect("/login")       
             }
-                const user = await User.findOne({email})
+                const user = await User.findOne({_id:req.session.user})
+
+                console.log("///staaarted\n",user,"\n///ended")
                 
                 if(!user){
                 return res.redirect("/login")       
                 } else {
-                console.log(user)
+                
 
-                const [firstName = "" , lastName = "" ] = (user.fullName || "" ).split(' ')
+                const [firstName = "" , lastName = "" ] = (user.name || "" ).split(' ')
 
                 res.render("account",{layout:"../layout/userAccount", active:"account", user, firstName , lastName})
                 }
@@ -269,4 +301,6 @@ module.exports = { loadPasswordReset,
                     verifyOtp , 
                    SaveNewPassword , 
                    loadAccount , 
-                   editAccount }
+                   editAccount,
+                resendOtp ,
+            newPasswordPage }

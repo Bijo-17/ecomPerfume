@@ -177,12 +177,13 @@ function emailValidate(){
 function phoneValidate(){
   const phoneval = phoneid.value
   const numberPattern = /^[0-9]+$/;
+  const sameDigit = /^(\d)\1{9}$/;
 
   if(phoneval.trim() === ""){
     errorPhone.style.display="block"
     errorPhone.innerHTML="Enter your phone number"
 
-  }else if(!numberPattern.test(phoneval)){
+  }else if(!numberPattern.test(phoneval) || sameDigit.test(phoneval)){
     errorPhone.style.display="block"
     errorPhone.innerHTML="phone number must contain only digits"
          

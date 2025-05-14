@@ -264,10 +264,10 @@ const loadHome = async (req,res)=>{
      
       if(user){
 
-        const userData = await User.findOne({_id:user});
-        console.log("userData",userData)
-
-         res.render("landingPage",{user:userData})
+         // const userData = await User.findOne({_id:user});
+        // console.log("userData",userData)
+         res.redirect("/home")
+         
       }else {
         return res.render("landingPage")
       }
@@ -280,6 +280,32 @@ const loadHome = async (req,res)=>{
         
     }
 }
+
+const userHome = async (req,res)=>{
+     try {
+      
+          const user = req.session.user;
+
+           if(user){
+
+        const userData = await User.findOne({_id:user});
+        console.log("userData",userData)
+        
+         res.render("landingPage",{user:userData})
+      }else {
+        return res.render("landingPage")
+      }
+
+
+     } catch (error) {
+
+       console.log("failed to load homePage", error.message)
+        res.status(500).send("unable to load server")
+      
+     }
+
+}
+
 
 const logout = async (req,res)=>{
    console.log("req.session",req.session.email)
@@ -302,6 +328,7 @@ module.exports ={
     loadRegister,
     verifyOtp,
     resendOtp,
+    userHome,
     logout
 }
 

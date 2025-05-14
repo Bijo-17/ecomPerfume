@@ -23,13 +23,14 @@ const productSchema = new mongoose.Schema({
                           required:true},
            stock_status: { 
                           type: Boolean ,
-                           required:true
+                           required:true,
+                           
                           },
             regular_price: { 
                           type: Number,
                           required:true
                           },
-            offer_price: { 
+            sales_price: { 
                            type: Number 
                           },
                  image: [{ type: String }],

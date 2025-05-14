@@ -3,6 +3,7 @@ const User = require("../models/userSchema")
 
 
 const userAuth = (req,res,next)=>{
+    
     if(req.session.user){
         User.findById(req.session.user)
         .then(data=>{
@@ -23,6 +24,7 @@ const userAuth = (req,res,next)=>{
 }
 
 const adminAuth = (req,res,next)=>{
+    if(req.session.admin){
     User.findOne({isAdmin:true})
     .then(data=>{
             if(data){
@@ -35,6 +37,9 @@ const adminAuth = (req,res,next)=>{
         console.log("error in sminauth middleware",error)
         res.status(500).send("internal server error")
     })
+} else{
+    res.redirect("/admin/login")
+}
 }
 
 module.exports = {

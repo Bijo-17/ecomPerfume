@@ -188,7 +188,7 @@
   const hiddenInput = document.getElementById('enteredOtp');
 
   form.addEventListener('submit', async (e) => {
-    e.preventDefault(); // prevent page reload
+    e.preventDefault(); 
 
     const otp = Array.from(inputs).map(input => input.value).join('');
     hiddenInput.value = otp;

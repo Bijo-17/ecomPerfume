@@ -4,7 +4,10 @@ const adminController = require("../controller/admin/adminController")
 const customerController = require("../controller/admin/customerController")
 const categoryController = require("../controller/admin/categoryController")
 const subcategoryController = require("../controller/admin/subcategoryController")
+const productController = require("../controller/admin/productController")
 
+const multer = require("multer")
+const uploads = require("../helpers/multer")
 const {userAuth , adminAuth} = require("../middlewares/auth")
 
 router.get("/login",adminController.loadLogin)
@@ -36,15 +39,21 @@ router.get('/category/delete', categoryController.deleteCategory); // soft delet
 
 // subcategory
 
-// router.get('/subcategory/add', subcategoryController.addForm); // Pass category_id as query param
+
 router.post('/subcategory/add/:id', subcategoryController.addSubcategory);
 
-// router.get('/subcategory/edit/:id', subcategoryController.editForm);
+
 router.post('/subcategory/edit/:id', subcategoryController.editSubcategory);
 
 router.get('/subcategory/block/:id', subcategoryController.blockSubcategory);
 router.get('/subcategory/unblock/:id', subcategoryController.unblockSubcategory);
 router.get('/subcategory/delete/:id', subcategoryController.deleteSubcategory);
+
+// produc management 
+
+router.get('/addProducts',adminAuth,productController.addProductPage)
+router.post('/addProducts',adminAuth,uploads.array("images",4),productController.addProducts)
+router.get('/products',adminAuth,productController.listProducts)
 
 
 
