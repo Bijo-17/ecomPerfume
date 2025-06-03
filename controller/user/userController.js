@@ -4,7 +4,8 @@ const env = require("dotenv").config();
 const bcrypt = require("bcrypt");
 const session = require("express-session");
 const nodemailer = require("nodemailer")
-
+const Product = require("../../models/productSchema")
+const Category = require("../../models/categorySchema")
 
 const pageNotFound = async (req,res)=>{
     try {
@@ -227,9 +228,9 @@ async function sendVerificationEmail(email,otp){
          
           if(existingUser){ 
             
-            if(existingUser.isBlocked){
-              return res.render("login" , {message : "User is blocked by admin " , activeTab: "login"})
-            }
+            // if(existingUser.isBlocked){
+            //   return res.render("login" , {message : "User is blocked by admin " , activeTab: "login"})
+            // }
 
 
             const pmatch = await bcrypt.compare(password,existingUser.password)
@@ -258,25 +259,28 @@ async function sendVerificationEmail(email,otp){
 }
 
 const loadHome = async (req,res)=>{
-    try {
-      const user = req.session.user
-      console.log("session user",user)
-     
-      if(user){
 
-         // const userData = await User.findOne({_id:user});
-        // console.log("userData",userData)
-         res.redirect("/home")
+       try {
+      
+          const user = req.session.user;
          
-      }else {
-        return res.render("landingPage")
-      }
+        console.log("Breadcrumbs:", res.locals.breadcrumbs);
 
+          const product = await Product.find({isDeleted:false}).sort({createdAt:-1}).populate('category_id').exec()
+      
+          // console.log('product',product)
+
+           if(user){
+
+            return res.redirect("/home")
+      }else {
+        return res.render("landingPage",{product})
+      }
         
         
     } catch (error) {
         console.log("failed to load homePage", error.message)
-        res.status(500).send("unable to load server")
+        return res.redirect("/pageNotFound")
         
     }
 }
@@ -285,13 +289,14 @@ const userHome = async (req,res)=>{
      try {
       
           const user = req.session.user;
+          const product = await Product.find({isDeleted:false}).sort({createdAt:-1}).populate('category_id').exec()
 
            if(user){
 
         const userData = await User.findOne({_id:user});
         console.log("userData",userData)
         
-         res.render("landingPage",{user:userData})
+         res.render("landingPage",{user:userData ,product})
       }else {
         return res.render("landingPage")
       }

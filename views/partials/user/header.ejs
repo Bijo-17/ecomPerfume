@@ -272,7 +272,7 @@
         <div class="row py-3 border-bottom d-flex justify-content-between">
           
           <div class="col-sm-4 col-md-4 col-lg-4 text-center text-sm-start d-flex gap-3 justify-content-center justify-content-md-start">
-            <div class="d-flex align-items-center my-3 my-sm-0">
+            <div class="d-flex align-items-center my-3 my-sm-0" >
               <a href="index.html" style="text-decoration: none;" class="fw-bolder fs-4">
                Petal & Mist
               </a>
@@ -310,7 +310,7 @@
 
               <%if(locals.user){%>
                 <div class="dropdown">
-                    <a href="#" class="sign-in-link"><%=locals.user.fullName%></a>
+                    <a href="#" class="sign-in-link"><%=locals.user.name%></a>
                     
                       <a href="/account" class="p-1">
                         <svg width="20" height="20"><use xlink:href="#user"></use></svg>

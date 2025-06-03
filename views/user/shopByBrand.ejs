@@ -1,0 +1,142 @@
+<%-include("../partials/user/header")%>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+           
+          
+            margin: 0 
+        }
+
+        .brands-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        .main-heading {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 50px;
+            text-align: center;
+        }
+
+        .sub-heading {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .divider {
+            width: 80%;
+            max-width: 500px;
+            height: 1px;
+            background-color: #ccc;
+            margin: 20px 0 50px 0;
+        }
+
+        .brands-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            width: 100%;
+            max-width: 1100px;
+        }
+
+        .brand-item {
+            border: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            height: 100px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .brand-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .brand-logo {
+            max-width: 100%;
+            max-height: 60px;
+            object-fit: contain;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 992px) {
+            .brands-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .brands-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .main-heading {
+                font-size: 2rem;
+            }
+            
+            .sub-heading {
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .brands-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .brand-item {
+                height: 80px;
+            }
+            
+            .main-heading {
+                font-size: 1.8rem;
+                margin-bottom: 30px;
+            }
+            
+            .divider {
+                margin: 15px 0 30px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="brands-container">
+        <h1 class="main-heading">BRANDS</h1>
+        
+        <h2 class="sub-heading">SHOP BY BRANDS</h2>
+        <div class="divider"></div>
+        
+        <div class="brands-grid">
+            <% const brands = [
+                { name: 'Amazfit', logo: '/images/amazfit-logo.png' },
+                { name: 'Balmain', logo: '/images/balmain-logo.png' },
+                { name: 'boAt', logo: '/images/boat-logo.png' },
+                { name: 'Casio', logo: '/images/casio-logo.png' },
+                { name: 'Longines', logo: '/images/longines-logo.png' },
+                { name: 'Noise', logo: '/images/noise-logo.png' },
+                { name: 'Seiko', logo: '/images/seiko-logo.png' },
+                { name: 'Tissot', logo: '/images/tissot-logo.png' }
+            ] %>
+            
+            <% brands.forEach(brand => { %>
+                <a href="/brands/<%= brand.name.toLowerCase() %>" class="brand-item">
+                    <img src="<%= brand.logo %>" alt="<%= brand.name %> Logo" class="brand-logo">
+                </a>
+            <% }); %>
+        </div>
+    </div>
+</body>
+<%-include("../partials/user/footer")%>

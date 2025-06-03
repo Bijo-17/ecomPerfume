@@ -6,6 +6,8 @@ const profileController = require("../controller/user/profileController")
 const User = require("../models/userSchema")
 const passport = require("passport")
 const {userAuth} = require("../middlewares/auth")
+const brandController = require("../controller/user/brandController")
+const productController = require("../controller/user/productController")
 
 
 router.get("/pageNotFound",userController.pageNotFound)
@@ -24,12 +26,14 @@ router.post("/verify",userController.verifyUser)
 
 
 
+
 router.get("/logout",userController.logout);
 
 router.get("/auth/google",passport.authenticate('google',{scope: ['profile','email']}));
 
 router.get("/auth/google/callback",passport.authenticate('google',{failureRedirect: '/register'}),(req,res)=>{
-    console.log(req.session)
+    console.log("sesssion",req.session,"\n end of session........")
+    console.log("req.session.passport",req.session.passport.user)
     req.session.user = req.session.passport.user
     res.redirect("/home") 
 });
@@ -54,8 +58,24 @@ router.get("/orders",(req,res)=>{
 })
 
 
+// brand management
+
+router.get("/brand",brandController.getBrand)
 
 
+// product managemet
+
+router.get("/product/:category",productController.getAllProducts)
+
+router.get("/product/:category/sort",productController.getAllProducts)
+
+router.get("/product",productController.getAllProducts)
+
+router.get("/productDetails/:id",productController.productDetails)
+
+
+
+router.post('/rateProduct/:productId',productController.rateProduct);
 
 
 module.exports = router

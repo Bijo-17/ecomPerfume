@@ -11,7 +11,12 @@ const brandSchema = new mongoose.Schema({
         status: { 
                    type: String, 
                    enum: ['active', 'blocked'], default: 'active' 
-                }
+                },
+        isDeleted: {
+                type:Boolean,
+                default:false
+        },        
+        image: [{ type: String }],        
 }, { timestamps: true });
 
 module.exports = mongoose.model('Brand', brandSchema);

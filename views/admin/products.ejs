@@ -1,0 +1,489 @@
+<%- include("../../views/partials/admin/header") %>
+<head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css">
+    <!-- CropperJS CSS -->
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" />
+
+    <style>
+    .table th, .table td {
+        vertical-align: middle !important;
+        text-align: center;
+    }
+</style>
+
+</head>
+<div class="content-header">
+    <div>
+        <h2 class="content-title card-title">Products</h2>
+    </div>
+</div>
+<header class="card-header text-center mb-20">
+    <form action="" method="get" class="d-inline">
+        <div class="input-group input-group-sm border border-1 border-grey rounded-pill" style="width: 500px; margin-left: 230px;">
+            <input type="text" class="form-control border-0 rounded-pill" placeholder="Search products or brands" name="search" value="<%= typeof search !== 'undefined' ? search:''%>">
+            <% if (search && search.trim() !== '') { %>
+                            <a href="/admin/products" 
+                               class="position-absolute text-dark" 
+                               style="right: 70px; top: 50%; transform: translateY(-50%); text-decoration: none; font-size: 18px;">&times;</a>
+                        <% } %>
+            <button class="btn  border-0" type="submit">Search</button>
+        </div>
+    </form>
+</header>
+<div class="right mt-5">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col"><b>Image</b></th>
+                <th scope="col"><b>Product name</b></th>
+                <th scope="col"><b>Brand</b></th>
+                <th scope="col"><b>Category</b></th>
+                <th scope="col"><b>Subcategory</b></th>
+                <th scope="col"><b>Regular Price</b></th>
+                <th scope="col"><b>Sale Price</b></th>
+                <th scope="col"><b>Offer Price</b></th>
+                <th scope="col"><b>Offer</b></th>
+                <th scope="col"><b>Quantity</b></th>
+                <th scope="col"><b>Stock</b></th>
+                
+                <th scope="col"><b>Action</b></th>
+                <th scope="col"><b>Edit</b></th>
+            </tr>
+        </thead>
+    <tbody class="text-center align-middle">
+    <% for(let i = 0; i < data.length; i++) { %>
+    <tr>
+        <td><img src="<%= data[i].image[0] %>" alt="Product Image" width="100" /></td>
+        <td><%= data[i].product_name %></td>
+        <td><%= data[i].brand_id ? data[i].brand_id.name : 'Null' %></td>
+        <td><%= data[i].category_id?.name %></td>
+        <td><%= data[i].subcategory_id ? data[i].subcategory_id.name : 'Null' %></td>
+        <td>₹ <%= data[i].regular_price %></td>
+
+        <!-- Sales Price -->
+        <td>₹ <%= data[i].sales_price %></td>
+
+        <!-- Offer Price -->
+        <td>
+            <% if (data[i].offer_price === 0) { %>
+                <span class="text-muted">No Offer</span>
+            <% } else { %>
+                ₹ <%= (data[i].sales_price * (1 - data[i].offer_price / 100)).toFixed(2) %>
+            <% } %>
+        </td>
+
+        <!-- Offer Column -->
+        <td>
+            <% if (data[i].offer_price === 0) { %>
+                <button class="btn btn-info btn-sm" onclick="addOffer('<%= data[i]._id %>')">
+                    <span class="text-white">Add Offer</span>
+                </button>
+            <% } else { %>
+                <span class="badge bg-success" style="font-size: 14px;"><%= data[i].offer_price %>% OFF</span><br>
+                <button class="btn btn-danger btn-sm mt-2" onclick="removeOffer('<%= data[i]._id %>')">
+                    <span class="text-white">Remove</span>
+                </button>
+            <% } %>
+        </td>
+
+        <td><%= data[i].volume + " ML" %></td>
+
+        <!-- Stock -->
+        <td>
+              <% if(data[i].stock === 0) {%>
+                 —
+               <%}else{%>
+                 <%=data[i].stock %>
+                 <%}%>
+
+        </td>
+
+        <!-- Action -->
+       
+      <td>
+        <div class="d-flex align-items-center gap-1">
+        <% if (data[i].isBlocked === false) { %>
+            <a href="/admin/products/block/<%= data[i]._id %>/<%= currentPage %>" class="btn btn-danger btn-sm">Block</a>
+        <% } else { %>
+            <a href="/admin/products/unblock/<%= data[i]._id %>/<%= currentPage %>" class="btn btn-success btn-sm">Unblock</a>
+        <% } %>
+        <a href="/admin/products/delete/<%= data[i]._id %>/<%= currentPage %>" class="btn btn-warning btn-sm text-white">Delete</a>
+       </div>
+     </td>
+        
+
+        <!-- Edit -->
+        <td>
+         <button type="button" class="btn btn-info btn-sm text-white"  data-bs-toggle="modal" 
+            data-bs-target="#editProudctModal<%=data[i]._id%>" >
+                Edit
+         </button>
+        </td>
+    </tr>
+    <% } %>
+  </tbody>
+
+
+    </table>
+</div>
+</div>
+</div>
+
+<div class="container mt-3">
+
+    <div class="container mt-3">
+   <nav aria-label="Page navigation">
+       <ul class="pagination justify-content-center mb-20" style="margin-right: 200px;">
+
+
+           <% for (let i = 1; i <= totalPages; i++) { %>
+           <li class="page-item <%=(i === currentPage) ? 'active' : '' %>">
+               <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+           </li>
+           <% } %>
+
+
+       </ul>
+   </nav>
+</div>
+
+</div>
+
+   <% for(let i = 0; i < data.length; i++) { %>
+
+
+<!-- Edit Product Modal -->
+<div class="modal fade" id="editProudctModal<%=data[i]._id%>" tabindex="-1" aria-labelledby="editProductLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editProductLabel">Edit Product</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="editProductForm" method="post" action="/admin/products/edit/<%=data[i]._id%>?_method=PATCH" enctype="multipart/form-data">
+          <input type="hidden" name="productId" id="productId">
+          <div class="mb-3">
+            <label for="productName" class="form-label">Product Name</label>
+            <input type="text" class="form-control" id="productName" name="product_name" value="<%=data[i].product_name%>">
+          </div>
+
+         
+          <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+            <input type="text" class="form-control" id="description" name="description" value="<%=data[i].description%>">
+          </div>
+
+          <div class="mb-3">
+            <label for="brand" class="form-label">Brand</label>
+            <select class="form-select border" style="width: 150px;" name="brand_id">
+              <%  for(let b = 0; b<brand.length;b++) { %>                                    
+                 <option value="<%=brand[b]._id%>"  <%= brand[b]._id.toString() === data[i].brand_id?._id.toString()? 'selected' : '' %> >
+                 <%=brand[b].name%>                                                     
+              </option>
+             <%}%>   
+            </select>                                              
+          </div>
+
+        
+               <div class="mb-3">
+            <label for="brand" class="form-label">Category</label>
+            <select class="form-select border" style="width: 150px;" name="category_id" id="category" onchange="filterSubcategories()">
+              <%  for(let c = 0; c<cat.length;c++) { %>                                    
+                 <option value="<%=cat[c]._id%>"  <%= cat[c]._id.toString() === data[i].category_id?._id.toString()? 'selected' : '' %> >
+                 <%=cat[c].name%>                                                     
+              </option>
+             <%}%>   
+            </select>                                              
+          </div>
+
+            <div class="mb-3">
+            <label for="brand" class="form-label">Subcategory</label>
+            <select class="form-select border" style="width: 150px;" name="subcategory_id" id="subcategory">
+             <% for(let s=0;s<subcat.length;s++) {  %>
+              <option value="<%=subcat[s]._id%>" <%= subcat[s]._id.toString() === data[i].subcategory_id?._id.toString() ? 'selected': ''%> > <%=subcat[s].name%> </option>
+               <% } %>
+            </select>                                              
+          </div>
+
+         
+          <div class="mb-3">
+            <label for="regularPrice" class="form-label">Regular Price</label>
+            <input type="number" class="form-control" id="regularPrice" name="regular_price" value="<%=data[i].regular_price%>">
+          </div>
+
+          <div class="mb-3">
+            <label for="salesPrice" class="form-label">Sales Price</label>
+            <input type="number" class="form-control" id="salesPrice" name="sales_price" value="<%=data[i].sales_price%>">
+          </div>
+
+          <div class="mb-3">
+            <label for="volume" class="form-label">Volume (ML)</label>
+            <input type="text" class="form-control" id="volume" name="volume[]" value="<%=data[i].volume%>">
+          </div>
+         
+          <div class="mb-3">
+            <label for="stock" class="form-label">Stock</label>
+            <input type="number" class="form-control" id="stock" name="stock" value="<%=data[i].stock%>">
+          </div>
+
+
+          <div class="mb-3">
+            <label class="form-label">Images</label>
+            <div id="productImages" class="d-flex gap-2 flex-wrap"> 
+                <% let imageCount = 0 %>
+               <%data[i].image.forEach(img=>{ %>
+              <img src="<%=img%> " width="260" style="border: 3px solid gray;" >
+                      <% imageCount++; %>
+              <%})%>
+           
+             <% if (imageCount < 4) { %>
+        <% for (let k = 0; k < (4 - imageCount); k++) { %>
+             <div style="display: inline-block; position: relative; margin-right: 10px;">
+               <label style="cursor: pointer;">
+               <img id="preview<%=k%>" src="/uploads/images/addimage.webp" alt="add image" width="260" style="border: 3px dashed gray; opacity: 0.5;">
+               <input type="file" accept="image/jpg, image/jpeg, image/png, image/webp" style="display: none;" onchange="previewImage(event)">
+             </label>
+          </div>
+          <% } %>
+        <% } %>
+
+
+
+  
+         <input type="file" id="croppedImageInput" name="images" style="display: none;" multiple>
+
+<!-- Crop Modal -->
+           <div id="cropModal" style="display: none; position: fixed; top: 10%; left: 50%; transform: translateX(-50%); background: white; padding: 20px; border: 1px solid #ccc; z-index: 1000;">
+           <img id="cropperImage" style="max-width: 100%; max-height: 400px;" />
+          <br>
+           <button type="button" onclick="cropImage()">Crop & Add</button>
+          <button type="button" onclick="closeCropModal()">Cancel</button>
+         </div>
+
+              
+
+           </div>
+          </div>
+
+         
+
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<%}%>
+
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
+<script>
+function addOffer(productId) {
+  Swal.fire({
+    title: 'Add Offer',
+    input: 'number',
+    inputLabel: 'Enter offer percentage (1 - 90)',
+    inputAttributes: {
+      min: 1,
+      max: 90,
+      step: 1,
+    },
+    inputValidator: (value) => {
+      if (!value) {
+        return 'Please enter a value';
+      }
+      const offer = Number(value);
+      if (isNaN(offer) || offer < 1 || offer > 90) {
+        return 'Offer must be between 1 and 90%';
+      }
+    },
+    showCancelButton: true,
+    confirmButtonText: 'Add Offer',
+    preConfirm: (offer) => {
+      return fetch(`/admin/products/addOffer/${productId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ offer: Number(offer) })
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .catch(error => {
+          Swal.showValidationMessage(`Request failed: ${error}`);
+        });
+    }
+  }).then((result) => {
+    if (result.isConfirmed) {
+      Swal.fire('Success', 'Offer added successfully!', 'success')
+        .then(() => location.reload());
+    }
+  });
+}
+
+
+    function removeOffer(productId) {
+    Swal.fire({
+      title: 'Remove Offer',
+      text: 'Are you sure you want to remove the offer for this product?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, remove it!',
+      cancelButtonText: 'Cancel'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fetch(`/admin/products/removeOffer/${productId}`, {
+          method: 'POST'
+        })
+        .then(response => {
+          if (!response.ok) throw new Error('Failed to remove offer');
+          return response.json();
+        })
+        .then(() => {
+          Swal.fire('Removed!', 'The offer has been removed.', 'success')
+            .then(() => location.reload());
+        })
+        .catch(err => {
+          Swal.fire('Error', err.message, 'error');
+        });
+      }
+    });
+  }
+
+const allSubcategory = <%- JSON.stringify(subcat) %>;
+
+  console.log("allsub",allSubcategory)
+   function filterSubcategories(){
+      console.log("trigerred")
+     const selectedCategoryId = document.getElementById('category').value;
+     const subcategorySelect =  document.getElementById('subcategory')
+
+    subcategorySelect.innerHTML = '<option value="">select subcategory </option>';
+
+    const filtered = allSubcategory.filter(sub=>sub.category_id === selectedCategoryId)
+    console.log("filtered",filtered)
+    filtered.forEach(sub=>{
+        const option = document.createElement("option");
+        option.value = sub._id;
+        option.text = sub.name;
+        subcategorySelect.appendChild(option)
+
+    })
+
+   }
+
+
+
+
+  function previewImage(input) {
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+
+    reader.onload = function (e) {
+      // Target the <img> element before the input
+      input.previousElementSibling.src = e.target.result;
+      input.previousElementSibling.style.opacity = "1";
+      input.previousElementSibling.style.border = "3px solid green";
+    };
+
+    reader.readAsDataURL(input.files[0]); // Converts file to base64 string
+  }
+}
+
+
+  let cropper;
+  let croppedFiles = [];
+  let currentInputIndex = null;
+
+  function previewImage(event) {
+    const input = event.target;
+
+    // Find the index from the parent label > img's id: "preview0", "preview1", etc.
+    const label = input.closest("label");
+    const img = label.querySelector("img");
+
+    if (!img || !input.files || input.files.length === 0) return;
+
+    const match = img.id.match(/preview(\d+)/);
+    if (!match) return;
+    currentInputIndex = parseInt(match[1]);
+
+    const file = input.files[0];
+    const reader = new FileReader();
+
+    reader.onload = function (e) {
+      const cropImage = document.getElementById("cropperImage");
+      cropImage.src = e.target.result;
+
+      // Show modal
+      document.getElementById("cropModal").style.display = "block";
+
+      // Destroy existing cropper if exists
+      if (cropper) {
+        cropper.destroy();
+      }
+
+      cropper = new Cropper(cropImage, {
+        aspectRatio: 1,
+        viewMode: 1,
+        autoCropArea: 1
+      });
+    };
+
+    reader.readAsDataURL(file);
+  }
+
+  function cropImage() {
+    if (!cropper) return;
+
+    cropper.getCroppedCanvas({
+      width: 440,
+      height: 440,
+    }).toBlob(blob => {
+      const file = new File([blob], `cropped_${Date.now()}.jpg`, { type: "image/jpeg" });
+      croppedFiles[currentInputIndex] = file;
+
+      // Update preview
+      const preview = document.getElementById(`preview${currentInputIndex}`);
+      if (preview) {
+        preview.src = URL.createObjectURL(blob);
+        preview.style.opacity = 1;
+        preview.style.border = "3px solid green";
+      }
+
+      // Update hidden input with all cropped files
+      const dt = new DataTransfer();
+      croppedFiles.forEach(f => f && dt.items.add(f));
+      document.getElementById("croppedImageInput").files = dt.files;
+
+      // Close modal
+      document.getElementById("cropModal").style.display = "none";
+      cropper.destroy();
+      cropper = null;
+    });
+  }
+
+  function closeCropModal() {
+    if (cropper) {
+      cropper.destroy();
+      cropper = null;
+    }
+    document.getElementById("cropModal").style.display = "none";
+  }
+
+
+
+
+</script>
+
+
+
+<%- include("../../views/partials/admin/footer") %>

@@ -1,0 +1,155 @@
+<%-include("../partials/user/header")%>
+<head>
+    <link rel="stylesheet" href="/css/productStyles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+       a {
+        text-decoration: none;
+        color: black;
+       }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <!-- Hero Banner -->
+        <section class="hero-banne">
+            <img src="/images/unisex-banner.jpg" alt=""> <br>
+            <div class="hero-text"><%=categoryName?  categoryName: 'All Products'%></div>
+        </section>
+
+        <%-include("../partials/user/breadcrum")%>
+
+        <div class="content-wrapper">
+            <!-- Sidebar Filters -->
+            <aside class="sidebar">
+                <div class="filter-section">
+                    <h3>Categories</h3>
+                    <div class="category-group">
+                      <a href="/product/Men">  <h4>MEN <% if(categoryName === 'Men') { %>
+                              <i class="fas fa-chevron-right"></i> 
+                            <% } %>    </h4> </a>
+                            <li>Perfume</li>
+                            <li>Bath and Body</li>
+                        
+                    </div>
+                    <div class="category-group">
+                       <a href="/product/Women" > <h4>WOMEN <% if(categoryName === 'Women') { %>
+                              <i class="fas fa-chevron-right"></i> 
+                            <% } %>    </h4> </a>
+                            <li>Perfume</li>
+                            <li>Bath and Body</li>
+                       
+                    </div>
+                    <div class="category-group">
+                     <a href="/product/Unisex" > <h4>UNISEX  <% if(categoryName === 'Unisex') { %>
+                              <i class="fas fa-chevron-right"></i> 
+                            <% } %>    </h4> </a>
+                       
+                            <li>Perfume</li>
+                            <li>Bath and Body</li>
+                       
+                    </div>
+                </div>
+
+            
+
+                  <form method="GET" action="/product/<%=categoryName%>" id="filterForm">
+
+
+  <!-- Price Range Filter -->
+  <label>Price:</label>
+  <select name="price" onchange="document.getElementById('filterForm').submit()">
+    <option value="">All</option>
+    <option value="0-499" <%= price === '0-499' ? 'selected' : '' %>>Below ₹500</option>
+    <option value="500-999" <%= price === '500-999' ? 'selected' : '' %>>₹500 - ₹999</option>
+    <option value="1000-1999" <%= price === '1000-1999' ? 'selected' : '' %>>₹1000 - ₹1999</option>
+    <option value="2000+" <%= price === '2000+' ? 'selected' : '' %>>Above ₹2000</option>
+  </select>
+
+  <!-- Sort Options -->
+  <label>Sort by:</label>
+  <select name="sort" onchange="document.getElementById('filterForm').submit()">
+    <option value="">Default</option>
+    <option value="priceLow" <%= sort === 'priceLow' ? 'selected' : '' %>>Price: Low to High</option>
+    <option value="priceHigh" <%= sort === 'priceHigh' ? 'selected' : '' %>>Price: High to Low</option>
+    <option value="nameAZ" <%= sort === 'nameAZ' ? 'selected' : '' %>>Name: A-Z</option>
+    <option value="nameZA" <%= sort === 'nameZA' ? 'selected' : '' %>>Name: Z-A</option>
+  </select>
+</form>
+
+
+
+
+
+
+            </aside>
+
+            <!-- Product Grid -->
+          <section class="container my-4">
+  <div class="row">
+    <% products.forEach(function(product) { %>
+      <div class="col-12 col-sm-6 col-md-4 mb-4">
+        <div class="card h-100 shadow-sm">
+          <a href="/productDetails/<%= product._id %>" class="text-decoration-none text-dark">
+            <img src="<%= product.image[0] %>" class="card-img-top" alt="<%= product.name %>">
+            <div class="card-body">
+              <h6 class="card-subtitle text-muted mb-1"><%= product.brand_id?.name %></h6>
+              <h5 class="card-title mb-2"><%= product.product_name %></h5>
+
+              <div class="mb-2">
+                <% for (let i = 0; i < 5; i++) { %>
+                  <% if (i < Math.floor(product.averageRating)) { %>
+                    <span class="text-warning">★</span>
+                  <% } else { %>
+                    <span class="text-secondary">☆</span>
+                  <% } %>
+                <% } %>
+                <small class="text-muted">(<%= product.ratingCount %>)</small>
+              </div>
+
+              <div class="mb-2">
+                <strong class="text-danger">₹<%= product.sales_price?.toLocaleString() %></strong>
+                <% if (product.sales_price !== product.regular_price) { %>
+                  <span class="text-muted text-decoration-line-through">₹<%= product.regular_price?.toLocaleString() %></span>
+                <% } %>
+              </div>
+
+              <button class="btn btn-outline-primary w-100">ADD TO CART</button>
+            </div>
+          </a>
+        </div>
+      </div>
+    <% }) %>
+  </div>
+</section>
+
+            
+
+
+
+   </div>
+        
+              
+           
+        
+          
+
+
+        <!-- Pagination -->
+        <div class="pagination">   
+              
+            <a href="?page=<%= currentPage-1%>" class="prev-page"><i class="fas fa-chevron-left"></i></a>
+            <% for (let i = 1; i <= totalPages; i++) { %>   
+            <a href="?page=<%= i %>" class="page-number <%=(i === currentPage) ? 'active' : '' %>" ><%= i %></a>
+             <% } %>
+            <a href="?page=<%= currentPage+1%>" class="next-page"><i class="fas fa-chevron-right"></i></a>
+        
+        </div>
+    </main>
+
+    <script src="/script.js"></script>
+
+<%-include("../partials/user/footer")%>
+   
+</body>
+</html>

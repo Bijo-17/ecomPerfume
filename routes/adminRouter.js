@@ -5,10 +5,12 @@ const customerController = require("../controller/admin/customerController")
 const categoryController = require("../controller/admin/categoryController")
 const subcategoryController = require("../controller/admin/subcategoryController")
 const productController = require("../controller/admin/productController")
+const brandController = require("../controller/admin/brandController")
 
-const multer = require("multer")
+const multer = require('multer')
+
 const uploads = require("../helpers/multer")
-const {userAuth , adminAuth} = require("../middlewares/auth")
+const {adminAuth} = require("../middlewares/auth")
 
 router.get("/login",adminController.loadLogin)
 
@@ -49,13 +51,35 @@ router.get('/subcategory/block/:id', subcategoryController.blockSubcategory);
 router.get('/subcategory/unblock/:id', subcategoryController.unblockSubcategory);
 router.get('/subcategory/delete/:id', subcategoryController.deleteSubcategory);
 
+// brand
+
+router.get('/addBrand',adminAuth,brandController.addBrandPage)
+router.post('/addBrand',adminAuth,uploads.single('image'),brandController.addBrand)
+router.post('/addBrand/edit/:id',uploads.single('image'), brandController.editBrand);
+router.get('/addBrand/block/:id', brandController.blockBrand);
+router.get('/addBrand/unblock/:id', brandController.unblockBrand);
+router.get('/addBrand/delete/:id', brandController.deleteBrand);
+
+router.post('/test-upload', uploads.single('image'), (req, res) => {
+  console.log("FILE:", req.file);
+  res.send("Received");
+});
+
+
 // produc management 
 
-router.get('/addProducts',adminAuth,productController.addProductPage)
-router.post('/addProducts',adminAuth,uploads.array("images",4),productController.addProducts)
+router.get('/addProduct',adminAuth,productController.addProductPage)
+router.post('/addProduct',adminAuth,uploads.array("images",4),productController.addProducts)
 router.get('/products',adminAuth,productController.listProducts)
+router.get('/products/block/:id/:page',productController.blockProduct)
+router.get('/products/unblock/:id/:page',productController.unblockProduct)
+router.get('/products/delete/:id/:page',productController.deleteProduct)
+router.post('/products/addOffer/:id',productController.addOffer)
+router.post('/products/removeOffer/:id',productController.removeOffer)
+router.patch('/products/edit/:id',uploads.array("images",4),productController.editProduct)
 
 
 
+  
 
 module.exports = router

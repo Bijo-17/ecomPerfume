@@ -17,7 +17,7 @@
   <!-- Add Category Modal -->
   <div class="modal fade" id="addCategoryModal" tabindex="-1" aria-labelledby="addCategoryModalLabel" aria-hidden="true">
     <div class="modal-dialog">
-      <form action="/admin/category/add" method="POST">
+      <form action="/admin/category/add" method="POST" id="addCategoryForm">
         <div class="modal-content">
           <div class="modal-header bg-primary text-white">
             <h5 class="modal-title" id="addCategoryModalLabel">Add New Category</h5>
@@ -130,16 +130,17 @@
                     </tr>
 
                     <%  if (category.subcategories?.length > 0)  { %>
+
                         <% category.subcategories.forEach(sub => { %>
                             <tr>
                                 <td class="ps-5">↳ <%= sub.name %></td>
                                 <td><%= sub.status %></td>
                                 <td>
                                                <!-- edit subcategory Button -->
-<button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editSubcategoryModal<%= category._id %>">Edit</button>
+<button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editSubcategoryModal<%= sub._id %>">Edit</button>
 
 <!-- Modal -->
-<div class="modal fade" id="editSubcategoryModal<%= category._id %>" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="editSubcategoryModal<%= sub._id %>" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog">
     <form action="/admin/subcategory/edit/<%= sub._id %>" method="POST" class="modal-content">
       <div class="modal-header">
@@ -162,10 +163,15 @@
 
 
                                     
-                                    <% if (sub.status === 'active') { %>
-                                        <a href="/admin/subcategory/block/<%= sub._id %>" class="btn btn-sm btn-secondary">Unlist</a>
-                                    <% } else { %>
+                                    <% if (sub.status === 'blocked') { %>
+                                      <% if(category.status === 'blocked') { %>
+                                               <a href="/admin/subcategory/block/<%= sub._id %>" class="btn btn-sm btn-success disabled">List</a>
+                                             
+                                        <% } else {%>
                                         <a href="/admin/subcategory/unblock/<%= sub._id %>" class="btn btn-sm btn-success">List</a>
+                                        <% } %>
+                                    <% } else { %>
+                                        <a href="/admin/subcategory/block/<%= sub._id %>" class="btn btn-sm btn-primary">Unlist</a>
                                     <% } %>
                                     <a href="/admin/subcategory/delete/<%= sub._id %>" class="btn btn-sm btn-danger">Delete</a>
                                 </td>
@@ -193,6 +199,49 @@
       
 
 </div>
+
+<script>
+ 
+document.getElementById('addCategoryForm').addEventListener('submit',validateCategoryForm)
+
+async function validateCategoryForm(e) {
+  e.preventDefault();
+
+const categoryName = document.getElementById("categoryName").value;
+const subcategoryName = document.getElementById("subcategoryName").value;
+
+console.log(categoryName, subcategoryName)
+
+
+try {
+
+  const response = await fetch('/admin/category/add',{
+               method:'post',
+               headers: {'Content-Type':'application/json'},
+               body:JSON.stringify({categoryName, subcategoryName})
+  })
+
+    const data = await response.json();
+
+
+    if(!data.success){
+        Swal.fire("Failed",data.message || "Brand already exists","error")
+    }else{
+           
+            window.location.href = "/admin/category";
+        
+    }
+  
+} catch (error) {
+   console.log('error adding brand',error)
+       Swal.fire("Failed",'Internal server error','error')
+}
+
+  
+}
+
+
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 

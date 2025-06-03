@@ -19,7 +19,7 @@ const verifyAdmin = async (req,res)=>{
        try{
         const admin = await User.findOne({email,isAdmin:true})
 
-        console.log(admin)
+     
        
         if(admin){     
 
@@ -87,4 +87,6 @@ const pageError = async (req,res)=>{
 }
 
 
-module.exports = { loadLogin,verifyAdmin , loadDashboard, logout , pageError}
+
+
+module.exports = { loadLogin,verifyAdmin , loadDashboard, logout , pageError }

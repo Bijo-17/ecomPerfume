@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= product.title %> | Your Store</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Image selection
+      const thumbnails = document.querySelectorAll('.thumbnail');
+      thumbnails.forEach(thumb => {
+        thumb.addEventListener('click', function() {
+          const mainImage = document.getElementById('mainImage');
+          mainImage.src = this.dataset.src;
+          
+          // Update active thumbnail
+          thumbnails.forEach(t => t.classList.remove('border-amber-700'));
+          thumbnails.forEach(t => t.classList.add('border-gray-200'));
+          this.classList.remove('border-gray-200');
+          this.classList.add('border-amber-700');
+        });
+      });
+
+      // Color selection
+      const colorButtons = document.querySelectorAll('.color-btn');
+      colorButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+          const colorLabel = document.getElementById('selectedColorLabel');
+          colorLabel.textContent = this.dataset.label;
+          
+          // Update active color
+          colorButtons.forEach(b => b.classList.remove('border-amber-700', 'scale-110'));
+          colorButtons.forEach(b => b.classList.add('border-gray-300'));
+          this.classList.remove('border-gray-300');
+          this.classList.add('border-amber-700', 'scale-110');
+        });
+      });
+
+      // Size selection
+      const sizeButtons = document.querySelectorAll('.size-btn');
+      sizeButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+          const sizeLabel = document.getElementById('selectedSizeLabel');
+          sizeLabel.textContent = this.dataset.size;
+          
+          // Update active size
+          sizeButtons.forEach(b => b.classList.remove('border-amber-700', 'bg-amber-50', 'text-amber-700'));
+          sizeButtons.forEach(b => b.classList.add('border-gray-300', 'hover:border-gray-400'));
+          this.classList.remove('border-gray-300', 'hover:border-gray-400');
+          this.classList.add('border-amber-700', 'bg-amber-50', 'text-amber-700');
+        });
+      });
+    });
+  </script>
+</head>
+<body class="min-h-screen bg-gray-50">
+  <!-- Breadcrumb -->
+  <div class="bg-white border-b">
+    <div class="max-w-7xl mx-auto px-4 py-3">
+      <div class="text-sm text-gray-600">
+        <span>Home</span> / <span>Clothing</span> / <span>Men</span> / <span>T-Shirts</span> /
+        <span class="text-gray-900"><%= product.title %></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 py-6">
+    <div class="grid lg:grid-cols-2 gap-8">
+      <!-- Left Side - Images -->
+      <div class="space-y-4">
+        <div class="bg-white rounded-lg p-4">
+          <div class="relative aspect-square mb-4">
+            <img 
+              id="mainImage"
+              src="<%= product.image %>" 
+              alt="<%= product.title %>"
+              class="w-full h-full object-cover rounded-lg"
+            >
+            <div class="absolute top-4 right-4 flex gap-2">
+              <button class="p-2 rounded-full bg-white/80 backdrop-blur-sm border border-gray-200">
+                <i class="fa-regular fa-heart text-sm"></i>
+              </button>
+              <button class="p-2 rounded-full bg-white/80 backdrop-blur-sm border border-gray-200">
+                <i class="fa-solid fa-share text-sm"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Thumbnail Images -->
+          <div class="flex gap-2 overflow-x-auto">
+            <% product.image.forEach((image, index) => { %>
+              <button 
+                class="thumbnail flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 <%= index === 0 ? 'border-amber-700' : 'border-gray-200' %>"
+                data-src="<%= image %>"
+              >
+                <img 
+                  src="<%= image %>" 
+                  alt="Product image <%= index + 1 %>"
+                  class="w-full h-full object-cover"    
+                >
+              </button>
+            <% }); %>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="grid grid-cols-2 gap-4">
+          <button class="py-3 px-4 rounded-md bg-amber-700 hover:bg-amber-800 text-white font-medium">
+            <i class="fa-solid fa-cart-shopping mr-2"></i>
+            ADD TO CART
+          </button>
+          <button class="py-3 px-4 rounded-md bg-orange-600 hover:bg-orange-700 text-white font-medium">
+            <i class="fa-solid fa-bolt mr-2"></i>
+            BUY NOW
+          </button>
+        </div>
+      </div>
+
+      <!-- Right Side - Product Details -->
+      <div class="space-y-6">
+        <div class="bg-white rounded-lg p-6">
+          <!-- Product Title and Rating -->
+          <div class="space-y-4">
+            <div>
+              <h1 class="text-2xl font-semibold text-gray-900 mb-2"><%= product.title %></h1>
+              <p class="text-gray-600"><%= product.description %></p>
+            </div>
+
+            <div class="flex items-center gap-4">
+              <div class="flex items-center gap-1">
+                <div class="flex items-center bg-green-600 text-white px-2 py-1 rounded text-sm">
+                  <span><%= product.rating %></span>
+                  <i class="fa-solid fa-star ml-1 text-xs"></i>
+                </div>
+                <span class="text-gray-600 text-sm"><%= product.ratingCount %> ratings & <%= product.reviewCount %> reviews</span>
+              </div>
+            </div>
+
+            <!-- Price -->
+            <div class="flex items-center gap-4">
+              <span class="text-3xl font-bold text-gray-900">₹<%= product.price %></span>
+              <span class="text-lg text-gray-500 line-through">₹<%= product.originalPrice %></span>
+              <span class="px-2 py-1 rounded bg-green-600 text-white text-xs font-medium">
+                <%= product.discount %>% off
+              </span>
+            </div>
+
+            <div class="text-sm text-green-600 font-medium"><%= product.delivery %></div>
+          </div>
+
+          <hr class="my-6 border-gray-200">
+
+          <!-- Color Selection -->
+          <div class="space-y-4">
+            <h3 class="font-semibold text-gray-900">
+              Color: <span id="selectedColorLabel"><%= product.volume[0].label %></span>
+            </h3>
+            <div class="flex gap-3">
+              <% product.volume.forEach((quantity, index) => { %>
+                <button 
+                  class="color-btn w-8 h-8 rounded-full border-2 <%= index === 0 ? 'border-amber-700 scale-110' : 'border-gray-300' %> transition-all"
+                  style="background-color: '<%= quantity.value %>';"
+                  data-label="<%= quantity.label %>"
+                ></button>
+              <% }); %>
+            </div>
+          </div>
+
+          <!-- Size Selection -->
+          <div class="space-y-4">
+            <h3 class="font-semibold text-gray-900">
+              Size: <span id="selectedSizeLabel"><%= product.volume[2] %></span>
+            </h3>
+            <div class="flex gap-2">
+              <% product.volume.forEach((quantity, index) => { %>
+                <button 
+                  class="size-btn flex items-center justify-center w-12 h-12 border-2 rounded-lg cursor-pointer transition-all <%= index === 2 ? 'border-amber-700 bg-amber-50 text-amber-700' : 'border-gray-300 hover:border-gray-400' %>"
+                  data-size="<%= quantity %>"
+                >
+                  <%= quantity %>
+                </button>
+              <% }); %>
+            </div>
+          </div>
+
+          <hr class="my-6 border-gray-200">
+
+          <!-- Offers -->
+          <div class="space-y-4">
+            <h3 class="font-semibold text-gray-900">Available Offers</h3>
+            <div class="space-y-2">
+                <%if (locals.product.offer_price){%> 
+                    
+                <div class="flex items-start gap-2 text-sm">
+                  <span class="px-2 py-1 rounded-sm border border-green-600 text-green-600 text-xs font-medium">
+                    <%= locals.product.offer_price %>
+                  </span>
+                  <span><%= product.offer_price %></span>
+                </div>
+             
+              <% }%>
+            </div>
+          </div>
+
+          <hr class="my-6 border-gray-200">
+
+          <!-- Delivery Info -->
+          <div class="space-y-4">
+            <h3 class="font-semibold text-gray-900">Delivery</h3>
+            <div class="space-y-3">
+              <div class="flex items-center gap-3">
+                <i class="fa-solid fa-truck text-gray-600"></i>
+                <div>
+                  <div class="font-medium">Free Delivery</div>
+                  <div class="text-sm text-gray-600">Tomorrow, 11 AM - 1 PM</div>
+                </div>
+              </div>
+              <div class="flex items-center gap-3">
+                <i class="fa-solid fa-rotate-left text-gray-600"></i>
+                <div>
+                  <div class="font-medium">7 Days Return Policy</div>
+                  <div class="text-sm text-gray-600">Easy returns & exchanges</div>
+                </div>
+              </div>
+              <div class="flex items-center gap-3">
+                <i class="fa-solid fa-shield text-gray-600"></i>
+                <div>
+                  <div class="font-medium">Warranty</div>
+                  <div class="text-sm text-gray-600">1 Year Brand Warranty</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Product Highlights -->
+        <div class="bg-white rounded-lg p-6">
+          <h3 class="font-semibold text-gray-900 mb-4">Product Highlights</h3>
+          <ul class="space-y-2 text-sm text-gray-700">
+           
+          </ul>
+        </div>
+
+        <!-- Specifications -->
+        <div class="bg-white rounded-lg p-6">
+          <h3 class="font-semibold text-gray-900 mb-4">Specifications</h3>
+          <div class="grid grid-cols-2 gap-4 text-sm">
+             <!-- Object.entries(product.specifications).forEach(([key, value]) => {  -->
+              <div>
+                <span class="text-gray-600"> key :</span>
+                <span class="ml-2 text-gray-900"> value </span>
+              </div>
+             <!-- }); -->
+          </div>
+        </div>
+
+        <!-- Customer Reviews -->
+        <div class="grid lg:grid-cols-3 gap-8 mt-8">
+          <!-- Rating Filters -->
+          <div class="bg-white rounded-lg p-6">
+            <h3 class="font-semibold text-gray-900 mb-4">Rating</h3>
+            <div class="space-y-3">
+              <div class="flex items-center gap-2">
+                <input type="checkbox" id="all-ratings" class="rounded" checked>
+                <label for="all-ratings" class="text-sm text-amber-700 font-medium">
+                  All Ratings
+                </label>
+              </div>
+              <% [5, 4, 3, 2, 1].forEach(rating => { %>
+                <div class="flex items-center gap-2">
+                  <input type="checkbox" id="<%= rating %>-star" class="rounded">
+                  <label for="<%= rating %>-star" class="flex items-center gap-1 text-sm">
+                    <% for(let i = 0; i < 5; i++) { %>
+                      <i class="fa-<%= i < rating ? 'solid' : 'regular' %> fa-star text-<%= i < rating ? 'yellow-400' : 'gray-300' %> text-xs"></i>
+                    <% } %>
+                  </label>
+                </div>
+              <% }); %>
+            </div>
+
+            <hr class="my-6 border-gray-200">
+
+            <div>
+              <h3 class="font-semibold text-gray-900 mb-2">Review this product</h3>
+              <p class="text-sm text-gray-600 mb-4">Share your thoughts with other customers</p>
+              <button class="w-full py-2 px-4 rounded-md bg-amber-700 hover:bg-amber-800 text-white font-medium">
+                Write a product review
+              </button>
+            </div>
+          </div>
+
+          <!-- Customer Reviews -->
+          <div class="lg:col-span-2 space-y-6">
+            <h3 class="font-semibold text-gray-900 text-xl">Customer Reviews</h3>
+
+             <!-- reviews.forEach(review => {  -->
+              <div class="bg-white rounded-lg p-6 border">
+                <div class="flex items-start justify-between">
+                  <div class="flex items-center gap-3 mb-3">
+                    <div class="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+                      <span class="text-amber-700 font-medium"> review.name.charAt(0) </span>
+                    </div>
+                    <div>
+                      <p class="font-medium text-gray-900"> review.name </p>
+                      <div class="flex items-center gap-1">
+                        <% for(let i = 0; i < 5; i++) { %>
+                          <!-- <i class="fa-<= i < review?.rating ? 'solid' : 'regular' > fa-star text-<= i < review.rating ? 'yellow-400' : 'gray-300' > text-xs"></i> -->
+                        <% } %>
+                      </div>
+                    </div>
+                  </div>
+                  <button class="text-gray-500 hover:text-gray-700">
+                    <i class="fa-regular fa-heart"></i>
+                  </button>
+                </div>
+                <h4 class="font-semibold text-gray-900 mb-2">< = review.title ></h4>
+                <p class="text-gray-700"><= review.comment ></p>
+              </div>
+             <!-- }); -->
+          </div>
+        </div>
+
+        <!-- Similar Products -->
+        <div class="mt-12">
+          <h3 class="font-semibold text-gray-900 text-xl mb-6 border-b pb-2">Similar Products</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+              <!-- similarProducts.forEach(product => {  -->
+               
+              <div class="bg-white rounded-lg p-4 border hover:shadow-lg transition-shadow">
+                <div class="aspect-square mb-4 bg-gray-100 rounded-lg flex items-center justify-center">
+                  <div class="w-24 h-32 bg-gradient-to-b from-<%= product.colorFrom %> to-<%= product.colorTo %> rounded-lg relative">
+                    <div class="absolute top-2 left-1/2 transform -translate-x-1/2 w-4 h-6 bg-yellow-400 rounded-sm"></div>
+                    <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-<%= product.textColor %> text-xs font-bold">
+                      <= product.shortName >
+                    </div>
+                  </div>
+                </div>
+                <h4 class="font-medium text-gray-900 mb-2"><%= product.name %></h4>
+                <div class="flex items-center gap-1 mb-2">
+                  <% for(let i = 0; i < 5; i++) { %>
+                    <i class="fa-<%= i < product.rating ? 'solid' : 'regular' %> fa-star text-<%= i < product.rating ? 'yellow-400' : 'gray-300' %> text-xs"></i>
+                  <% } %>
+                </div>
+                <p class="text-xl font-bold text-gray-900 mb-3">₹<%= product.price %></p>
+                <button class="w-full py-2 px-4 rounded-md bg-gray-800 hover:bg-gray-900 text-white font-medium">
+                  ADD TO CART
+                </button>
+              </div>
+            <!-- < }); > -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Sample data for the template
+    const product = {
+      title: "Premium Cotton Blend T-Shirt for Men",
+      description: "Comfortable, Stylish & Durable",
+      rating: 4.3,
+      ratingCount: 2847,
+      reviewCount: 312,
+      price: 599,
+      originalPrice: 1299,
+      discount: 53,
+      delivery: "Free delivery by Tomorrow, 11 AM",
+      images: [
+        "/placeholder.svg?height=500&width=500",
+        "/placeholder.svg?height=500&width=500",
+        "/placeholder.svg?height=500&width=500",
+        "/placeholder.svg?height=500&width=500"
+      ],
+      colors: [
+        { name: "blue", value: "#3B82F6", label: "Royal Blue" },
+        { name: "black", value: "#000000", label: "Jet Black" },
+        { name: "white", value: "#FFFFFF", label: "Pure White" },
+        { name: "red", value: "#EF4444", label: "Crimson Red" }
+      ],
+      sizes: ["XS", "S", "M", "L", "XL", "XXL"],
+      offers: [
+        { type: "Bank Offer", description: "10% instant discount on HDFC Bank Credit Cards" },
+        { type: "Special Price", description: "Get extra 20% off (price inclusive of cashback/coupon)" },
+        { type: "EMI", description: "No Cost EMI on orders above ₹3000" }
+      ],
+      highlights: [
+        "100% Premium Cotton Blend",
+        "Regular Fit with Comfortable Stretch",
+        "Pre-shrunk and Color-fast",
+        "Machine Washable",
+        "Available in Multiple Colors",
+        "Perfect for Casual & Semi-formal Occasions"
+      ],
+      specifications: {
+        "Fabric": "Cotton Blend",
+        "Fit": "Regular",
+        "Sleeve": "Half Sleeve",
+        "Neck": "Round Neck",
+        "Pattern": "Solid",
+        "Occasion": "Casual"
+      }
+    };
+
+    const reviews = [
+      {
+        name: "Anonymous",
+        rating: 4,
+        title: "Perfectly Balanced",
+        comment: "Not too strong, not too light—just right."
+      },
+      {
+        name: "Sumesh",
+        rating: 3,
+        title: "Fresh and clean",
+        comment: "Smells crisp and refreshing all day."
+      },
+      {
+        name: "Akshay",
+        rating: 5,
+        title: "Long lasting loved it.",
+        comment: "Value for money"
+      }
+    ];
+
+    const similarProducts = [
+      {
+        name: "Devil - men's perfume",
+        shortName: "DEVIL",
+        price: "799.00",
+        rating: 3,
+        colorFrom: "orange-600",
+        colorTo: "red-700",
+        textColor: "white"
+      },
+      {
+        name: "SENORIA WOMAN",
+        shortName: "SENORIA",
+        price: "599.00",
+        rating: 3,
+        colorFrom: "pink-400",
+        colorTo: "purple-600",
+        textColor: "white"
+      },
+      {
+        name: "G.O.A.T MAN",
+        shortName: "G.O.A.T",
+        price: "599.00",
+        rating: 3,
+        colorFrom: "amber-600",
+        colorTo: "orange-700",
+        textColor: "white"
+      },
+      {
+        name: "WHITE OUD",
+        shortName: "WHITE",
+        price: "799.00",
+        rating: 3,
+        colorFrom: "gray-200",
+        colorTo: "gray-400",
+        textColor: "gray-800"
+      }
+    ];
+  </script>
+</body>
+</html>

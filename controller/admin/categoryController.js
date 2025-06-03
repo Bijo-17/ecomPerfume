@@ -16,9 +16,11 @@ const categoryInfo = async (req, res) => {
 
       const categories = await Category.find({ isDeleted: false })
       .sort({ createdAt: -1 })
-      .skip(skip)
+      .skip(skip) 
       .limit(limit)
       .lean();
+
+    
 
       const subcategories = await Subcategory.find({ isDeleted: false }).lean();
 
@@ -28,6 +30,8 @@ const categoryInfo = async (req, res) => {
               sub.category_id.toString() === category._id.toString()
           );
       });
+
+      console.log("categories",categories ,"ended....")
 
       res.render('category', {
           categories,
@@ -46,20 +50,20 @@ const addCategory = async (req, res) => {
     try {
       const { categoryName, subcategoryName } = req.body;
 
-      
+      console.log("category",categoryName, subcategoryName)
          
       // Check if category exists
       let category = await Category.findOne({ name:  { $regex: `^${categoryName.trim()}$`, $options: 'i' }, isDeleted:false });
 
-      
+      console.log("newcat",!category)
 
       if(category){
-       return res.status(400).json("category already exists")
+      return res.status(400).json({success:false,message:"category already existsedd"})
     
       }
 
   
-      if (!category) {
+      if (!category && categoryName.trim() !=="") {
         category = await new Category({ name: categoryName.trim() }).save();
       }
   
@@ -70,7 +74,7 @@ const addCategory = async (req, res) => {
         }).save();
       }
   
-      res.redirect('/admin/category'); // go back to Add Product page
+      res.status(200).json({success:true , message:"ok done"}); 
     } catch (err) {
       console.error("Error adding category/subcategory:", err);
       res.redirect('/admin/pageError');
@@ -83,12 +87,13 @@ const addCategory = async (req, res) => {
       const { id } = req.params;
       const { name } = req.body;
       console.log(name)
+      console.log("id",id)
   
       await Category.findByIdAndUpdate(id, { name: name.trim() });
       res.redirect('/admin/category');
     } catch (error) {
       console.error("Error editing category:", error);
-      res.redirect('/pageError');
+      res.redirect('/admin/pageError');
     }
   };
 
@@ -96,13 +101,14 @@ const addCategory = async (req, res) => {
   const blockCategory = async (req,res)=>   {
     try {
      let id = req.query.id;
-     console.log(id)
+     console.log(id) 
      await Category.updateOne({_id:id}, {$set:{status:"blocked"}});
      await Subcategory.updateMany({ category_id: id }, { status: 'blocked' });
      res.redirect("/admin/category")
+   
      
     } catch (error) {
-     res.redirect("/pageError")
+     res.redirect("/admin/pageError")
      
     }
  }
@@ -116,7 +122,7 @@ const addCategory = async (req, res) => {
       res.redirect("/admin/category")
       
      } catch (error) {
-      res.redirect("/pageError")
+      res.redirect("/admin/pageError")
       
      }
   }
@@ -128,11 +134,11 @@ const addCategory = async (req, res) => {
       const  id  = req.query.id;
       console.log("deleteid",id)
   
-      // Soft delete category
-      await Category.findByIdAndUpdate(id, { isDeleted: true });
+      //  delete category
+      await Category.findByIdAndUpdate(id,{isDeleted:true});
   
-      // Also soft delete subcategories
-      await Subcategory.updateMany({ category_id: id }, { isDeleted: true });
+      // Also  delete subcategories
+      await Subcategory.updateMany({ category_id: id } ,{$set:{isDeleted:true}} );
   
       res.redirect('/admin/category');
     } catch (error) {

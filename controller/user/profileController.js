@@ -92,10 +92,10 @@ const resetPassword = async (req,res)=>{
         // }
     }
     else {
-        return res.render("forgotPassword",{message: "user not found ITS YOU"})
+        return res.render("forgotPassword",{message: "user not found"})
     }
     
-   } catch (error) {
+   } catch (error) { 
        
     console.log(error)
     res.redirect("/pageNotFound")
@@ -115,7 +115,7 @@ const  verifyOtp = async (req,res)=>{
         const email = req.session.email;
         const otpExpiry = req.session.otpExpiry
         console.log(enteredOtp)
-        console.log(otp)
+        console.log("sessionOtp",otp)
 
         if(!otp || !email){
            return res.render("forgotPassword",{message:"session expired"})
@@ -150,7 +150,7 @@ const resendOtp = async (req,res)=>{
 
     console.log("resend",otp)
 
-    req.session.otp = otp;
+    req.session.userOtp = otp;
     req.session.otpExpiry = otpExpiry;
     
     res.status(200).json({ success:true, message:"OTP send sucessfully" })

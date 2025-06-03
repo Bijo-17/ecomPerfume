@@ -1,10 +1,16 @@
 
 
 <%-include("../partials/user/header")%>
-
+ <head>
+  <style>
+        a {
+          text-decoration: none;
+        }
+  </style>
+ </head>
 
     <!-- banner -->
-
+   
     
     <section>
         <div id="carouselExampleDark" class="carousel carousel-dark slide" data-bs-ride="carousal">
@@ -15,14 +21,14 @@
           </div>
           <div class="carousel-inner">
             <div class="carousel-item active" data-bs-interval="10000">
-              <img src="/images/banner_ image1.webp" class="d-block w-100" alt="...">
+              <img src="/uploads/banner-images/banner-img1.webp" class="d-block w-100" alt="...">
               <div class="carousel-caption d-none d-md-block">
                 <h5>First slide label</h5>
                 <p>Some representative placeholder content for the first slide.</p>
               </div>
             </div>
             <div class="carousel-item" data-bs-interval="2000">
-              <img src="..." class="d-block w-100" alt="...">
+              <img src="/uploads/banner-images/banner-unisex.png" class="d-block w-100" alt="...">
               <div class="carousel-caption d-none d-md-block">
                 <h5>Second slide label</h5>
                 <p>Some representative placeholder content for the second slide.</p>
@@ -46,7 +52,12 @@
           </button>
         </div>
       </section>
+
+
+      <!-- breadcrum -->
   
+     <%-include("../partials/user/breadcrum")%>
+
       <!-- category section -->
 <section>
       <div class="container py-5">
@@ -54,46 +65,37 @@
     
         <div class="row justify-content-center">
           <div class="col-6 col-sm-4 col-md-3 col-lg-2 d-flex justify-content-center mb-4">
-            <div class="text-center border p-3 rounded bg-white category-card">
-              <img src="images/category-thumb-1.jpg" alt="Earphones" class="category-image" />
-              <h6 class="fw-semibold small">EARPHONES</h6>
+           <a href="/product/men">  <div class="text-center border p-3 rounded bg-white category-card">
+              <img src="uploads/category-images/cat-men.png" alt="Earphones" class="category-image" />
+              <h6 class="fw-semibold small">MEN</h6>
             </div>
+           </a>
           </div>
     
           <div class="col-6 col-sm-4 col-md-3 col-lg-2 d-flex justify-content-center mb-4">
-            <div class="text-center border p-3 rounded bg-white category-card">
-              <img src="images/smartphones.jpg" alt="Smart Phones" class="category-image" />
-              <h6 class="fw-semibold small">SMART PHONES</h6>
-            </div>
+          <a href="/product/women">   <div class="text-center border p-3 rounded bg-white category-card">
+              <img src="uploads/category-images/cat-women.png" alt="Smart Phones" class="category-image" />
+              <h6 class="fw-semibold small">WOMEN</h6>
+            </div> </a>
           </div>
     
           <div class="col-6 col-sm-4 col-md-3 col-lg-2 d-flex justify-content-center mb-4">
-            <div class="text-center border p-3 rounded bg-white category-card">
-              <img src="images/laptops.jpg" alt="Laptops" class="category-image" />
-              <h6 class="fw-semibold small">LAPTOPS</h6>
-            </div>
+           <a href="/product/unisex">  <div class="text-center border p-3 rounded bg-white category-card">
+              <img src="uploads/category-images/cat-unisex.png" alt="Laptops" class="category-image" />
+              <h6 class="fw-semibold small">UNISEX</h6>
+            </div> </a>
           </div>
     
-          <div class="col-6 col-sm-4 col-md-3 col-lg-2 d-flex justify-content-center mb-4">
+          <!-- <div class="col-6 col-sm-4 col-md-3 col-lg-2 d-flex justify-content-center mb-4">
             <div class="text-center border p-3 rounded bg-white category-card">
               <img src="images/tablets.jpg" alt="Tablets" class="category-image" />
               <h6 class="fw-semibold small">TABLETS</h6>
             </div>
-          </div>
+          </div> -->
     
-          <div class="col-6 col-sm-4 col-md-3 col-lg-2 d-flex justify-content-center mb-4">
-            <div class="text-center border p-3 rounded bg-white category-card">
-              <img src="images/watches.jpg" alt="Smart Watches" class="category-image" />
-              <h6 class="fw-semibold small">SMART WATCHES</h6>
-            </div>
-          </div>
+       
     
-          <div class="col-6 col-sm-4 col-md-3 col-lg-2 d-flex justify-content-center mb-4">
-            <div class="text-center border p-3 rounded bg-white category-card">
-              <img src="images/tv.jpg" alt="TV" class="category-image" />
-              <h6 class="fw-semibold small">TV</h6>
-            </div>
-          </div>
+        
         </div>
       </div>
 
@@ -109,8 +111,8 @@
 <section>
   <div class="container">
           
-    <img src="/images/banner-ad-1.jpg" width="100%" height="400rem">
-
+    <img src="/uploads/banner-images/middle-banner.jpg" width="100%" height="400rem">
+             
   </div>
 
 </section>
@@ -125,68 +127,67 @@
     <div class="container py-5 ">
 
         <h3 class="text-center mb-4">For Men</h3>
+    
         <div class="row g-4 justify-content-center">
-      
+        <% let menCount = 0; %>
+         <% product.forEach((p) => { 
+          
+             if (p.category_id?.name?.toLowerCase() === 'men' && menCount < 4) {
+              menCount++;
+          %>
           <!-- Single Product Card -->
           <div class="col-6 col-sm-4 col-md-3">
             <div class="card product-card p-3 shadow-sm">
               <i class="fa-regular fa-heart wishlist-icon"></i>
-              <img src="images/category-thumb-3.jpg" alt="iPhone" class="product-image mx-auto">
+         <a href="/productDetails/<%=p._id%>"> <img src="<%=p.image[0]%>" alt="<%=p.product_name%>" class="product-image mx-auto">
               <div class="card-body text-center">
-                <h6 class="card-title">APPLE IPHONE 15 PRO MAX</h6>
-                <p class="mb-1 price">120000₹<span class="original-price">125000</span></p>
+                <h6 class="card-title"><%=p.product_name%></h6>
+                <div class="mb-2">
+                <% for (let i = 0; i < 5; i++) { %>
+                  <% if (i < Math.floor(product.averageRating)) { %>
+                    <span class="text-warning">★</span>
+                  <% } else { %>
+                    <span class="text-secondary">☆</span>
+                  <% } %>
+                <% } %>
+                <small class="text-muted">(<%= product.ratingCount %>)</small>
+              </div>
+                <p class="mb-1 price">₹<%=p.sales_price%><span class="original-price">₹<%=p.regular_price%></span></p>               
+       </a>
                 <button class="btn btn-outline-dark btn-sm w-100 mt-2">Add to Cart</button>
               </div>
             </div>
           </div>
       
           <!-- Repeat for other products -->
-          <div class="col-6 col-sm-4 col-md-3">
+          <!-- <div class="col-6 col-sm-4 col-md-3">
             <div class="card product-card p-3 shadow-sm">
               <i class="fa-regular fa-heart wishlist-icon"></i>
               <img src="images/category-thumb-4.jpg" alt="AirPods" class="product-image mx-auto">
               <div class="card-body text-center">
-                <h6 class="card-title">APPLE AIRPODS PRO (2ND GEN)</h6>
-                <p class="mb-1 price">20000₹<span class="original-price">25000</span></p>
+                <h6 class="card-title"><%=p.product_name%></h6>
+                <p class="mb-1 price">₹<%=p.sales_price%><span class="original-price">₹<%=p.regular_price%></span></p>
                 <button class="btn btn-outline-dark btn-sm w-100 mt-2">Add to Cart</button>
               </div>
             </div>
-          </div>
+          </div> -->
       
-          <div class="col-6 col-sm-4 col-md-3">
-            <div class="card product-card p-3 shadow-sm">
-              <i class="fa-regular fa-heart wishlist-icon"></i>
-              <img src="images/category-thumb-4.jpg" alt="AirPods" class="product-image mx-auto">
-              <div class="card-body text-center">
-                <h6 class="card-title">APPLE AIRPODS PRO (2ND GEN)</h6>
-                <p class="mb-1 price">20000₹<span class="original-price">25000</span></p>
-                <button class="btn btn-outline-dark btn-sm w-100 mt-2">Add to Cart</button>
-              </div>
-            </div>
-          </div>
+    
 
 
-
-          <div class="col-6 col-sm-4 col-md-3">
-            <div class="card product-card p-3 shadow-sm">
-              <i class="fa-regular fa-heart wishlist-icon"></i>
-              <img src="images/category-thumb-4.jpg" alt="AirPods" class="product-image mx-auto">
-              <div class="card-body text-center">
-                <h6 class="card-title">APPLE AIRPODS PRO (2ND GEN)</h6>
-                <p class="mb-1 price">20000₹<span class="original-price">25000</span></p>
-                <button class="btn btn-outline-dark btn-sm w-100 mt-2">Add to Cart</button>
-              </div>
-            </div>
-          </div>
-          <!-- Add more cards as needed... -->
-         
-        </div>
    
+          <!-- Add more cards as needed... -->
+           <% } })%>
+        </div>
+     
+     
         <div class="text-center mt-4">
-            <button class="btn btn-outline-dark px-5 py-2" style="border-radius: 0; width: 200px;">
+           <a href="/product/Men"> <button class="btn btn-outline-dark px-5 py-2" style="border-radius: 0; width: 200px;">
               View All
             </button>
+          </a>
           </div>
+
       </div>
 
 
@@ -195,67 +196,51 @@
       <div class="container pt-2 pb-5 ">
 
         <h3 class="text-center mb-4">For Women</h3>
+
+
         <div class="row g-4 justify-content-center">
       
+          <% let womenCount = 0; %>
+         <% product.forEach((p) => { 
+         
+             if (p.category_id?.name?.toLowerCase() === 'women' && womenCount < 4) {
+              womenCount++;
+          %>
           <!-- Single Product Card -->
           <div class="col-6 col-sm-4 col-md-3">
             <div class="card product-card p-3 shadow-sm">
               <i class="fa-regular fa-heart wishlist-icon"></i>
-              <img src="images/category-thumb-3.jpg" alt="iPhone" class="product-image mx-auto">
+           <a href="/productDetails/<%=p._id%>">  <img src="<%=p.image[0]%>" alt="<%=p.product_name%>" class="product-image mx-auto">
               <div class="card-body text-center">
-                <h6 class="card-title">APPLE IPHONE 15 PRO MAX</h6>
-                <p class="mb-1 price">120000₹<span class="original-price">125000</span></p>
-                <button class="btn btn-outline-dark btn-sm w-100 mt-2">Add to Cart</button>
+                <h6 class="card-title"><%=p.product_name%></h6>
+
+                 <div class="mb-2">
+                <% for (let i = 0; i < 5; i++) { %>
+                  <% if (i < Math.floor(p.averageRating)) { %>
+                    <span class="text-warning">★</span>
+                  <% } else { %>
+                    <span class="text-secondary">☆</span>
+                  <% } %>
+                <% } %>
+                <small class="text-muted">(<%= p.ratingCount %>)</small>
               </div>
-            </div>
-          </div>
-      
-          <!-- Repeat for other products -->
-          <div class="col-6 col-sm-4 col-md-3">
-            <div class="card product-card p-3 shadow-sm">
-              <i class="fa-regular fa-heart wishlist-icon"></i>
-              <img src="images/category-thumb-4.jpg" alt="AirPods" class="product-image mx-auto">
-              <div class="card-body text-center">
-                <h6 class="card-title">APPLE AIRPODS PRO (2ND GEN)</h6>
-                <p class="mb-1 price">20000₹<span class="original-price">25000</span></p>
-                <button class="btn btn-outline-dark btn-sm w-100 mt-2">Add to Cart</button>
-              </div>
-            </div>
-          </div>
-      
-          <div class="col-6 col-sm-4 col-md-3">
-            <div class="card product-card p-3 shadow-sm">
-              <i class="fa-regular fa-heart wishlist-icon"></i>
-              <img src="images/category-thumb-4.jpg" alt="AirPods" class="product-image mx-auto">
-              <div class="card-body text-center">
-                <h6 class="card-title">APPLE AIRPODS PRO (2ND GEN)</h6>
-                <p class="mb-1 price">20000₹<span class="original-price">25000</span></p>
-                <button class="btn btn-outline-dark btn-sm w-100 mt-2">Add to Cart</button>
-              </div>
-            </div>
-          </div>
 
 
 
-          <div class="col-6 col-sm-4 col-md-3">
-            <div class="card product-card p-3 shadow-sm">
-              <i class="fa-regular fa-heart wishlist-icon"></i>
-              <img src="images/category-thumb-4.jpg" alt="AirPods" class="product-image mx-auto">
-              <div class="card-body text-center">
-                <h6 class="card-title">APPLE AIRPODS PRO (2ND GEN)</h6>
-                <p class="mb-1 price">20000₹<span class="original-price">25000</span></p>
+                <p class="mb-1 price">₹<%=p.sales_price%><span class="original-price">₹<%=p.regular_price%></span></p>               
+              </a>
                 <button class="btn btn-outline-dark btn-sm w-100 mt-2">Add to Cart</button>
               </div>
             </div>
           </div>
-          <!-- Add more cards as needed... -->
+        <% } })%>
          
-        </div>
-   
+      </div>
         <div class="text-center mt-4">
-            <button class="btn btn-outline-dark px-5 py-2" style="border-radius: 0; width: 200px;">
+          <a href="/product/Women">   <button class="btn btn-outline-dark px-5 py-2" style="border-radius: 0; width: 200px;">
               View All
             </button>
+            </a>
           </div>
       </div>
 
@@ -263,69 +248,52 @@
       <!-- for Unisex -->
 
       <div class="container py-2 pb-2 ">
-
+         
         <h3 class="text-center mb-4">Unisex</h3>
-        <div class="row g-4 justify-content-center">
+
       
+       
+      
+    <div class="row g-4 justify-content-center">
+        <% let unisexCount = 0; %>
+         <% product.forEach((p) => { 
+             if (p.category_id?.name?.toLowerCase() === 'unisex' && unisexCount < 4) {
+              unisexCount++;
+          %>
           <!-- Single Product Card -->
           <div class="col-6 col-sm-4 col-md-3">
             <div class="card product-card p-3 shadow-sm">
               <i class="fa-regular fa-heart wishlist-icon"></i>
-              <img src="images/category-thumb-3.jpg" alt="iPhone" class="product-image mx-auto">
+              <a href="/productDetails/<%=p._id%>"><img src="<%=p.image[0]%>" alt="<%=p.product_name%>" class="product-image mx-auto">
               <div class="card-body text-center">
-                <h6 class="card-title">APPLE IPHONE 15 PRO MAX</h6>
-                <p class="mb-1 price">120000₹<span class="original-price">125000</span></p>
+                <h6 class="card-title"><%=p.product_name%></h6>
+                <div class="mb-2">
+                <% for (let i = 0; i < 5; i++) { %>
+                  <% if (i < Math.floor(p.averageRating)) { %>
+                    <span class="text-warning">★</span>
+                  <% } else { %>
+                    <span class="text-secondary">☆</span>
+                  <% } %>
+                <% } %>
+                <small class="text-muted">(<%= product.ratingCount %>)</small>
+              </div>
+                <p class="mb-1 price">₹<%=p.sales_price%><span class="original-price">₹<%=p.regular_price%></span></p>               
+              </a>
                 <button class="btn btn-outline-dark btn-sm w-100 mt-2">Add to Cart</button>
               </div>
             </div>
           </div>
-      
-          <!-- Repeat for other products -->
-          <div class="col-6 col-sm-4 col-md-3">
-            <div class="card product-card p-3 shadow-sm">
-              <i class="fa-regular fa-heart wishlist-icon"></i>
-              <img src="images/category-thumb-4.jpg" alt="AirPods" class="product-image mx-auto">
-              <div class="card-body text-center">
-                <h6 class="card-title">APPLE AIRPODS PRO (2ND GEN)</h6>
-                <p class="mb-1 price">20000₹<span class="original-price">25000</span></p>
-                <button class="btn btn-outline-dark btn-sm w-100 mt-2">Add to Cart</button>
-              </div>
-            </div>
-          </div>
-      
-          <div class="col-6 col-sm-4 col-md-3">
-            <div class="card product-card p-3 shadow-sm">
-              <i class="fa-regular fa-heart wishlist-icon"></i>
-              <img src="images/category-thumb-4.jpg" alt="AirPods" class="product-image mx-auto">
-              <div class="card-body text-center">
-                <h6 class="card-title">APPLE AIRPODS PRO (2ND GEN)</h6>
-                <p class="mb-1 price">20000₹<span class="original-price">25000</span></p>
-                <button class="btn btn-outline-dark btn-sm w-100 mt-2">Add to Cart</button>
-              </div>
-            </div>
-          </div>
-
-
-
-          <div class="col-6 col-sm-4 col-md-3">
-            <div class="card product-card p-3 shadow-sm">
-              <i class="fa-regular fa-heart wishlist-icon"></i>
-              <img src="images/category-thumb-4.jpg" alt="AirPods" class="product-image mx-auto">
-              <div class="card-body text-center">
-                <h6 class="card-title">APPLE AIRPODS PRO (2ND GEN)</h6>
-                <p class="mb-1 price">20000₹<span class="original-price">25000</span></p>
-                <button class="btn btn-outline-dark btn-sm w-100 mt-2">Add to Cart</button>
-              </div>
-            </div>
-          </div>
-          <!-- Add more cards as needed... -->
+  
+        <% } })%>
          
-        </div>
-   
+       </div>
+    
+      
         <div class="text-center mt-4">
-            <button class="btn btn-outline-dark px-5 py-2" style="border-radius: 0; width: 200px;">
+            <a href="/product/Unisex"> <button class="btn btn-outline-dark px-5 py-2" style="border-radius: 0; width: 200px;">
               View All
             </button>
+            </a>
           </div>
       </div>
 

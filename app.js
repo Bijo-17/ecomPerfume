@@ -10,6 +10,7 @@ const ejs = require("ejs")
 const path = require("path")
 const expressLayout = require("express-ejs-layouts")
 const methodOverride = require('method-override');
+const getBreadcrumbs = require("./middlewares/breadcrum");
 
 const passport = require("./config/passport")
 
@@ -46,8 +47,18 @@ app.set("layout", false);
 //  app.set('layout', '../layout/userAccount');
 app.use(expressLayout)
 
+app.use(getBreadcrumbs);
+
+app.use((req, res, next) => {
+  res.locals.breadcrumbs = req.breadcrumbs || [];
+  next();
+});
+
 app.use("/",userRouter)
 app.use("/admin",adminRouter)
+
+
+
 
 
 

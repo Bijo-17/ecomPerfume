@@ -31,8 +31,8 @@ const editSubcategory = async (req, res) => {
     try {
       const { id } = req.params;
       const { name } = req.body;
-      console.log(id)
-      console.log(name)
+      console.log("id",id)
+      console.log("subcategory",name)
   
       await Subcategory.findByIdAndUpdate(id, { name: name.trim() });
       res.redirect('/admin/category');

@@ -114,16 +114,14 @@ body {
         <% } %>
 
       <form action="/admin/verify" method="post">
-        <button type="button" class="btn btn-google">
-          <i class="fab fa-google"></i> Sign in with Google
-        </button>
+       
         <div class="form-group mb-3">
           <i class="fas fa-envelope form-icon"></i>
-          <input type="email" class="form-control" placeholder="Email" name="email" required />
+          <input type="email" class="form-control" placeholder="Email" name="email" required value="admin@gmail.com" />
         </div>
         <div class="form-group mb-2">
           <i class="fas fa-lock form-icon"></i>
-          <input type="password" class="form-control" placeholder="Password" name="password" required />
+          <input type="password" class="form-control" placeholder="Password" name="password" required value="1234567a" />
         </div>
         <a href="#" class="forgot-password text-decoration-none text-muted">Forgot Password?</a>
         <button type="submit" class="btn btn-dark mt-3">Login</button>

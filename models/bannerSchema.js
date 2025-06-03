@@ -12,8 +12,13 @@ const bannerSchema = new mongoose.Schema({
                     type: Date 
                 },
        status: { 
-                  type: Boolean
-                 }
+                  type: Boolean,
+                  default:true
+                 },
+        isDeleted:{
+                    type: Boolean,
+                    default:false
+                  }         
 }, { timestamps: true });
 
 module.exports = mongoose.model('Banner', bannerSchema);

@@ -2,25 +2,33 @@
 const User = require("../models/userSchema")
 
 
-const userAuth = (req,res,next)=>{
-    
-    if(req.session.user){
-        User.findById(req.session.user)
-        .then(data=>{
-            if(data && !data.isBlocked){
-                next();
-            } else {
-                res.redirect("/login")
-            }
-        })
+const userAuth = async (req,res,next)=>{
+    try{ 
+       const userId = req.session.user
 
-        .catch(error=>{
-            console.log("Error in user atuth middleware");
-            res.status(500).send("Internal Server error")
-        })
-    }else {
-        res.redirect("/login")
+          if (!userId) {
+            return res.redirect('/login');
+        }
+         
+       const user = await User.findById(userId);
+
+         if (!user || user.isBlocked) {
+            req.session.user=null; // clear session
+            return res.render("login", {message:"Your account is blocked by admin", activeTab: "login" });
+        }
+
+        next();
+
+
+
+    } catch(error)   {
+
+
+            console.log("Error in user atuth middleware",error);
+           return res.status(500).send("Internal Server error")
+        
     }
+   
 }
 
 const adminAuth = (req,res,next)=>{
@@ -34,7 +42,7 @@ const adminAuth = (req,res,next)=>{
             }
     })
     .catch(error=>{
-        console.log("error in sminauth middleware",error)
+        console.log("error in adminauth middleware",error)
         res.status(500).send("internal server error")
     })
 } else{
