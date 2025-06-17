@@ -58,14 +58,14 @@
         <td><%= data[i].brand_id ? data[i].brand_id.name : 'Null' %></td>
         <td><%= data[i].category_id?.name %></td>
         <td><%= data[i].subcategory_id ? data[i].subcategory_id.name : 'Null' %></td>
-        <td>₹ <%= data[i].regular_price %></td>
+        <td>₹ <%= data[i].regular_price  %></td>
 
         <!-- Sales Price -->
         <td>₹ <%= data[i].sales_price %></td>
-
+           <td>final₹ <%= data[i].final_price %></td>
         <!-- Offer Price -->
         <td>
-            <% if (data[i].offer_price === 0) { %>
+            <% if (!data[i].offer_price) { %>
                 <span class="text-muted">No Offer</span>
             <% } else { %>
                 ₹ <%= (data[i].sales_price * (1 - data[i].offer_price / 100)).toFixed(2) %>
@@ -74,7 +74,7 @@
 
         <!-- Offer Column -->
         <td>
-            <% if (data[i].offer_price === 0) { %>
+            <% if (!data[i].offer_price) { %>
                 <button class="btn btn-info btn-sm" onclick="addOffer('<%= data[i]._id %>')">
                     <span class="text-white">Add Offer</span>
                 </button>
@@ -227,39 +227,54 @@
             <input type="number" class="form-control" id="stock" name="stock" value="<%=data[i].stock%>">
           </div>
 
+        
+        <div class="product-container" data-product-id="<%= data[i]._id %>">
 
-          <div class="mb-3">
+           <div class="mb-3">
             <label class="form-label">Images</label>
             <div id="productImages" class="d-flex gap-2 flex-wrap"> 
                 <% let imageCount = 0 %>
                <%data[i].image.forEach(img=>{ %>
-              <img src="<%=img%> " width="260" style="border: 3px solid gray;" >
+            <div style="display: inline-block; position: relative; margin-right: 10px;">
+              <label style="cursor :pointer;"> 
+                 <img id="preview<%=imageCount%>" src="<%=img%> " width="260" style="border: 3px solid gray;" >
+                <input type="file" accept="image/jpg, image/jpeg, image/png, image/webp" style="display: none;" onchange="previewImage(event)">
+              </label>
                       <% imageCount++; %>
+
+            </div>      
               <%})%>
-           
+             
              <% if (imageCount < 4) { %>
         <% for (let k = 0; k < (4 - imageCount); k++) { %>
              <div style="display: inline-block; position: relative; margin-right: 10px;">
                <label style="cursor: pointer;">
-               <img id="preview<%=k%>" src="/uploads/images/addimage.webp" alt="add image" width="260" style="border: 3px dashed gray; opacity: 0.5;">
+               <img id="preview<%= k+imageCount %>" src="/uploads/images/addimage.webp" alt="add image" width="260" style="border: 3px dashed gray; opacity: 0.5;">
                <input type="file" accept="image/jpg, image/jpeg, image/png, image/webp" style="display: none;" onchange="previewImage(event)">
              </label>
           </div>
           <% } %>
         <% } %>
 
-
-
-  
          <input type="file" id="croppedImageInput" name="images" style="display: none;" multiple>
+     </div>
 
 <!-- Crop Modal -->
-           <div id="cropModal" style="display: none; position: fixed; top: 10%; left: 50%; transform: translateX(-50%); background: white; padding: 20px; border: 1px solid #ccc; z-index: 1000;">
+           <!-- <div id="cropModal" style="display: none; position: fixed; top: 10%; left: 50%; transform: translateX(-50%); background: white; padding: 20px; border: 1px solid #ccc; z-index: 1000;">
            <img id="cropperImage" style="max-width: 100%; max-height: 400px;" />
           <br>
            <button type="button" onclick="cropImage()">Crop & Add</button>
           <button type="button" onclick="closeCropModal()">Cancel</button>
-         </div>
+         </div> -->
+
+         <!-- Inside your loop (per product) -->
+      <div id="cropModal-<%= data[i]._id %>" class="crop-modal" style="display: none; position: fixed; top: 10%; left: 50%; transform: translateX(-50%); background: white; padding: 20px; border: 1px solid #ccc; z-index: 1000;">
+       <img id="cropperImage-<%= data[i]._id %>" style="max-width: 100%; max-height: 400px;" />
+      <br>
+       <button type="button" onclick="cropImage('<%= data[i]._id %>')">Crop & Add</button>
+       <button type="button" onclick="closeCropModal('<%= data[i]._id %>')">Cancel</button>
+    </div>
+ </div>
 
               
 
@@ -383,101 +398,99 @@ const allSubcategory = <%- JSON.stringify(subcat) %>;
 
 
 
-  function previewImage(input) {
-  if (input.files && input.files[0]) {
-    const reader = new FileReader();
+//   function previewImage(input) {
+//   if (input.files && input.files[0]) {
+//     const reader = new FileReader();
 
-    reader.onload = function (e) {
-      // Target the <img> element before the input
-      input.previousElementSibling.src = e.target.result;
-      input.previousElementSibling.style.opacity = "1";
-      input.previousElementSibling.style.border = "3px solid green";
-    };
+//     reader.onload = function (e) {
+//       // Target the <img> element before the input
+//       input.previousElementSibling.src = e.target.result;
+//       input.previousElementSibling.style.opacity = "1";
+//       input.previousElementSibling.style.border = "3px solid green";
+//     };
 
-    reader.readAsDataURL(input.files[0]); // Converts file to base64 string
-  }
+//     reader.readAsDataURL(input.files[0]); // Converts file to base64 string
+//   }
+// }
+
+
+let croppers = {}; // Store cropper instances per product
+let croppedFiles = {};
+let currentInputIndex = {};
+let currentProductId = null;
+
+function previewImage(event) {
+  const input = event.target;
+  const label = input.closest("label");
+  const img = label.querySelector("img");
+
+  if (!img || !input.files.length) return;
+
+  // Extract preview index
+  const match = img.id.match(/preview(\d+)/);
+  if (!match) return;
+  const index = parseInt(match[1]);
+
+  // Extract productId from nearest container or dataset
+  const productDiv = input.closest(".product-container"); // Make sure you add a class to your product wrapper div
+  const productId = productDiv?.dataset?.productId;
+  if (!productId) return;
+
+  currentInputIndex[productId] = index;
+  currentProductId = productId;
+
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    const cropImg = document.getElementById(`cropperImage-${productId}`);
+    cropImg.src = e.target.result;
+
+    document.getElementById(`cropModal-${productId}`).style.display = "block";
+
+    if (croppers[productId]) croppers[productId].destroy();
+
+    croppers[productId] = new Cropper(cropImg, {
+      aspectRatio: 1,
+      viewMode: 1,
+      autoCropArea: 1,
+    });
+  };
+  reader.readAsDataURL(input.files[0]);
 }
 
+function cropImage(productId) {
+  const cropper = croppers[productId];
+  if (!cropper) return;
 
-  let cropper;
-  let croppedFiles = [];
-  let currentInputIndex = null;
+  cropper.getCroppedCanvas({ width: 440, height: 440 }).toBlob((blob) => {
+    const file = new File([blob], `cropped_${Date.now()}.jpg`, { type: "image/jpeg" });
 
-  function previewImage(event) {
-    const input = event.target;
+    if (!croppedFiles[productId]) croppedFiles[productId] = [];
+    croppedFiles[productId][currentInputIndex[productId]] = file;
 
-    // Find the index from the parent label > img's id: "preview0", "preview1", etc.
-    const label = input.closest("label");
-    const img = label.querySelector("img");
-
-    if (!img || !input.files || input.files.length === 0) return;
-
-    const match = img.id.match(/preview(\d+)/);
-    if (!match) return;
-    currentInputIndex = parseInt(match[1]);
-
-    const file = input.files[0];
-    const reader = new FileReader();
-
-    reader.onload = function (e) {
-      const cropImage = document.getElementById("cropperImage");
-      cropImage.src = e.target.result;
-
-      // Show modal
-      document.getElementById("cropModal").style.display = "block";
-
-      // Destroy existing cropper if exists
-      if (cropper) {
-        cropper.destroy();
-      }
-
-      cropper = new Cropper(cropImage, {
-        aspectRatio: 1,
-        viewMode: 1,
-        autoCropArea: 1
-      });
-    };
-
-    reader.readAsDataURL(file);
-  }
-
-  function cropImage() {
-    if (!cropper) return;
-
-    cropper.getCroppedCanvas({
-      width: 440,
-      height: 440,
-    }).toBlob(blob => {
-      const file = new File([blob], `cropped_${Date.now()}.jpg`, { type: "image/jpeg" });
-      croppedFiles[currentInputIndex] = file;
-
-      // Update preview
-      const preview = document.getElementById(`preview${currentInputIndex}`);
-      if (preview) {
-        preview.src = URL.createObjectURL(blob);
-        preview.style.opacity = 1;
-        preview.style.border = "3px solid green";
-      }
-
-      // Update hidden input with all cropped files
-      const dt = new DataTransfer();
-      croppedFiles.forEach(f => f && dt.items.add(f));
-      document.getElementById("croppedImageInput").files = dt.files;
-
-      // Close modal
-      document.getElementById("cropModal").style.display = "none";
-      cropper.destroy();
-      cropper = null;
-    });
-  }
-
-  function closeCropModal() {
-    if (cropper) {
-      cropper.destroy();
-      cropper = null;
+    const preview = document.getElementById(`preview${currentInputIndex[productId]}`);
+    if (preview) {
+      preview.src = URL.createObjectURL(blob);
+      preview.style.opacity = 1;
+      preview.style.border = "3px solid green";
     }
-    document.getElementById("cropModal").style.display = "none";
+
+    const dt = new DataTransfer();
+    croppedFiles[productId].forEach((f) => f && dt.items.add(f));
+
+    const input = document.querySelector(`#productImages input[type="file"][name="images"][data-product-id="${productId}"]`);
+    if (input) input.files = dt.files;
+
+    closeCropModal(productId);
+  });
+}
+
+function closeCropModal(productId) {
+  document.getElementById(`cropModal-${productId}`).style.display = "none";
+  if (croppers[productId]) {
+    croppers[productId].destroy();
+    delete croppers[productId];
   }
+}
 
 
 

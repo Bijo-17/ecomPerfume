@@ -6,6 +6,7 @@ const categoryController = require("../controller/admin/categoryController")
 const subcategoryController = require("../controller/admin/subcategoryController")
 const productController = require("../controller/admin/productController")
 const brandController = require("../controller/admin/brandController")
+const orderController = require("../controller/admin/orderController")
 
 const multer = require('multer')
 
@@ -78,8 +79,13 @@ router.post('/products/addOffer/:id',productController.addOffer)
 router.post('/products/removeOffer/:id',productController.removeOffer)
 router.patch('/products/edit/:id',uploads.array("images",4),productController.editProduct)
 
+// orders 
 
+router.get('/orderList',orderController.getOrders)
+router.get('/orderDetails/:orderId/:productId',orderController.orderDetails)
+router.post('/verifyReturn/:orderId/:productId',orderController.approveReturn)
+router.post('/cancelReturn/:orderId/:productId',orderController.cancelReturn)
+router.post('/updateOrderStatus/:orderId/:productId',orderController.updateOrderStatus)
 
-  
 
 module.exports = router

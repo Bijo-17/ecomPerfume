@@ -144,16 +144,23 @@ const resendOtp = async (req,res)=>{
     if(!req.session.email){
         return res.render("forgotPassword",{message:"session expired"})
     }
+
+    const email = req.session.email;
  
    const otp = generateOtp();
     const otpExpiry = Date.now() + 60 * 1000;
+    const emailSent = await emailVerificationOtp(email,otp)
 
     console.log("resend",otp)
 
-    req.session.userOtp = otp;
-    req.session.otpExpiry = otpExpiry;
+      if(emailSent){
+
+      req.session.userOtp = otp;
+      req.session.otpExpiry = otpExpiry;
     
-    res.status(200).json({ success:true, message:"OTP send sucessfully" })
+     res.status(200).json({ success:true, message:"OTP send sucessfully" })
+
+    }
 }
 catch(error){
    res.status(500).json({sucess:false , message:"Unable to send OTP , please try again"})
@@ -223,21 +230,22 @@ const SaveNewPassword = async (req,res)=>{
             }
                 const user = await User.findOne({_id:req.session.user})
 
-                console.log("///staaarted\n",user,"\n///ended")
+            
                 
                 if(!user){
                 return res.redirect("/login")       
                 } else {
                 
 
-                const [firstName = "" , lastName = "" ] = (user.name || "" ).split(' ')
+                const [firstName = "" ,middleName = "", lastName = "" ] = (user.name || "" ).split(' ')
 
-                res.render("account",{layout:"../layout/userAccount", active:"account", user, firstName , lastName})
+                res.render("account",{layout:"../layout/userAccount", active:"account", user, firstName ,middleName, lastName})
                 }
 
         } catch (error) {
             
             res.status(500).json("error")
+            console.log("error in loading profile",error)
 
         }
 
@@ -251,34 +259,45 @@ const editAccount = async (req,res)=>{
 
         const email = req.session.email;
         if (!email) return res.redirect("/login");
-
+        
         const user = await User.findOne({ email });
         if (!user) return res.redirect("/login");
 
-        const { firstName, lastName, dob, gender, city, state, houseName, pincode } = req.body;
+        const { firstName, lastName, } = req.body;
+        const editedDetails = req.body;
+         
+          editedDetails.name = String(firstName + ' ' + lastName)
 
-        console.log("edited details: ",req.body)
+        let updatedFields = {};
 
+          for (let key in editedDetails) {
       
-        user.fullName = `${firstName} ${lastName}`;
-        user.dob = dob;
-        user.gender = gender;
-        // user.address = address._id;
+      if (editedDetails[key] && editedDetails[key] !== JSON.stringify(user[key])) {
+        
+                updatedFields[key] =  editedDetails[key];
+       
+      }
+    }
+   
+        if (req.file) {
+                    newPath = '/uploads/path/' + req.file.filename;
+              if(user.profileImage !== newPath){
+                   updatedFields.profileImage = '/uploads/images/' + req.file.filename
+                  
+              }     
+        
 
-        if (user.address) {
-            // Address already exists — update it
-            await Address.findByIdAndUpdate(user.address, {
-             houseName, city, state, pincode
-            });
-          } else {
-            // No address yet — create new
-            const newAddress = new Address({ houseName, city, state, pincode });
-            await newAddress.save();
-            user.address = newAddress._id;
-          }
+           }    
 
-        await user.save()
 
+         console.log("updated fieds",updatedFields)
+       
+        console.log("edited details: ",req.body)
+ 
+         await User.findByIdAndUpdate(user._id, updatedFields , {new:true} )
+
+       
+        
         res.redirect('/account');
         
       } catch (error) {
@@ -290,9 +309,193 @@ const editAccount = async (req,res)=>{
 
 }
 
+async function emailVerificationOtp(email,otp){
+    try {
+         
+        const transporter =nodemailer.createTransport({
+
+            service:'gmail',
+            port:587,
+            secure:false,
+            requireTLS:true,
+            auth:{
+                user:process.env.NODEMAILER_EMAIL,
+                pass:process.env.NODEMAILER_PASSWORD
+            }
+        })
+
+        const info = await transporter.sendMail({
+
+            from:process.env.NODEMAILER_EMAIL,
+            to:email,
+            subject:"Add this email for Accound in Petal & Mist",
+            text:`Your OTP is ${otp}`,
+            html:`<b> Your OTP ${otp} <b>`,
+
+        })
+
+        return info.accepted.length>0
+
+    } catch (error) {
+        console.error("Error sending email",error);
+        return false;
+    }
+}  
+
+const changeEmail = async (req,res)=>{
+    try {
+
+        const user = req.session.user;
+        const email = req.body.email;
+         req.session.email = email;
+
+         console.log("changeEmail req.body",req.body)
+      
+         
+       
+         if(user){ 
+         const otp = generateOtp();
+        const otpExpiry = Date.now() + 60 * 1000; // 1 minute expiry
+        const emailSent = await emailVerificationOtp(email,otp)
+               console.log("otp generated",otp)
+               req.session.userOtp = otp;
+               console.log("all sessioiin",req.session);
+           if(emailSent){
+                
+            req.session.userOtp = otp;
+            req.session.otpExpiry = otpExpiry;
+            console.log("req.session.userOtp",req.session.userOtp)
+
+           } else {
+               res.status(400).json({success:false, message:"failed to send otp, please try again"})
+           }
+
+           res.render("changeEmailOtp");
+
+         } else {
+             res.status(400).json({success:false, message:"session expired , please log in again"})
+         }
+
+
+    } catch (error) {
+        console.log("failed to send otp to email", error)
+        res.status(400).json({success:false, message:"unable to send otp , please log in again"})
+      
+    }
+}
 
 
 
+const verifyChangeEmail = async (req,res)=>{
+        try {
+            const enteredOtp = req.body.otp
+           const email = req.session.email
+          const otp = req.session.userOtp 
+           const otpExpiry = req.session.otpExpiry 
+           
+             console.log("enterd otp",enteredOtp, "generatedotp",otp) 
+             console.log("req.session =>",req.session,"ended /'''''''''''");
+
+            if(!otp || !email){
+                console.log("returnedfrom!otp , !email")
+                console.log("not Email",email, "not otp",otp)
+              return res.render("account",{message:"session expired"})
+        } 
+
+        if (Date.now() > otpExpiry) {
+            console.log("returned from otpexpiry")
+            return res.status(400).json({ success: false, message: "OTP expired. Please resend OTP." });
+          }
+        
+        if(otp !== enteredOtp ){ 
+            console.log("otp doesnot matcch")
+           return res.status(400).json({success:false,message:"otp donot match"})
+       }
+        
+           
+            
+            
+
+           return res.status(200).json( {success:true,message:"otp verification sucessfull"})
+
+        } catch (error) {
+            console.log("unable to change email",error)
+           res.status(400).json({success : false , message: "unable to change the email"});
+            
+        }
+}
+
+const saveNewEmail = async (req,res)=>{
+    try {
+       const email = req.session.email;
+       const userId = req.session.user;
+         
+       if(userId && email) { 
+
+              const userDetails = await User.findByIdAndUpdate(userId,{email});
+
+
+       }
+
+       res.redirect('/account')
+           
+
+    } catch (error) {
+
+        console.log("unable to change email",error)
+       res.status(400).json({success : false , message: "unable to change the email"});
+            
+
+
+    }
+}
+
+const changePassword = async (req, res)=>{
+    try {
+
+        const userId = req.session.user       
+         const user = await User.findById(userId)
+
+         console.log("user",user)
+
+        const {currentPassword , newPassword, confirmPassword} = req.body;
+         
+        console.log( "passowrds",req.body, currentPassword , newPassword , confirmPassword)
+
+        const pmatch = await bcrypt.compare(currentPassword,user.password)
+
+        if(!pmatch){
+         
+            return res.status(400).json({message:"Inavlid password"})
+
+        }else if (newPassword !== confirmPassword ){
+              
+           return res.status(400).json({message:"Password do not match"})
+        }
+        
+
+           const saltRounds = 10;
+
+
+
+          const hashedPassword = await bcrypt.hash(newPassword,saltRounds)
+            
+               user.password = hashedPassword;
+
+               await user.save();
+
+               res.status(200).json({message:"password changed sucessfully"})
+      
+  
+    } catch (error) {
+        console.log("error in changing password",error);
+        res.status(400).json({message:"Server Error"})
+        
+    }
+}
+
+
+//  rzp_test_mAfXiHc8Pp0GEC
 
 
 
@@ -303,4 +506,9 @@ module.exports = { loadPasswordReset,
                    loadAccount , 
                    editAccount,
                 resendOtp ,
-            newPasswordPage }
+              newPasswordPage,
+            changeEmail,
+        verifyChangeEmail,
+    saveNewEmail,
+   changePassword
+ }

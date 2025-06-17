@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart - Petal & Mist</title>
+    <link rel="stylesheet" href="/css/cartStyle.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Top Navigation -->
+        <nav class="top-nav">
+            <div class="nav-content">
+                <h1 class="brand-name">PETAL & MIST</h1>
+                <div class="nav-icons">
+                    <button class="nav-icon"><i class="fas fa-search"></i></button>
+                    <button class="nav-icon"><i class="fas fa-heart"></i></button>
+                    <button class="nav-icon active"><i class="fas fa-shopping-bag"></i></button>
+                    <button class="nav-icon"><i class="fas fa-user"></i></button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Secondary Navigation -->
+        <nav class="secondary-nav">
+            <div class="nav-links">
+                <a href="#" class="nav-link">Offers</a>
+                <a href="#" class="nav-link">category</a>
+                <a href="#" class="nav-link">Bath and Body</a>
+                <a href="#" class="nav-link">New Arrivals</a>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <h2 class="page-title">Shopping Cart</h2>
+
+            <div class="cart-container">
+                <!-- Cart Items -->
+             <% if(cart?.items && cart?.items.length>0) { %> 
+
+                <div class="cart-items">
+                    <!-- Cart Header -->
+                    <div class="cart-header">
+                        <div class="header-product">Product</div>
+                        <div class="header-price">Price</div>
+                        <div class="header-quantity">Quantity</div>
+                        <div class="header-total">Total</div>
+                    </div>
+
+                    <!-- Cart Item 1 -->
+                     <% cart?.items.forEach(product=> {  %>
+
+                   <div class="cart-item <%= (!product.product_id.stock_status || product.product_id.isBlocked || product.product_id.isDeleted || product.product_id.stock === 0) ? 'unavailable' : '' %>" data-product-id="<%=product.product_id._id%>">
+                      
+                   
+                        <div class="product-info">
+                     <a href="/productDetails/<%=product.product_id._id%>" > 
+                            <div class="product-image">
+                                <img src="<%=product.product_id.image[0] %>" alt="CEO MAN Perfume">
+                            </div>
+                            <div class="product-details">
+                                <h3 class="product-name"><%=product.product_id.product_name%></h3>
+                                <div class="product-rating">
+                                    
+                                    <div class="stars">
+                                  <% const ratingCount = product.product_id.averageRating %>
+                                
+                                      <% for(let i = 1;i<= 5; i++) { %> 
+                                        <% if(ratingCount>=i) { %>
+                                        <i class="fas fa-star"></i>
+                                      
+                                             <!-- <i class="fas fa-star-half-alt"></i>                                  -->
+                                        <% } else {  %>
+                                            <i class="far fa-star"></i>
+                                        <% } %>
+                                    <% } %>    
+                                    </div>
+                                  
+                                    <span class="rating-count">(<%=product.product_id.ratingCount%>)</span>
+                                </div> </a>
+                                <p class="product-quantity-info">Quantity : 100 ML</p>
+                                <a href="/cart/remove/<%=product.product_id._id%>">  <button class="remove-btn">Remove</button> </a>
+                            </div>
+                        </div>
+                        <div class="product-price">
+                            <span class="current-price">₹<%= product.product_id.final_price%></span>
+                              <span class="regular-price">₹<%= product.product_id.regular_price%> </span>
+                        </div>
+                        <div class="quantity-controls-wrapper">
+                            <div class="quantity-controls d-flex gap-2 align-items-center">
+                            <button class="qty-btn minus" data-action="decrease"
+                              <%= (!product.product_id.stock_status || product.product_id.isBlocked || product.product_id.isDeleted) ? 'disabled' : '' %>>-</button>
+                            <input type="number" class="qty-input" value="<%=product.quantity%>"  min="2" max="5" data-id="<%=product.product_id._id%>" data-stock="<%=product.product_id.stock%>"
+                              <%= (!product.product_id.stock_status || product.product_id.isBlocked || product.product_id.isDeleted) ? 'disabled' : '' %> >
+                            <button class="qty-btn plus" data-action="increase" 
+                              <%= (!product.product_id.stock_status || product.product_id.isBlocked || product.product_id.isDeleted) ? 'disabled' : '' %>>+</button> 
+                            </div>                      
+                             <div id="quantity-error<%=product.product_id._id%>" style="color: red; font-size: 0.8rem; display: inline-block; margin-top: 4px;" ></div>     
+                        </div>
+                        <div class="item-total" >
+                            <span class="total-price">₹<%= product.quantity * product.product_id.final_price%></span>
+                            <span class="original-price">₹<%= product.quantity * product.product_id.regular_price%></span>
+                        </div>
+
+                        <div class="product-error error-msg">
+
+                           <% if(!product.product_id.stock_status || product.product_id.stock === 0) { %> 
+                                                           <div class="error-msg" > Out of stock   </div>
+                        
+                                                         <% } else if(product.product_id.isBlocked ||product.product_id.isDeleted ){ %> 
+                                                              
+                                                             <div class="error-msg"> Unavailable </div>
+                                                        
+                                                        <%}%>
+                    
+                            </div>             
+                    </div>                        
+
+                    <% }) %>
+
+                    <% } else{ %> 
+                    <div > Looks like you haven't add anything to cart</div>
+                    <%} %>
+
+                    <!-- Cart Item 2 -->
+                    <!-- <div class="cart-item" data-product-id="2">
+                        <div class="product-info">
+                            <div class="product-image">
+                                <img src="/placeholder.svg?height=120&width=120" alt="TEMPTATION Perfume">
+                            </div>
+                            <div class="product-details">
+                                <h3 class="product-name">TEMPTATION - Perfume</h3>
+                                <div class="product-rating">
+                                    <div class="stars">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="far fa-star"></i>
+                                    </div>
+                                    <span class="rating-count">(3)</span>
+                                </div>
+                                <p class="product-quantity-info">Quantity : 100 ML</p>
+                                <button class="remove-btn">Remove</button>
+                            </div>
+                        </div>
+                        <div class="product-price">
+                            <span class="current-price">₹899.00</span>
+                        </div>
+                        <div class="quantity-controls">
+                            <button class="qty-btn minus" data-action="decrease">-</button>
+                            <input type="number" class="qty-input" value="1" min="1" max="10">
+                            <button class="qty-btn plus" data-action="increase">+</button>
+                        </div>
+                        <div class="item-total">
+                            <span class="total-price">₹899.00</span>
+                            <span class="original-price">999.00</span>
+                        </div>
+                    </div> -->
+                </div>
+
+                <!-- Cart Summary -->
+                <div class="cart-summary">
+                    <!-- Gift Wrap Option -->
+                    <!-- <div class="gift-wrap-option">
+                        <label class="gift-wrap-label">
+                            <input type="checkbox" id="giftWrap" class="gift-wrap-checkbox">
+                            <span class="checkmark"></span>
+                            For ₹49.00 Please Wrap The Product
+                        </label>
+                    </div> -->
+
+                    <!-- Order Summary -->
+                    <div class="order-summary">
+                        <div class="summary-row">
+                            <span class="summary-label">Subtotal</span>
+                            <span class="summary-value" id="subtotal">₹ 00.00  </span>
+                        </div>
+                        <div class="summary-row discount-row">
+                            <span class="summary-label">Discount</span>
+                            <span class="summary-value discount" id="discount">-₹ 0.00 </span>
+                        </div>
+                        <div class="summary-row gift-wrap-row" style="display: none;">
+                            <span class="summary-label">Gift Wrap</span>
+                            <span class="summary-value" id="giftWrapCost">₹49.00</span>
+                        </div>
+                        <div class="summary-row total-row">
+                            <span class="summary-label">Total</span>
+                            <span class="summary-value total" id="finalTotal">₹800.00</span>
+                        </div>
+                    </div>
+
+                    <!-- Checkout Button -->
+                    <button class="checkout-btn" id="checkoutBtn">Checkout</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/js/cartjs"></script>
+   
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+ <script>
+
+   
+
+// 
+
+document.addEventListener('DOMContentLoaded', () => {
+
+
+    updateCartSummary();
+
+    
+    const cartItems = document.querySelectorAll('.cart-item');
+
+    function updateQuantity(index, delta) {
+        const item = cartItems[index];
+        const input = item.querySelector('.qty-input');
+        const maxStock = parseInt(input.dataset.stock);
+        let currentQty = parseInt(input.value);
+        const productId = input.dataset.id;
+        let errorQuantity = document.getElementById(`quantity-error${productId}`)
+    
+        console.log("max stock",maxStock)
+        let newQty = currentQty + delta;
+
+        if (newQty < 1) newQty = 1;
+        if( newQty > 5){
+               newQty = 5;  
+               errorQuantity.innerHTML = 'Max quantiy limit reached';
+         } else {
+            errorQuantity.innerHTML = '';
+         }
+
+        if (newQty > maxStock ){ 
+             newQty = maxStock;
+             errorQuantity.innerHTML = 'No more items left';
+            }
+        input.value = newQty;
+
+        updateItemTotal(item, newQty);
+    }
+
+    function setQuantity(index, newQty) {
+        const item = cartItems[index];
+        const input = item.querySelector('.qty-input');
+        const maxStock = parseInt(input.dataset.stock);
+         const productId = input.dataset.id;
+        let errorQuantity = document.getElementById(`quantity-error${productId}`)
+
+        if (isNaN(newQty) || newQty < 1) newQty = 1;
+        if(newQty > 6){ 
+          newQty = 5;
+           errorQuantity.textContent = 'Max limit for the item reached'
+        }
+        if (newQty > maxStock){
+           newQty = maxStock;
+            errorQuantity.textContent = 'No moere item left'
+        }
+        input.value = newQty;
+
+        updateItemTotal(item, newQty);
+    }
+
+    function updateItemTotal(item, quantity) {
+        const priceElement = item.querySelector('.current-price');
+        const totalElement = item.querySelector('.total-price');
+        const regularElement = item.querySelector('.regular-price')
+        const  originalElement = item.querySelector('.original-price')
+        const price = parseFloat(priceElement.textContent.replace("₹", ""));
+          const originalPrice = parseFloat(regularElement.textContent.replace("₹", ""));
+        const total = (price * quantity).toFixed(2);
+        const originalTotal = (originalPrice * quantity).toFixed(2)
+        totalElement.textContent = "₹" + total;
+        originalElement.textContent = "₹" + originalTotal
+
+        updateCartSummary(); // Optional: if you want to update subtotal/total
+    }
+
+    function removeItem(index) {
+        const item = cartItems[index];
+        item.remove();
+        updateCartSummary();
+    }
+
+    function updateCartSummary() {
+        let subtotal = 0;
+        let discountTotal = 0;          
+        document.querySelectorAll('.cart-item').forEach(item => {
+            const total = parseFloat(item.querySelector('.original-price').textContent.replace("₹", ""));
+            subtotal += total;
+            const dTotal = parseFloat(item.querySelector('.total-price').textContent.replace("₹", ""));
+            discountTotal += dTotal;
+        });
+        document.getElementById('subtotal').textContent = "₹" + subtotal.toFixed(2);
+        document.getElementById('discount').textContent = "-₹" + (subtotal- discountTotal).toFixed(2);
+        document.getElementById('finalTotal').textContent = "₹" + discountTotal.toFixed(2);
+
+        // Update finalTotal, discount
+    }
+
+    function attachEventListeners() {
+        cartItems.forEach((item, index) => {
+            const minusBtn = item.querySelector('.minus');
+            const plusBtn = item.querySelector('.plus');
+            const qtyInput = item.querySelector('.qty-input');
+            
+
+            minusBtn.addEventListener('click', () => updateQuantity(index, -1));
+            plusBtn.addEventListener('click', () => updateQuantity(index, 1));
+            qtyInput.addEventListener('change', (e) => setQuantity(index, parseInt(e.target.value)));
+           
+        });
+
+        const giftWrapCheckbox = document.getElementById('giftWrap');
+        const checkoutBtn = document.getElementById('checkoutBtn');
+
+        if (giftWrapCheckbox) {
+            giftWrapCheckbox.addEventListener('change', updateCartSummary);
+        }
+
+    
+
+        if (checkoutBtn) {
+            checkoutBtn.addEventListener('click',async () => {
+               
+                const errorDivs = document.querySelectorAll('.error-msg')
+
+                let hasError = false;
+
+                errorDivs.forEach(div=>{
+                    if(div.textContent.trim() != ''){
+                        hasError = true
+                    }
+                })
+
+          if (hasError) {
+               Swal.fire('Error','One or more products are unavailable or out of stock.','error' );
+            return; 
+        }
+          
+   try {
+        
+    const finalTotal = document.getElementById('finalTotal').value;
+
+    console.log("finalTotal",finalTotal)
+    const cartItems = document.querySelectorAll('.cart-item');
+    const updatedCart = [];
+
+    cartItems.forEach(item => {
+    const productId = item.querySelector('.qty-input').dataset.id;
+    const quantity = parseInt(item.querySelector('.qty-input').value);
+    const isAvailable = !item.classList.contains('disabled-item');
+
+    if (isAvailable) {
+      updatedCart.push({ productId, quantity });
+    }
+  });
+      
+      const response = await fetch('/cart/validate-before-checkout', {
+        method: 'POST',
+        headers: {  
+          'Content-Type': 'application/json'
+        },
+          body: JSON.stringify({ cartItems: updatedCart , total: finalTotal })
+      });
+
+      const data = await response.json();
+
+      if (!data.success) {
+        Swal.fire("Error", data.message, "error");
+        
+      } else {
+
+
+        window.location.href = "/checkout";
+      }
+    } catch (err) {
+      console.error("Checkofut validation failed", err);
+      Swal.fire("Oops", "Something went wrong.", "error");
+    }
+
+
+
+            });
+        }
+    }
+
+    attachEventListeners();
+});
+
+
+
+    </script>
+</body>
+</html>

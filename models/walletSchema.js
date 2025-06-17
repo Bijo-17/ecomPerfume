@@ -10,7 +10,7 @@ const walletSchema = new mongoose.Schema({
      balance: { 
                 type: Number, 
                  default: 0 },
-  status: { 
+  status: {     
                 type: String, 
                 enum: ['credited', 'debited'] }
 }, { timestamps: true });

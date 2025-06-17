@@ -1,0 +1,199 @@
+
+<head>  <link rel="stylesheet" href="/css/orderStyle.css" > 
+    <style>         
+             .quantity-badge {
+  display: inline-block;
+
+  color: #333;
+  padding: 2px 6px;
+  margin-left: 2px;
+  font-size: 14px;
+  font-weight: 500;
+ 
+
+}
+
+#returnModal {
+  display: none;
+}
+#returnModal.active {
+  display: flex;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5);
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+}
+#returnModal .modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  width: 400px;
+  max-width: 90%;
+}
+#returnModal .modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+#returnModal textarea {
+  width: 100%;
+  padding: 10px;
+  resize: none;
+  margin-top: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+#returnModal .modal-footer {
+  margin-top: 15px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+               
+                    
+                    
+   </style>
+ </head>
+
+<div class="orders-content">
+    <div class="orders-header">
+        <h2 class="section-title">My Orders</h2>
+    </div>
+
+    <div class="orders-list" id="ordersList">
+        <!-- Order 1 - Processing -->
+         <% for(let i =0 ; i< orders.length ; i++) { %> 
+               
+            <% orders[i].order_items.forEach(product=> { %>
+           
+        <div class="order-item" data-order-id="<%=orders[i].order_id%>" data-product-id="<%= product.product_id._id %>" >
+            <div class="order-product">
+                <div class="product-image">
+                    <img src="<%=product.product_id.image[0]%>" alt="product img">
+                </div>
+                <div class="product-details">
+                    <div class="product-brand"><%=product.brand_name%></div>
+                    <div class="product-name">-<%=product.product_id.product_name%></div>
+                    <div class="product-rating">
+                      
+                     <div class="stars">
+                        <% for(let s=1 ; s<=5;s++){ %> 
+                            <%if(product.product_id.averageRating >= s) {  %>
+                            <i class="fas fa-star filled"></i>
+                           <%} else { %> 
+                            <i class="fas fa-star"></i>
+                            <% } %>
+                          <%}%>
+                            (<%=product.product_id.ratingCount%>)
+                     </div>
+                  </div>
+                    <div class="product-price"><%=product.product_price%>  <span class="quantity-badge"> x <%= product.quantity%> </span></div>
+                </div>
+            </div>
+            <div class="order-status-section">
+                <div class="order-status">
+                    <span class="status-label">Status :</span>
+                    <span class="status-value <%=product.order_status%>"><%= product.order_status %></span>
+                </div>
+                <div class="order-date"> <%= orders[i].order_date.toISOString().substring(0, 10) %></div>
+            </div>
+        
+            <div class="order-actions">
+            
+                    <i class="fas fa-chevron-right"></i>
+               
+            </div>
+        </div>
+
+         <% }) %>
+     <% } %>
+      
+
+        <!-- Order 3 - Cancelled -->
+        <!-- <div class="order-item" data-order-id="ORD003">
+            <div class="order-product">
+                <div class="product-image">
+                    <img src="/placeholder.svg?height=80&width=80" alt="BEARDO GODFATHER">
+                </div>
+                <div class="product-details">
+                    <div class="product-brand">BEARDO</div>
+                    <div class="product-name">- GODFATHER</div>
+                    <div class="product-rating">
+                        <div class="stars">
+                            <i class="fas fa-star filled"></i>
+                            <i class="fas fa-star filled"></i>
+                            <i class="fas fa-star filled"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <div class="product-price">₹1,499</div>
+                </div>
+            </div>
+            <div class="order-status-section">
+                <div class="order-status">
+                    <span class="status-label">Status :</span>
+                    <span class="status-value cancelled">Cancelled</span>
+                </div>
+                <div class="order-date">21/12/2024</div>
+            </div>
+            <div class="order-actions">
+                <button class="view-details-btn" onclick="viewOrderDetails('ORD003')">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div> -->
+
+
+    </div>
+
+    <div class="no-more-orders">
+        <p>No more orders</p>
+    </div>
+</div>
+
+<!-- Order Details Modal -->
+<div class="modal-overlay" id="orderDetailsModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Order Details</h3>
+            <button class="close-modal" id="closeOrderModal">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body" id="orderModalBody">
+            <!-- Order details will be populated here -->
+        </div>
+    </div>
+</div>
+
+<!-- Return Product Modal -->
+<div class="modal-overlay" id="returnModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Return Product</h3>
+      <button class="close-modal" onclick="closeReturnModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <label for="returnReason">Why do you want to return this product?</label>
+      <textarea id="returnReason" rows="4" placeholder="Enter your reason here..."></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="action-btn btn-secondary" onclick="closeReturnModal()">Cancel</button>
+      <button class="action-btn btn-primary" onclick="submitReturnReason()">Submit</button>
+    </div>
+  </div>
+</div>
+
+
+ <script id="order-data" type="application/json">
+            <%- JSON.stringify(orders) %>
+    </script>
+
+<script src="/js/order.js"> </script>

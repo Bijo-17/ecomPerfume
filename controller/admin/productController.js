@@ -242,10 +242,12 @@ const addOffer = async (req,res)=>{
       const productId = req.params.id;
     
       const {offer} = req.body
+      
+      const product = await Product.findById(productId)
      
+     const finalPrice =  (  product.sales_price * (1 - offer / 100)).toFixed(2)
 
-
-      const updateOffer = await Product.findByIdAndUpdate(productId,{offer_price:offer});
+      const updateOffer = await Product.findByIdAndUpdate(productId,{offer_price:offer , final_price:finalPrice});
 
      return res.status(200).json({ message: 'Offer added successfully' });
 
@@ -262,7 +264,9 @@ const removeOffer = async (req,res)=>{
     
     console.log(productId)
 
-      const updateOffer = await Product.findByIdAndUpdate(productId,{offer_price:0});
+    const product = await Product.findById(productId)
+
+      const updateOffer = await Product.findByIdAndUpdate(productId,{offer_price:null , final_price:product.sales_price});
 
      return res.status(200).json({ message: 'Offer added successfully' });
 
@@ -315,7 +319,15 @@ const editProduct = async (req,res)=>{
       }
       updatedFields.image = images;
     }
- 
+
+    console.log("updated Fiels offer",updatedFields.offer_price)
+
+    if(updatedFields.stock &&  updatedFields.stock.length>0 ){
+        updatedFields.stock_status = true;
+    }
+
+
+
     const updatedProduct = await Product.findByIdAndUpdate(productId, updatedFields, { new: true });
 
 

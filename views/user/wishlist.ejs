@@ -1,0 +1,94 @@
+<h1>My Wishlist</h1>
+
+<div class="wishlist-container">
+
+   
+  
+    <% if (wishlist && wishlist.products.length>0) { %>
+        <div class="wishlist-grid">
+            <% wishlist.products.forEach(item => { %>
+                <div class="wishlist-item">
+                    <div class="item-remove">
+                      <a href="/wishlist/remove/<%=item.product_id._id%>">  <button class="btn-remove" data-id="<%= item.id %>">
+                            <i class="fas fa-times"></i>
+                        </button> </a>
+                    </div>
+                    <div class="item-image">
+                        <img src="<%= item.product_id.image[0] %>" alt="<%= item.product_id.product_name %>">
+                    </div>
+                    <div class="item-details">
+                        <h3 class="item-name"><%= item.product_id.product_name%></h3>
+                        <div class="item-price">
+                            <span class="current-price">₹<%= item.product_id.final_price.toFixed(2) %></span>
+                            <% if (item.product_id.regular_price > item.product_id.final_price) { %>
+                                <span class="original-price">₹<%= item.product_id.regular_price.toFixed(2) %></span>
+                                <span class="discount"><%= Math.round(parseFloat(1 - item.product_id.final_Price/item.product_id.regular_price) * 100) %>% off</span>
+                            <% } %>
+                        </div>
+                    </div>
+                    <div class="item-actions">
+                        <button class="btn-add-to-cart" data-id="<%= item.product_id.id %>">ADD TO CART</button>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+    <% } else { %>
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-heart"></i>
+            </div>
+            <h2>Your Wishlist is Empty</h2>
+            <p>Save items you like in your wishlist. Review them anytime and easily move them to the bag.</p>
+            <button class="btn-shop">Continue Shopping</button>
+        </div>
+    <% } %>
+</div>
+
+
+<script> 
+
+ document.addEventListener('DOMContentLoaded' , ()=>{         
+ document.querySelectorAll('.btn-add-to-cart').forEach(button => {
+    button.addEventListener('click', async function () {
+      const productId = this.dataset.id;
+
+   
+   const response = await fetch(`/addToCart/${productId}`,{
+         
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+   })
+
+ const data = await response.json();
+
+
+      if (data.success) {
+        Swal.fire({        
+         icon: "success",
+          title: "Item added to Cart ",
+          showConfirmButton: false,
+            timer: 1200,
+             willClose: () => {
+                window.location.reload();
+             }
+
+        })
+    
+      }else {
+        Swal.fire({
+           icon: "error",
+            title: data.message || "something went wrong",
+            showConfirmButton:false, 
+            timer:1200, 
+             willClose: () => {
+              window.location.reload();
+             }
+        })
+      }
+
+ })
+ });
+
+})
+
+</script>

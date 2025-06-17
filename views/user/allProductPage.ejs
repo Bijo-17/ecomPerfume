@@ -1,6 +1,6 @@
 <%-include("../partials/user/header")%>
 <head>
-    <link rel="stylesheet" href="/css/productStyles.css">
+    <link rel="stylesheet" href="/css/productStyles.css" >
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
        a {
@@ -108,15 +108,15 @@
               </div>
 
               <div class="mb-2">
-                <strong class="text-danger">₹<%= product.sales_price?.toLocaleString() %></strong>
-                <% if (product.sales_price !== product.regular_price) { %>
+                <strong class="text-danger">₹<%= product.final_price?.toLocaleString() %></strong>
+                <% if (product.final_price !== product.regular_price) { %>
                   <span class="text-muted text-decoration-line-through">₹<%= product.regular_price?.toLocaleString() %></span>
                 <% } %>
               </div>
-
-              <button class="btn btn-outline-primary w-100">ADD TO CART</button>
+            </a>
+              <button class="btn btn-outline-primary w-100 addToCart-btn" data-id="<%=product._id%>" > ADD TO CART</button>
             </div>
-          </a>
+          
         </div>
       </div>
     <% }) %>
@@ -150,6 +150,57 @@
     <script src="/script.js"></script>
 
 <%-include("../partials/user/footer")%>
+
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script> 
+
+     
+ document.querySelectorAll('.addToCart-btn').forEach(button => {
+    button.addEventListener('click', async function () {
+      const productId = this.dataset.id;
+
+   
+   const response = await fetch(`/addToCart/${productId}`,{
+         
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+   })
+
+ const data = await response.json();
+
+
+      if (data.success) {
+        Swal.fire({        
+         icon: "success",
+          title: "Item added to Cart ",
+          showConfirmButton: false,
+            timer: 1200,
+             willClose: () => {
+                window.location.reload();
+             }
+
+        })
+    
+      }else {
+        Swal.fire({
+           icon: "error",
+            title: data.message || "something went wrong",
+            showConfirmButton:false, 
+            timer:1200, 
+             willClose: () => {
+              window.location.reload();
+             }
+        })
+      }
+
+ })
+ });
+
+
+
+</script>
    
 </body>
 </html>

@@ -1,0 +1,141 @@
+
+<%- include("../../views/partials/admin/header") %>
+<head> 
+<style>
+ 
+ .badge-sealed {
+  display: inline-block;
+  background: repeating-linear-gradient(
+    -45deg,
+    #f44336,
+    #f44336 10px,
+    #d32f2f 10px,
+    #d32f2f 20px
+  );
+  color: #fff;
+  padding: 5px 12px;
+  border-radius: 12px;
+  font-weight: bold;
+  font-size: 0.875rem;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  border: 2px solid #c62828;
+  text-shadow: 1px 1px #00000030;
+  cursor: not-allowed;
+}
+
+
+
+</style>
+
+</head>
+
+
+<section class="content-main">
+    <div class="content-header">
+        <h2 class="content-title">Order Management</h2>
+        <div>
+            <form id="searchForm" class="d-flex" style="gap: 10px;">
+                <input type="text" name="search" placeholder="Search by Order ID/User" class="form-control" value="<%= searchQuery || '' %>">
+                <select name="status" class="form-select">
+                    <option value="">All Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="shipped">Shipped</option>
+                    <option value="out-for-delivery">Out for Delivery</option>
+                    <option value="delivered">Delivered</option>
+                    <option value="cancelled">Cancelled</option>
+                </select>
+                <button type="submit" class="btn btn-primary">Search</button>
+                <a href="/admin/orderList" class="btn btn-light">Clear</a>
+            </form>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <table class="table table-hover table-bordered">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Order ID</th>
+                        <th>Date</th>
+                        <th>User</th>
+                        <th>Product</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                 
+           <tbody>
+                  <% orders.forEach((order, index) => { %>
+                  <% const rowSpan = order.order_items.length; %>
+                   <% const bgColor = index % 2 === 0 ? 'table-light' : 'table-secondary'; %>
+
+                    <% order.order_items.forEach((item, itemIndex) => { %>
+              <tr class="<%= bgColor %>">
+                   <% if (itemIndex === 0) { %>
+                      <td rowspan="<%= rowSpan %>"><%= index + 1 %></td>
+                      <td rowspan="<%= rowSpan %>"><%= order.order_id %></td>
+                      <td rowspan="<%= rowSpan %>"><%= new Date(order.createdAt).toLocaleDateString() %></td>
+                     <td rowspan="<%= rowSpan %>"><%= order.user_id.name %> (<%= order.user_id.email %>)</td>
+                  <% } %>
+                  <td><%= item.product_id.product_name%> x (<%= item.quantity%>) </td>
+                  <td>
+               <% if(item.order_status === 'returned'){ %> 
+
+                  <span class="badge badge-sealed" title="Returned — No further actions allowed">
+                      <i class="fas fa-lock"></i> Returned
+                 </span>
+
+                <% } else {  %>
+
+          <form method="POST" action="/admin/updateOrderStatus/<%= order._id %>/<%= item.product_id._id %>">
+            <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+              <option value="pending" <%= item.order_status === 'pending' ? 'selected' : '' %>>Pending</option>
+              <option value="shipped" <%= item.order_status === 'shipped' ? 'selected' : '' %>>Shipped</option>
+              <option value="out_for_delivery" <%= item.order_status === 'out_for_delivery' ? 'selected' : '' %>>Out for Delivery</option>
+              <option value="delivered" <%= item.order_status === 'delivered' ? 'selected' : '' %>>Delivered</option>
+              <option value="cancelled" <%= item.order_status === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
+            </select>
+          </form>
+          <% } %>
+        </td>
+
+        <td>
+               <% if (item.return_request?.status === 'requested') { %>
+            <span class="btn btn-sm btn-warning" >Return Requested </span>
+          <% } %>
+          <a href="/admin/orderDetails/<%= order._id %>/<%= item._id%>" class="btn btn-sm btn-info">View</a>
+       
+        </td>
+      </tr>
+    <% }) %>
+  <% }) %>
+</tbody>
+
+
+
+            </table>
+
+            <!-- Pagination -->
+            <nav>
+                <ul class="pagination">
+                    <% for (let i = 1; i <= totalPages; i++) { %>
+                        <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                            <a class="page-link" href="?page=<%= i %><%= searchQuery ? `&search=${searchQuery}` : '' %>"><%= i %></a>
+                        </li>
+                    <% } %>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</section>
+
+<%- include("../../views/partials/admin/footer") %>
+
+
+
+
+
+
+

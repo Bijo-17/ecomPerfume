@@ -49,17 +49,18 @@ const userSchema = new Schema({
           ref:"Address",
        
  },
-    cart: {
-        type : Array
+    cart_id: {
+            type:Schema.Types.ObjectId,
+            ref:"Cart",
     },
     wallet:{
-        type:Number,
-        default:0,
+        type:Schema.Types.ObjectId,
+        ref:"Wallet"
     },
-    wishlist:[{
+    wishlist_id:{
         type:Schema.Types.ObjectId,
         ref:"Wishlist"
-    }],
+    },
     orderHistory:[{
         type:Schema.Types.ObjectId,
         ref:"Order"
@@ -73,6 +74,13 @@ const userSchema = new Schema({
     },
     redeemed:{
         type:Boolean
+    },
+    date_of_birth:{
+          type: Date,
+    },
+    gender:{
+           type: String,
+           enum: ['male','female']
     },
     redeemedUsers: [{
         type: Schema.Types.ObjectId,
@@ -90,9 +98,12 @@ const userSchema = new Schema({
             type: Date,
             default: Date.now
         }
+    }],
+      profileImage:[{
+        type:String
     }]
   
- })
+ }, { timestamps: true });
 
  const User = mongoose.model("User",userSchema)
 

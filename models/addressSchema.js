@@ -8,24 +8,34 @@ const addressSchema = new mongoose.Schema({
              ref: 'User', 
              required: true 
     },
-    first_name: {   
+     isDefault:{
+            type: Boolean,
+            default:false
+     },
+    name : {
+           type: String,
+           required:true
+    },
+       address_name: {   
             type: String, 
             required: true 
      },
-            last_name: { 
-            type: String,
-            required: true 
-     },
+    
      date_of_birth: { 
             type: Date,
-            required: true 
+          
     },
      gender: { 
              type: String, 
              enum: ['male', 'female'],
-             required: true 
+            
     },
-      city: { 
+
+    locality:{
+         type:String,
+         required:true
+        },  
+     city: { 
             type: String,
             required: true 
     },
@@ -42,14 +52,23 @@ const addressSchema = new mongoose.Schema({
     },
         country: { 
             type: String,
-            required: true 
+           
     },
     phone_number:{
         type: Number,
         required: true
 
-    }
- }, 
+    },
+    alt_phone_number:{
+           type: Number,
+           sparse:true
+    },
+    address_type: { 
+    type:String,
+       enum:['home','work']
+       
+     }, 
+ },   
      { timestamps: true });
 
 const Address = mongoose.model('Address', addressSchema);

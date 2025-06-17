@@ -1,0 +1,103 @@
+<h1>My Wallet</h1>
+
+<div class="wallet-container">
+    <div class="wallet-balance">
+        <div class="balance-header">
+            <h2>Available Balance</h2>
+        </div>
+        <div class="balance-amount">
+            <i class="fas fa-wallet"></i>
+      
+            <span>₹ <%= wallet?.balance >= 0 ? wallet.balance.toFixed(2) : '0.00' %></span>
+
+        </div>
+        <div class="balance-actions">
+            <button class="btn-add-money">ADD MONEY</button>
+        </div>
+    </div>
+    
+    <div class="wallet-transactions">
+        <h2>Transaction History</h2>
+        
+        <% if (wallet?.transactions && wallet?.transactions.length > 0) { %>
+            <div class="transaction-list">
+                <% wallet.transactions.forEach(transaction => { %>
+                    <div class="transaction-item">
+                        <div class="transaction-icon <%= transaction.type %>">
+                            <i class="fas fa-<%= transaction.type === 'credit' ? 'arrow-down' : 'arrow-up' %>"></i>
+                        </div>
+                        <div class="transaction-details">
+                            <h3><%= transaction.description %></h3>
+                            <p class="transaction-date"><%= transaction.date %></p>
+                        </div>
+                        <div class="transaction-amount <%= transaction.type %>">
+                            <%= transaction.type === 'credit' ? '+' : '-' %> ₹<%= transaction.amount.toFixed(2) %>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+        <% } else { %>
+            <div class="empty-transactions">
+                <div class="empty-icon">
+                    <i class="fas fa-receipt"></i>
+                </div>
+                <h3>No Transactions Yet</h3>
+                <p>Your transaction history will appear here</p>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<div id="addMoneyModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Add Money to Wallet</h2>
+            <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="addMoneyForm">
+                <div class="form-group">
+                    <label for="amount">Enter Amount (₹)</label>
+                    <input type="number" id="amount" name="amount" min="1" step="1" placeholder="Enter amount">
+                </div>
+                
+                <div class="quick-amounts">
+                    <button type="button" class="quick-amount" data-amount="100">₹100</button>
+                    <button type="button" class="quick-amount" data-amount="500">₹500</button>
+                    <button type="button" class="quick-amount" data-amount="1000">₹1000</button>
+                </div>
+                
+                <div class="payment-methods">
+                    <h3>Payment Method</h3>
+                    <div class="payment-options">
+                        <label class="payment-option">
+                            <input type="radio" name="paymentMethod" value="card" checked>
+                            <span class="option-label">
+                                <i class="fas fa-credit-card"></i>
+                                <span>Credit/Debit Card</span>
+                            </span>
+                        </label>
+                        <label class="payment-option">
+                            <input type="radio" name="paymentMethod" value="upi">
+                            <span class="option-label">
+                                <i class="fas fa-mobile-alt"></i>
+                                <span>UPI</span>
+                            </span>
+                        </label>
+                        <label class="payment-option">
+                            <input type="radio" name="paymentMethod" value="netbanking">
+                            <span class="option-label">
+                                <i class="fas fa-university"></i>
+                                <span>Net Banking</span>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn-proceed">PROCEED</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

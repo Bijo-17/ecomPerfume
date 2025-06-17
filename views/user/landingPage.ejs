@@ -138,7 +138,9 @@
           <!-- Single Product Card -->
           <div class="col-6 col-sm-4 col-md-3">
             <div class="card product-card p-3 shadow-sm">
-              <i class="fa-regular fa-heart wishlist-icon"></i>
+         <span class="wishlist-btn" data-id="<%= p._id %>">
+               <i class="fa-regular fa-heart wishlist-icon"></i>
+          </span>
          <a href="/productDetails/<%=p._id%>"> <img src="<%=p.image[0]%>" alt="<%=p.product_name%>" class="product-image mx-auto">
               <div class="card-body text-center">
                 <h6 class="card-title"><%=p.product_name%></h6>
@@ -152,9 +154,9 @@
                 <% } %>
                 <small class="text-muted">(<%= product.ratingCount %>)</small>
               </div>
-                <p class="mb-1 price">₹<%=p.sales_price%><span class="original-price">₹<%=p.regular_price%></span></p>               
+                <p class="mb-1 price">₹<%=p.final_price%><span class="original-price">₹<%=p.regular_price%></span></p>               
        </a>
-                <button class="btn btn-outline-dark btn-sm w-100 mt-2">Add to Cart</button>
+                <button class="btn btn-outline-dark btn-sm w-100 mt-2 addToCart-btn" data-id="<%=p._id%>" >Add to Cart</button>
               </div>
             </div>
           </div>
@@ -172,11 +174,7 @@
             </div>
           </div> -->
       
-    
 
-
-   
-          <!-- Add more cards as needed... -->
            <% } })%>
         </div>
      
@@ -209,7 +207,9 @@
           <!-- Single Product Card -->
           <div class="col-6 col-sm-4 col-md-3">
             <div class="card product-card p-3 shadow-sm">
-              <i class="fa-regular fa-heart wishlist-icon"></i>
+                <span class="wishlist-btn" data-id="<%= p._id %>">
+               <i class="fa-regular fa-heart wishlist-icon"></i>
+          </span>
            <a href="/productDetails/<%=p._id%>">  <img src="<%=p.image[0]%>" alt="<%=p.product_name%>" class="product-image mx-auto">
               <div class="card-body text-center">
                 <h6 class="card-title"><%=p.product_name%></h6>
@@ -227,9 +227,9 @@
 
 
 
-                <p class="mb-1 price">₹<%=p.sales_price%><span class="original-price">₹<%=p.regular_price%></span></p>               
+                <p class="mb-1 price">₹<%=p.final_price%><span class="original-price">₹<%=p.regular_price%></span></p>               
               </a>
-                <button class="btn btn-outline-dark btn-sm w-100 mt-2">Add to Cart</button>
+                <button class="btn btn-outline-dark btn-sm w-100 mt-2 addToCart-btn" data-id="<%=p._id%>">Add to Cart</button>
               </div>
             </div>
           </div>
@@ -263,7 +263,9 @@
           <!-- Single Product Card -->
           <div class="col-6 col-sm-4 col-md-3">
             <div class="card product-card p-3 shadow-sm">
-              <i class="fa-regular fa-heart wishlist-icon"></i>
+                 <span class="wishlist-btn" data-id="<%= p._id %>">
+               <i class="fa-regular fa-heart wishlist-icon"></i>
+          </span>
               <a href="/productDetails/<%=p._id%>"><img src="<%=p.image[0]%>" alt="<%=p.product_name%>" class="product-image mx-auto">
               <div class="card-body text-center">
                 <h6 class="card-title"><%=p.product_name%></h6>
@@ -277,9 +279,10 @@
                 <% } %>
                 <small class="text-muted">(<%= product.ratingCount %>)</small>
               </div>
-                <p class="mb-1 price">₹<%=p.sales_price%><span class="original-price">₹<%=p.regular_price%></span></p>               
+                <p class="mb-1 price">₹<%=p.final_price%><span class="original-price">₹<%=p.regular_price%></span></p>               
               </a>
-                <button class="btn btn-outline-dark btn-sm w-100 mt-2">Add to Cart</button>
+                <button class="btn btn-outline-dark btn-sm w-100 mt-2 addToCart-btn" data-id="<%=p._id%>">Add to Cart</button>
+               
               </div>
             </div>
           </div>
@@ -299,5 +302,104 @@
 
 </section>
 
-
 <%-include("../partials/user/footer")%>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script> 
+
+document.addEventListener('DOMContentLoaded',function(){ 
+     
+ document.querySelectorAll('.addToCart-btn').forEach(button => {
+    button.addEventListener('click', async function () {
+      const productId = this.dataset.id;
+
+   
+   const response = await fetch(`/addToCart/${productId}`,{
+         
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+   })
+
+ const data = await response.json();
+
+
+      if (data.success) {
+        Swal.fire({        
+         icon: "success",
+          title: "Item added to Cart ",
+          showConfirmButton: false,
+            timer: 1200,
+             willClose: () => {
+                window.location.reload();
+             }
+
+        })
+    
+      }else {
+        Swal.fire({
+           icon: "error",
+            title: data.message || "something went wrong",
+            showConfirmButton:false, 
+            timer:1200, 
+             willClose: () => {
+              window.location.reload();
+             }
+        })
+      }
+
+ })
+ });
+
+  const wishlistButtons = document.querySelectorAll('.wishlist-btn');
+
+  wishlistButtons.forEach(button => {
+    button.addEventListener('click', async function () {
+      const productId = this.getAttribute('data-id');
+     
+      
+   const response = await fetch(`/addToWishlist/${productId}`,{
+         
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+   })
+
+    const data = await response.json();
+
+
+      if (data.success) {
+        Swal.fire({        
+         icon: "success",
+          title: "Item added to wishlist ",
+          showConfirmButton: false,
+            timer: 1200,
+             willClose: () => {
+                window.location.reload();
+             }
+
+        })
+    
+      }else {
+        Swal.fire({
+           icon: "error",
+            title: data.message || "something went wrong",
+            showConfirmButton:false, 
+            timer:1200, 
+             willClose: () => {
+              window.location.reload();
+             }
+        })
+      }
+
+ })
+ });
+
+
+
+
+})
+
+
+</script>
+
+

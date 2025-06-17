@@ -113,7 +113,7 @@ const productDetails = async (req,res)=>{
 
     const product = await Product.findOne({_id:productId  }).populate('brand_id category_id')
 
-    console.log("product started.........\n",product , "product ended ......");
+    // console.log("product started.........\n",product , "product ended ......");
     
     let product_status;
 
@@ -197,6 +197,7 @@ const rateProduct =async (req,res)=>{
 };
 
 }
+
 
 
 

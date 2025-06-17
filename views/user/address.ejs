@@ -1,0 +1,280 @@
+
+<h1>Manage Addresses</h1>
+
+<div class="address-container">
+    <button id="addAddressBtn" class="btn-add-address" onclick="openEditBox('addressAddForm')">
+        <i class="fas fa-plus"></i> Add New Address
+    </button>
+    
+    <div id="addressAddForm" class="address-form" style="display:none;">
+        <h2>Add New Address</h2>
+        <form id="newAddressForm" method="post" action="/address/addAddress">
+            <div class="form-row">
+                
+                <div class="form-group">
+                    <label for="fullName">Full Name</label>
+                    <input type="text" id="fullName" name="fullName" value="<%= user.firstName %> <%= user.lastName %>" required>
+                </div>
+                <div class="form-group">
+                 
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="mobileNumber">Mobile Number</label>
+                    <input type="text" id="mobileNumber" name="mobileNumber" value="<%= user.mobile %>" required>
+                </div>
+                <div class="form-group">
+                    <label for="pinCode">Pin Code</label>
+                    <input type="text" id="pinCode" name="pinCode" value="<%= user.pincode %>" required>
+                </div>
+                   <div class="form-group">
+                    <label for="mobileNumber">Alternate Mobile Number (optional) </label>
+                    <input type="text" id="mobileNumber" name="altMobileNumber" value="<%= user.alt_phone_number%>">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group full-width">
+                    <label for="address_name">Address (House No, Building, Street, Area)</label>
+                    <textarea id="address_name" name="address_name" rows="3" required><%= user.address?.address_name %></textarea>
+                </div>
+            </div>
+
+             <div class="form-row">
+                <div class="form-group full-width">
+                    <label for="landmark">Landmark (optional) </label>
+                    <input type="text" id="landmark" name="landmark"><%= user.address?.landmark %>
+                </div>
+            </div>
+            
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="locality">Locality/Town</label>
+                    <input type="text" id="locality" name="locality" value="<%= user.city %>" required>
+                </div>
+                <div class="form-group">
+                    <label for="cityDistrict">City/District</label>
+                    <input type="text" id="cityDistrict" name="cityDistrict" value="<%= user.city %>" required>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="stateRegion">State</label>
+                    <select id="stateRegion" name="stateRegion" required>
+                        <option value="<%= user.state %>" selected><%= user.state %></option>
+                        <option value="Tamil Nadu">Tamil Nadu</option>
+                        <option value="Karnataka">Karnataka</option>
+                        <option value="Kerala">Kerala</option>
+                        <!-- Add more states as needed -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="address_type">Address Type</label>
+                    <div class="radio-group">
+                        <label class="radio-label">
+                            <input type="radio" name="address_type" value="home" checked>
+                            <span>Home</span>
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="address_type" value="work">
+                            <span>Work</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="makeDefault">
+                        <span>Make this my default address</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="button" id="cancelAddressBtn" onclick="closeEditBox('addressAddForm')">CANCEL</button>
+                <button type="submit">SAVE</button>
+            </div>
+        </form>
+    </div>
+
+      <!-- address listing -->
+    
+    <div class="address-list" >
+        <% if (addresses && addresses.length > 0) { %>
+            <% addresses.forEach((address, index) => { %>
+                <div class="address-card <%= address.isDefault ? 'default' : '' %>">
+                    <% if (address.isDefault) { %>
+                        <div class="default-badge">Default</div>
+                    <% } %>
+                    <div class="address-header">
+                        <h3><%= address.name %></h3>
+                        <span class="address-type <%= address.address_type %>"><%= address.address_type %></span>
+                    </div>
+                    <div class="address-content">
+                        <p><strong><%=  %></strong></p>
+                        <p><%= address.address_name %></p>
+                        <p><%= address.locality %>, <%= address.city %></p>
+                        <p><%= address.state %> - <%= address.pin_code %></p>
+                        <p>Mobile: <%= address.phone_number %></p>
+                    </div>
+                    <div class="address-actions">
+                        <button class="btn-edit" data-id="<%= index %>" onclick="editAddressBox('addressEditForm-<%= address._id %>')">EDIT</button> 
+                        <form action="/address/<%= address._id %>?_method=DELETE" method="POST">
+                            <button class=btn btn-danger type="submit" onclick="return confirm('Are you sure you want to delete this address?')">DELETE</button>
+                         </form>
+
+                       <form action="/address/setDefault/<%= address._id %>" method="POST" >
+                        <% if (!address.isDefault) {   %>
+                       
+                            <button class="btn-default" data-id="<%= index %>">SET AS DEFAULT</button>
+                        <% } %>
+                       </form>
+                    </div>
+                </div>
+            <% }); %>
+        <% } else { %>
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-map-marker-alt"></i>
+                </div>
+                <h2>No Saved Addresses</h2>
+                <p>You don't have any saved addresses yet. Add a new address to get started.</p>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+
+  <!-- edit address box -->
+
+  <% addresses.forEach(address=> { %>
+
+ <div id="addressEditForm-<%= address._id %>" class="address-form"   style="display: none; position: fixed; top: 0; 
+      z-index: 9999; 
+    align-items: center; justify-content: center;"  >
+        <h3>Edit Address</h3>
+        <form id="editAddressForm" method="post" action="/address/editAddress">
+             <input type="hidden" name="addressId" value="<%= address._id %>">
+            <div class="form-row">
+                
+                <div class="form-group">
+                    <label for="fullName">Full Name</label>
+                    <input type="text" id="fullName" name="name" value="<%= address.name %> " required>
+                </div>
+                <div class="form-group">
+                 
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="mobileNumber">Mobile Number</label>
+                    <input type="text" id="mobileNumber" name="phone_number" value="<%= address.phone_number %>" required>
+                </div>
+                <div class="form-group">
+                    <label for="pinCode">Pin Code</label>
+                    <input type="text" id="pinCode" name="pin_code" value="<%= address.pin_code %>" required>
+                </div>
+                   <div class="form-group">
+                    <label for="mobileNumber">Alternate Mobile Number (optional) </label>
+                    <input type="text" id="mobileNumber" name="alt_phone_number" value="<%= address.alt_phone_number%>">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group full-width">
+                    <label for="address_name">Address (House No, Building, Street, Area)</label>
+                    <textarea id="address_name" name="address_name" rows="3" required><%= address.address_name %></textarea>
+                </div>
+            </div>
+
+             <div class="form-row">
+                <div class="form-group full-width">
+                    <label for="landmark">Landmark (optional) </label>
+                    <input type="text" id="landmark" name="landmark" value="<%= address?.landmark %>"  >
+                </div>
+            </div>
+            
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="locality">Locality/Town</label>
+                    <input type="text" id="locality" name="locality" value="<%= address.locality %>" required>
+                </div>
+                <div class="form-group">
+                    <label for="cityDistrict">City/District</label>
+                    <input type="text" id="cityDistrict" name="city" value="<%= address.city %>" required>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="stateRegion">State</label>
+                    <select id="stateRegion" name="state" required>
+                        <option value="<%= user.state %>" selected><%= address.state %></option>
+                        <option value="Tamil Nadu">Tamil Nadu</option>
+                        <option value="Karnataka">Karnataka</option>
+                        <option value="Kerala">Kerala</option>
+                        <!-- Add more states as needed -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="address_type">Address Type</label>
+                    <div class="radio-group">
+                        <label class="radio-label">
+                            <input type="radio" name="address_type" value="home" <%=address.address_type === 'home'? 'checked' : ''%> >
+                            <span>Home</span>
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="address_type" value="work" <%=address.address_type === 'work'? 'checked' : ''%> >
+                            <span>Work</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- <div class="form-row">
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="makeDefault">
+                        <span>Make this my default address</span>
+                    </label>
+                </div>
+            </div> -->
+            
+            <div class="form-actions">
+                <button type="button" id="cancelAddressBtn" onclick="closeEditBox('addressEditForm-<%= address._id %>')">CANCEL</button>
+                <button type="submit">SAVE</button>
+            </div>
+        </form>
+    </div>
+   <%})%>
+
+<script>
+
+function openEditBox(value){
+    document.getElementById(value).style.display = 'block' ;
+  
+}
+
+function closeEditBox(value){
+     document.getElementById(value).style.display = 'none' ;
+}
+
+function editAddressBox(value){
+
+    console.log("trigerrd")
+    document.getElementById(value).style.display = 'block' ;
+    console.log(value)
+   
+}
+
+
+</script>
+

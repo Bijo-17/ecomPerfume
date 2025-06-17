@@ -51,7 +51,10 @@ const productSchema = new mongoose.Schema({
              offer_price:{
                           type: Number,
                           default:0
-                         }, 
+                         },
+             final_price:{
+                            type:Number
+                         },             
          averageRating: { type: Number, 
                           default: 0 
                         },

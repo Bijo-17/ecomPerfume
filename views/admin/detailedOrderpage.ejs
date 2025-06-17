@@ -1,0 +1,157 @@
+<%- include('../../views/partials/admin/header') %> <!-- your common admin header/sidebar -->
+
+
+ 
+      <section class="content-main"> 
+
+  <div class=" mt-4">
+
+    <!-- Back Button -->
+    <div class="mb-4">
+      <a href="/admin/orderList" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back to Orders</a>
+    </div>
+
+    <!-- Order Overview -->
+    <div class="card mb-4">
+      <div class="card-header bg-primary text-white">
+        <h5>Order Details - <%= order.order_id %></h5>
+      </div>
+      <div class="card-body">
+        <p><strong>Date:</strong> <%= new Date(order.createdAt).toLocaleDateString() %></p>
+        <p><strong>User:</strong> <%= order.user_id.name %> (<%= order.user_id.email %>)</p>
+        <p><strong>Status:</strong> <%= order.order_status %></p>
+        <p><strong>Payment Method:</strong> <%= order.payment_method.method %></p>
+        <p><strong>Total:</strong> ₹ <%= order.total_price.toFixed(2) %></p>
+      </div>
+    </div>
+
+    <!-- Shipping Address -->
+    <div class="card mb-4">
+      <div class="card-header bg-info text-white">
+        <h6>Shipping Address</h6>
+      </div>
+      <div class="card-body">
+        <p>
+          <%= order.address_id.name %><br>
+          <%= order.address_id.address_name %>, <%= order.address_id.locality%><br>
+          <%= order.address_id.city %>, <%= order.address_id.state %> - <%= order.address_id.pin_code %><br>
+          Phone: <%= order.address_id.phone_number %>
+        </p>
+      </div>
+    </div>
+
+    <!-- Ordered Products -->
+    <div class="card mb-4">
+      <div class="card-header bg-success text-white">
+        <h6>Ordered Products</h6>
+      </div>
+      <div class="card-body p-0">
+        <table class="table table-striped">   
+          <thead class="table-dark">
+            <tr>
+              <th>#</th>
+              <th>Product</th>
+              <th>Volume</th>
+              <th>Quantity</th>
+              <th>Price</th>
+              <th>Delivery</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% order.order_items.forEach((item, index) => { %>
+              <tr>
+                <td><%= index + 1 %></td>
+                <td><%= item.product_id.product_name %></td>
+                <td><%= item.product_id.volume %> ml</td>
+                <td><%= item.quantity %></td>
+                <td>₹ <%= item.product_price.toFixed(2) %></td>
+                <td>₹ <%= item.delivery_charge.toFixed(2) %></td>
+                <td><%= item.order_status %></td>
+              </tr>
+
+              <% if(item.return_request?.status === 'requested') { %>
+              <!-- Return Request Section -->
+              <tr>
+                <td colspan="7">
+                  <div class="alert alert-warning mb-2">
+                    <strong>Return Requested:</strong> <%= item.return_request.reason %>
+                  </div>
+                  <form method="POST" action="/admin/verify-return/<%= order._id %>?productId=<%= item.product_id._id %>">
+                    <input type="hidden" name="amount" value="<%= item.price * item.quantity %>">
+                    <button type="button" class="btn btn-sm btn-success" onclick="verifyReturn('<%= order._id %>', '<%= item.product_id._id %>')" >Confirm Return & Refund to Wallet</button>
+                    <button type="button" class="btn btn-sm btn-warning"  onclick="cancelReturn('<%= order._id %>', '<%= item.product_id._id %>')" > Cancel Request</button>
+                  </form>
+                </td>
+              </tr>
+              <% } %>
+
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+      </section>
+
+
+<%- include('../../views/partials/admin/footer') %>
+
+<script> 
+
+
+
+function verifyReturn(orderId, productId) {
+    Swal.fire({
+        title: "Verify Return?",
+        text: "Refund will be added to user's wallet.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, verify",
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(`/admin/verifyReturn/${orderId}/${productId}`, {
+                method: "POST",
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire("Verified!", "Wallet updated.", "success").then(() => location.reload());
+                } else {
+                    Swal.fire("Failed!", "Something went wrong.", "error");
+                }
+            });
+        }
+    });
+}
+
+
+
+function cancelReturn(orderId, productId) {
+    Swal.fire({
+        title: "Cancel Return?",
+        text: "The cancellation request will be cancelled.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, cancel",
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(`/admin/cancelReturn/${orderId}/${productId}`, {
+                method: "POST",
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire("Cancelled!", "Cancelled return request.", "success").then(() => location.reload());
+                } else {
+                    Swal.fire("Failed!", "Something went wrong.", "error");
+                }
+            });
+        }
+    });
+}
+
+
+
+</script>

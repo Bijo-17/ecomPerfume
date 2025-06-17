@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Petal & Mist</title>
+    <link rel="stylesheet" href="/css/checkout-with-address.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+     
+     .total-value {
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+}
+
+.total-value.waived {
+  color: #28a745; /* green for free shipping */
+}
+
+.total-value del {
+  color: #888;
+  margin-right: 6px;
+}
+
+.free-text {
+  font-weight: bold;
+  color: #28a745;
+  font-size: 15px;
+}
+
+  </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Top Navigation -->
+        <nav class="top-nav">
+            <div class="nav-content">
+                <h1 class="brand-name">PETAL & MIST</h1>
+                <div class="nav-icons">
+                    <button class="nav-icon"><i class="fas fa-search"></i></button>
+                    <button class="nav-icon"><i class="fas fa-heart"></i></button>
+                    <button class="nav-icon"><i class="fas fa-shopping-bag"></i></button>
+                    <button class="nav-icon"><i class="fas fa-user"></i></button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Secondary Navigation -->
+        <nav class="secondary-nav">
+            <div class="nav-links">
+                <a href="#" class="nav-link">Offers</a>
+                <a href="#" class="nav-link">category</a>
+                <a href="#" class="nav-link">Bath and Body</a>
+                <a href="#" class="nav-link">New Arrivals</a>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <h2 class="page-title">Checkout</h2>
+
+            <div class="checkout-container">
+                <!-- Left Column - Forms -->
+                <div class="checkout-forms">
+                    <!-- Delivery Section -->
+                    <section class="delivery-section">
+                        <h3 class="section-title">Delivery</h3>
+
+                       
+
+                        <script id="address-data" type="application/json">
+                             <%- JSON.stringify(address) %>
+                          </script>
+
+               <!-- 2. Selected Address slot, empty for JS to fill -->
+                    <div class="selected-address" id="selectedAddressContainer"></div>
+
+                 <!-- 3. Additional Addresses button -->
+                    
+
+                  
+                    
+
+                <% if (address && address.length > 0) { %>
+
+                        <button class="additional-addresses-btn" id="additionalAddressesBtn" style="display: non;">
+                             More Address & Add Address
+                        </button>
+
+                  <% } else { %> 
+
+
+                         <form id="checkoutForm" class="checkout-form" >
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <input type="text" id="fullName" name="nameForm" placeholder="Full Name" required>
+                                </div>
+                               
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group full-width">
+                                    <input type="text" id="address" name="address_nameForm" placeholder="Address" required>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <input type="text" id="locality" name="localityForm" placeholder="Locality" required>
+                                </div>
+                                <div class="form-group">
+                                    <input type="text" id="city" name="cityForm" placeholder="City" required>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <input type="text" id="pinCode" name="pin_codeForm" placeholder="Pin Code" required>
+                                </div>
+                                <div class="form-group">
+                                    <input type="text" id="landmark" name="landmarkForm" placeholder="Landmark(optional)">
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <input type="number" id="phoneNumber" name="phone_numberForm" placeholder="Phone number" required>
+                                </div>
+                                <div class="form-group">
+                                    <select id="state" name="stateForm" required>
+                                        <option value="">State</option>
+                                        <option value="Andhra Pradesh">Andhra Pradesh</option>                                      
+                                        <option value="Assam">Assam</option>                                  
+                                        <option value="Goa">Goa</option>
+                                        <option value="Haryana">Haryana</option>
+                                        <option value="Himachal Pradesh">Himachal Pradesh</option>                                      
+                                        <option value="Kerala">Kerala</option>
+                                        <option value="Maharashtra">Maharashtra</option>                            
+                                        <option value="Tamil Nadu">Tamil Nadu</option>
+                                      
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group full-width">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="saveAddressCheckbox" name="saveInfoForm">
+                                        <span class="checkmark"></span>
+                                        Save This Info For Future
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="address-type">
+                                <label class="radio-label">
+                                    <input type="radio" name="address_typeForm" value="home" checked>
+                                    <span class="radio-button"></span>
+                                    Home
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="address_typeForm" value="work">
+                                    <span class="radio-button"></span>
+                                    Work
+                                </label>
+                            </div>
+                        </form>
+                        <% } %>
+                    </section>
+                
+          
+
+                
+                    <!-- Payment Section -->
+                    <section class="payment-section">
+                        <h3 class="section-title">Payment</h3>
+                        
+                        <div class="payment-options">
+                            <!-- Card Payment -->
+                            <div class="payment-option">
+                                <label class="payment-label">
+                                    <input type="radio" name="paymentMethod" value="card" checked>
+                                    <span class="radio-button"></span>
+                                    Card
+                                </label>
+                                <div class="payment-details card-details">
+                                    <div class="card-input-container">
+                                        <select class="card-select">
+                                            <option value="credit">Credit Card</option>
+                                            <option value="debit">Debit Card</option>
+                                        </select>
+                                        <div class="card-logo">
+                                            <img src="/placeholder.svg?height=24&width=38" alt="Mastercard" class="card-icon">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- UPI Payment -->
+                            <div class="payment-option">
+                                <label class="payment-label">
+                                    <input type="radio" name="paymentMethod" value="upi">
+                                    <span class="radio-button"></span>
+                                    UPI
+                                </label>
+                                <div class="payment-details upi-details" style="display: none;">
+                                    <input type="text" class="upi-input" placeholder="upi@123.com">
+                                </div>
+                            </div>
+
+                            <!-- COD Payment -->
+                            <div class="payment-option">
+                                <label class="payment-label">
+                                    <input type="radio" name="paymentMethod" value="cod">
+                                    <span class="radio-button"></span>
+                                    COD
+                                </label>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Right Column - Order Summary -->
+              
+                 <div class="order-summary">
+                   <% cart.items.forEach(product=>{  %> 
+                    <div class="order-item">
+                        <div class="item-badge"><%=product.quantity%></div>
+                        <div class="item-image">
+                            <img src="<%=product.product_id.image[0]%>" alt="product-img">
+                        </div>
+                        <div class="item-details">
+                            <h4 class="item-name"><%=product.product_id.product_name%></h4>
+                            <p class="item-volume"><%=product.product_id.volume %> ML</p> 
+                            <div class="item-price">
+                                <span class="current-price">₹ <%=product.product_id.final_price %>  </span>
+                                <span class="original-price">₹ <%=product.product_id.regular_price%></span>
+                                <span class="current-price">X <%= product.quantity%></span>
+                            </div>
+                        </div>
+                    </div>
+                 <% }) %>
+                    <div class="discount-section">
+                        <div class="discount-input-container">
+                            <input type="text" id="discountCode" placeholder="Discount code" class="discount-input">
+                            <button type="button" id="applyDiscount" class="apply-btn">Apply</button>
+                        </div>
+                        <div id="discount-error" style="color: red; font-size: 0.8rem;"></div>
+                    </div>
+
+                    <div class="order-totals">
+                        <div class="total-row">
+                            <span class="total-label">Subtotal</span>
+                            <span class="total-value" id="subtotal">₹<%=subtotal.toFixed(2)%></span>
+                        </div>
+                        <div class="total-row">
+                            <span class="total-label">Shipping</span>
+                           <% if(subtotal > 500) { %>
+                                 <span class="total-value waived">
+                                 <del>₹40.00</del> <span class="free-text">Free</span>
+                                 </span>
+                        <% } else { %>   
+                                 <span class="total-value">₹40.00</span>
+                             <% } %>
+                        </div>
+                        <div class="total-row discount-row"">
+                            <span class="total-label">Discount</span>
+                            <span class="total-value discount" id="discount">-₹0.00</span>
+                        </div>
+                        <div class="total-row final-total">
+                            <span class="total-label">Total</span>
+                            <span class="total-value" id="finalTotal">₹ <%= finaltotal.toFixed(2)%></span>
+                        </div>
+                    </div>
+
+                    <button type="submit"  class="place-order-btn" id="placeOrderBtn">
+                        Place your order
+                    </button>
+                </div>
+
+
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Copyright © 2025 Petal & Mist. All Rights Reserved</p>
+        </footer>
+    </div>
+
+
+<!-- Address Selection Modal -->
+<div class="modal-overlay" id="addressModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Select Delivery Address</h3>
+            <button class="close-modal" id="closeModal">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="address-list" id="addressList"></div>
+            <button class="add-new-address-btn" id="addNewAddressBtn" onclick="openAddAddressModal()">
+                <i class="fas fa-plus"></i> Add New Address
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Add/Edit Address Modal -->
+<div class="modal-overlay" id="addressFormModal" >
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="addressFormTitle">Add New Address</h3>
+            <button class="close-modal" id="closeAddressFormModal">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form id="addressForm" class="address-form" method="post" >
+                <input type="hidden" id="addressId" name="addressId">
+                <div class="form-row">
+                    <div class="form-group">
+                        <input type="text" id="fullName" name="name" placeholder="Full Name" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="tel" id="mobile" name="phone_number" placeholder="Mobile Number" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group full-width">
+                        <input type="text" id="addressLine" name="address_name" placeholder="Address (House No, Building, Street, Area)" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <input type="text" id="locality" name="locality" placeholder="Locality/Town" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="city" name="city" placeholder="City/District" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <select id="state" name="state" required>
+                            <option value="">Select State</option>
+                            <option value="Kerala">Kerala</option>
+                            <option value="Tamil Nadu">Tamil Nadu</option>
+                            <option value="Karnataka">Karnataka</option>
+                            <option value="Maharashtra">Maharashtra</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="pincode" name="pin_code" placeholder="Pin Code" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <input type="text" id="landmark" name="landmark" placeholder="Landmark (Optional)">
+                    </div>
+                </div>
+                <div class="address-type-selection">
+                    <label class="radio-label">
+                        <input type="radio" name="address_type" value="home" checked>
+                        <span class="radio-button"></span> Home
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="address_type" value="work">
+                        <span class="radio-button"></span> Work
+                    </label>
+                 
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="cancel-btn" id="cancelAddressForm">Cancel</button>
+                    <button type="submit" class="save-btn">Save Address</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+<script>
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    const addressModal = document.getElementById('addressModal');
+    const addressFormModal = document.getElementById('addressFormModal');
+    const addressList = document.getElementById('addressList');
+    const selectedAddressContainer = document.getElementById('selectedAddressContainer');
+    let selectedAddressId = null;
+
+    // Backend-passed address data
+    // const savedAddresses = <%- JSON.stringify(address) %>;
+
+      const rawData = document.getElementById('address-data').textContent;
+    const savedAddresses = JSON.parse(rawData);
+
+     const defaultAddress = savedAddresses.find(addr => addr.isDefault) || savedAddresses[0];
+
+     console.log("default address",defaultAddress);
+
+        if (defaultAddress) {
+          
+            selectAddress(defaultAddress._id);
+        }
+
+    
+
+
+    // Show modal with all addresses
+    document.getElementById('additionalAddressesBtn')?.addEventListener('click', () => {
+        populateAddressList();
+        addressModal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    });
+
+    document.getElementById('closeModal')?.addEventListener('click', () => {
+        addressModal.classList.remove('active');
+        document.body.style.overflow = 'auto';
+    });
+
+    // Add New Address
+    document.getElementById('addNewAddressBtn')?.addEventListener('click', () => {
+        document.getElementById('addressForm').reset();
+        document.getElementById('addressFormTitle').textContent = 'Add New Address';
+        document.getElementById('addressFormModal').classList.add('active');
+    });
+
+    document.getElementById('cancelAddressForm')?.addEventListener('click', () => {
+        document.getElementById('addressFormModal').classList.remove('active');
+    });
+
+    // Populate modal with addresses
+    function populateAddressList() {
+        addressList.innerHTML = '';
+        savedAddresses.forEach(address => {
+            const card = document.createElement('div');
+            card.className = `modal-address-card ${address._id === selectedAddressId ? 'selected' : ''}`;
+            card.onclick = () => selectAddress(address._id);
+
+            card.innerHTML = `
+                <div class="modal-address-header">
+                    <span class="modal-address-type">${address.isDefault ? 'Default' : address.address_type}</span>
+                    <div class="modal-address-actions">
+                        <button class="modal-edit-btn" onclick="event.stopPropagation(); editAddress('${address._id}')">Edit</button>
+                        <button class="modal-delete-btn" onclick="event.stopPropagation(); deleteAddress('${address._id}')">Delete</button>
+                    </div>
+                </div>
+                <div class="modal-address-content">
+                    <div class="modal-address-name">${address.name}</div>
+                    <div>${address.address_name}</div>
+                    <div>${address.locality}, ${address.city}, ${address.state} ${address.pin_code}</div>
+                    <div>Mobile: ${address.phone_number}</div>
+                </div>
+            `;
+            addressList.appendChild(card);
+        });
+    }
+
+    // Select and update address
+    function selectAddress(id) {
+        selectedAddressId = id;
+        const selected = savedAddresses.find(a => a._id === id);
+        if (!selected) return;
+
+        selectedAddressContainer.innerHTML = `
+            <div class="address-card">
+                <div class="address-header">
+                    <label class="address-radio">
+                        <input type="radio" name="selectedAddress" value="${selected._id}" checked>
+                        <span class="radio-button"></span>
+                        <span class="address-type">${selected.isDefault ? 'Default' : selected.address_type}</span>
+                    </label>
+                    <button class="edit-btn" onclick="editAddress('${selected._id}')">Edit</button>
+                </div>
+                <div class="address-content">
+                    <p class="address-name">${selected.name}</p>
+                    <p class="address-line">${selected.address_name}</p>
+                    <p class="address-pincode">${selected.pin_code}</p>
+                    <p class="address-mobile">Mobile: ${selected.phone_number}</p>
+                    <span class="address-label">${selected.address_type}</span>
+                </div>
+            </div>
+        `;
+
+        addressModal.classList.remove('active');
+        document.body.style.overflow = 'auto';
+    }
+
+    // Edit function
+    window.editAddress = function (id) {
+        const address = savedAddresses.find(a => a._id === id);
+        if (!address) return;
+
+        document.getElementById('addressFormTitle').textContent = 'Edit Address';
+        document.getElementById('addressFormModal').classList.add('active');
+        document.getElementById('addressId').value = address._id;
+        document.getElementById('fullName').value = address.name;
+        document.getElementById('mobile').value = address.phone_number;
+        document.getElementById('addressLine').value = address.address_name;
+        document.getElementById('locality').value = address.locality;
+        document.getElementById('city').value = address.city;
+        document.getElementById('state').value = address.state;
+        document.getElementById('pincode').value = address.pin_code;
+
+        // document.querySelector(`input[name="addressType"][value="${address.address_type}"]`).checked = true;
+        
+        console.log("entereddd editaddress")
+
+    const form = document.getElementById('addressForm');
+         form.method = "POST"
+        form.action = '/address/edit';
+
+
+    };
+
+
+function openAddAddressModal() {
+  const form = document.getElementById('addressForm');
+  form.action = '/address/add';
+  form.reset(); 
+ 
+}
+
+
+
+
+
+
+
+document.getElementById('placeOrderBtn').addEventListener('click', async () => {
+    const addressId = selectedAddressId || ''; // from existing selected address logic
+    const isTypedAddress  = !addressId;
+    const saveForFuture = document.getElementById('saveAddressCheckbox')?.checked;
+    const discountCoupon = document.getElementById('discountCode').value.trim()
+
+    // If user typed a new address, get form values
+    const addressForm = document.getElementById('addressForm');
+    
+    const total = document.getElementById('finalTotal').value
+    
+
+    const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+
+    
+  if (paymentMethod !== 'cod') {
+        return Swal.fire("unavailable","Please select cash on Delivery to continue","warning")
+   }
+
+          let payload = {
+                           paymentMethod,             
+                           saveForFuture,
+                           isTypedAddress,
+                            discountCoupon
+                        };
+                          
+                         
+        console.log("payload", payload)
+
+    if (isTypedAddress) {
+
+                  const form = document.getElementById('checkoutForm');
+
+                  console.log("form found", !form)
+
+                  if (!form) {
+                            return Swal.fire("Form Missing", "Checkout form not found!", "error");
+                           }
+
+ 
+                            const name = form.querySelector('[name="nameForm"]')?.value?.trim();
+                            const phone_number = form.querySelector('[name="phone_numberForm"]')?.value?.trim();
+                            const address_name = form.querySelector('[name="address_nameForm"]')?.value?.trim();
+                            const locality = form.querySelector('[name="localityForm"]')?.value?.trim();
+                            const city = form.querySelector('[name="cityForm"]')?.value?.trim();
+                            const state = form.querySelector('[name="stateForm"]')?.value?.trim();
+                            const pin_code = form.querySelector('[name="pin_codeForm"]')?.value?.trim();
+                            const address_type = form.querySelector('input[name="address_typeForm"]:checked')?.value;
+
+                       
+                       console.log("valid", name , phone_number , address_name , locality , city , state  , pin_code , !address_type)
+
+                      if (!name || !phone_number || !address_name || !locality || !city || !state || !pin_code || !address_type) {
+                                    return Swal.fire("Missing Info", "Please fill in the full address before placing the order.", "warning");
+                        }      
+
+                      Object.assign(payload, {
+                                               name,
+                                               phone_number,
+                                               address_name,
+                                               locality,
+                                               city,
+                                               state,
+                                               pin_code,
+                                               address_type
+                    
+                                            });
+
+                  
+
+           } else {       
+              console.log("entered  else satatement")
+                   payload.addressId = addressId;
+
+                  }
+           console.log("full payload", payload)
+         
+                try {
+
+                   const response = await fetch('/orders/cod', {
+                         method: 'POST',
+                         headers: {
+                                      'Content-Type': 'application/json'
+                                     },
+                        body: JSON.stringify(payload)
+                      });
+
+        const data = await response.json();
+
+        if (data.success) {
+            Swal.fire("Order Placed", "Your order has been placed successfully!", "success")
+            .then(() => window.location.href = "/orders/success");
+        } else {
+          return   Swal.fire("Error", data.message || "Something went wrong", "error");
+        }
+
+                    
+         } catch (error) {
+                    console.log(error);
+                    return Swal.fire("Server Error","Unable to submit the adddress","error");
+                }
+
+        })
+
+          document.getElementById('applyDiscount').addEventListener('click',()=>{ 
+           const discountCoupon = document.getElementById('discountCode').value.trim()
+           const total =parseFloat( document.getElementById('finalTotal').textContent.replace("₹", ""))
+           console.log("dicount", discountCoupon , total)
+
+           const isValid = discountCoupon.toLowerCase() === 'new50' ? true: false
+
+           console.log(isValid , "valid")
+
+           if(total > 599){ 
+             if(isValid){
+
+                   document.getElementById('discount-error').textContent = ""
+                  const  discountTotal = total- 50  
+                   
+                   document.getElementById('discount').textContent = "-₹" + '50'
+                   document.getElementById('finalTotal').textContent =   "₹" + discountTotal
+
+             }else {
+                document.getElementById('discount-error').textContent = "invalid code"
+             }
+
+            } else if(isValid) {
+                 document.getElementById('discount-error').textContent = 'Coupon applicable for order over ₹599'
+            } else {
+                 document.getElementById('discount-error').textContent = "invalid code"
+            }
+
+          })
+
+
+
+
+
+    });
+
+
+   
+
+    
+
+
+
+
+</script>
+
+
+
+    <!-- <script src="/js/checkout-with-address.js"></script> -->
+</body>
+</html>

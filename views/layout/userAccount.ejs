@@ -1,22 +1,30 @@
-<!DOCTYPE html>
-<html lang="en">
+ 
+    
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+       
     <title>User Account Dashboard</title>
     <link rel="stylesheet" href="/css/userAccountStyles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+
 </head>
+
+
 <body>
+    <%-include("../partials/user/header")%>  
+
+    <div class="profile-page"> 
+
+
     <div class="container">
         <div class="sidebar">
             <div class="profile-header">
                 <div class="avatar">
-                    <img src="/images/avatar.png" alt="User Avatar">
+                    <img src="<%=user.profileImage || '/images/avatar.png' %>" alt="User Avatar">
                 </div>
                 <div class="user-info">
                     <p>Hello,</p>
-                    <h3><%= firstName %> <%= lastName %></h3>
+                    <h3><%= user.name %></h3>
                 </div>
             </div>
             
@@ -28,7 +36,7 @@
                             <span>Account Overview</span>
                         </a>
                     </li>
-                    <li class="<%= active === 'orders' ? 'active' : '' %>">
+                    <li class="<%= active === 'order' ? 'active' : '' %>">
                         <a href="/orders">
                             <i class="fas fa-box"></i>
                             <span>My Orders</span>
@@ -67,11 +75,15 @@
             </div>
         </div>
         
-        <div class="main-content">
-            <%- body %>
-        </div>
+               <div class="main-content">
+               <%- body %>
+                   </div>
+      </div>
     </div>
 
+   
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="/js/main.js"></script>
     <% if (typeof pageScript !== 'undefined') { %>
         <script src="/js/<%= pageScript %>.js"></script>
@@ -91,6 +103,7 @@
         }
     });
     </script>
+
 
 </body>
 </html>

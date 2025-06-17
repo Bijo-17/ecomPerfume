@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Verify OTP - Petal & Mist</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+  <style>
+    body {
+      background: #fffafc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .otp-container {
+      background: #ffffff;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      text-align: center;
+      width: 90%;
+      max-width: 400px;
+    }
+
+    .otp-container h1 {
+      font-size: 28px;
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .otp-container p {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 30px;
+    }
+
+    .otp-inputs {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 30px;
+    }
+
+    .otp-inputs input {
+      width: 50px;
+      height: 55px;
+      font-size: 24px;
+      text-align: center;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      outline: none;
+      transition: 0.3s;
+    }
+
+    .otp-inputs input:focus {
+      border-color: #e89bb2;
+      box-shadow: 0 0 5px #e89bb2;
+    }
+
+    .btn-verify, .btn-resend {
+      background-color: #e89bb2;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      margin-top: 10px;
+    }
+
+    .btn-verify:hover, .btn-resend:hover {
+      background-color: #d3779a;
+    }
+
+    .timer-text {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #999;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="otp-container">
+    <h1>Verify OTP</h1>
+    <p>Enter the 6-digit code sent to your email</p>
+
+    <form id="otpForm" action="" method="">
+      <div class="otp-inputs">
+        <input type="text" maxlength="1" name="otp1" required>
+        <input type="text" maxlength="1" name="otp2" required>
+        <input type="text" maxlength="1" name="otp3" required>
+        <input type="text" maxlength="1" name="otp4" required>
+        <input type="text" maxlength="1" name="otp5" required>
+        <input type="text" maxlength="1" name="otp6" required>
+      </div>
+
+        <!-- Hidden field for combined OTP -->
+     <input type="hidden" name="enteredOtp" id="enteredOtp">
+
+      <button type="submit" class="btn-verify">Verify</button>
+    </form>
+
+    <div class="timer-text" id="timer">Resend OTP in 60s</div>
+    <button class="btn-resend" id="resendBtn" style="display:none ;">Resend OTP</button>
+  </div>
+   
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  const inputs = document.querySelectorAll('.otp-inputs input');
+  const timerEl = document.getElementById('timer');
+  const resendBtn = document.getElementById('resendBtn');
+
+  // Auto tab input logic
+  inputs.forEach((input, index) => {
+    input.addEventListener('input', () => {
+      if (input.value.length === 1 && index < inputs.length - 1) {
+        inputs[index + 1].focus();
+      }
+    });
+    input.addEventListener('keydown', (e) => {
+      if (e.key === "Backspace" && input.value === '' && index > 0) {
+        inputs[index - 1].focus();
+      }
+    });
+  });
+
+  // Timer Logic
+  let timeLeft = 60;
+  const startTimer = () => {
+    timerEl.textContent = `Resend OTP in ${timeLeft}s`;
+    const countdown = setInterval(() => {
+      timeLeft--;
+      timerEl.textContent = `Resend OTP in ${timeLeft}s`;
+      if (timeLeft <= 0) {
+        clearInterval(countdown);
+        timerEl.style.display = 'none';
+        resendBtn.style.display = 'inline-block';
+         
+      }
+    }, 1000);
+  };
+  startTimer();
+
+  // Resend OTP Button Logic
+  resendBtn.addEventListener('click', async () => {
+  
+    try {
+      const response = await fetch('/resendForgotOtp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const data = await response.json();
+
+
+      if (data.success) {
+        Swal.fire("OTP Sent!", "A new OTP has been sent to your email.", "success");
+        timeLeft = 60;
+        timerEl.style.display = 'block';
+        resendBtn.style.display = 'none';
+        resendBtn.disabled = false;
+       
+        startTimer();
+      } else {
+        Swal.fire("Failed", data.message || "Could not resend OTP", "error");
+        resendBtn.disabled = false;
+        resendBtn.style.display= "inline-block"
+      
+      }
+    } catch (err) {
+      console.error(err);
+      Swal.fire("Error", "Something went wrong.", "error");
+      resendBtn.disabled = false;
+    }
+  });
+
+  // Submit OTP using AJAX
+  const form = document.getElementById('otpForm');
+  const hiddenInput = document.getElementById('enteredOtp');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault(); 
+
+    const otp = Array.from(inputs).map(input => input.value).join('');
+    hiddenInput.value = otp;
+
+    try {
+      const res = await fetch('/verifyChangeEmail', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ otp })
+      });
+
+      const response = await res.json();
+
+      if (response.success) {
+        Swal.fire({
+          icon: "success",
+          title: "OTP Verified Successfully",
+          showConfirmButton: false,
+          timer: 1500
+        }).then(() => {
+          window.location.href =  '/changeEmail';
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Invalid otp",
+          text: response.message
+        });
+      }
+    } catch (error) {
+      Swal.fire("Server Error", "Please try again later.", "error");
+      console.error(error);
+    }
+  });
+</script>
+
+
+</body>
+</html>

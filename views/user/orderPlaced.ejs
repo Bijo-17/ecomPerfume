@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Completed - Petal & Mist</title>
+    <link rel="stylesheet" href="/css/orderPlacedStyle.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+ <style>
+.product-preview {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 10px;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  margin-bottom: 15px;
+  background-color: #fafafa;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.product-image {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  flex-shrink: 0;
+}
+
+.product-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.quantity-badge {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background-color: crimson;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: bold;
+  padding: 3px 7px;
+  border-radius: 50px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+}
+
+.product-details {
+  flex-grow: 1;
+}
+
+.product-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+  word-wrap: break-word;
+}
+</style>
+
+
+
+</head>
+<body>
+    <div class="container">
+        <!-- Top Navigation -->
+        <nav class="top-nav">
+            <div class="nav-content">
+                <h1 class="brand-name">PETAL & MIST</h1>
+                <div class="nav-icons">
+                    <button class="nav-icon"><i class="fas fa-search"></i></button>
+                    <button class="nav-icon"><i class="fas fa-heart"></i></button>
+                    <button class="nav-icon"><i class="fas fa-shopping-bag"></i></button>
+                    <button class="nav-icon"><i class="fas fa-user"></i></button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Secondary Navigation -->
+        <nav class="secondary-nav">
+            <div class="nav-links">
+                <a href="#" class="nav-link">Offers</a>
+                <a href="#" class="nav-link">category</a>
+                <a href="#" class="nav-link">Bath and Body</a>
+                <a href="#" class="nav-link">New Arrivals</a>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="order-confirmation-container">
+                <!-- Left Section - Order Confirmation -->
+                <div class="confirmation-section">
+                    <div class="order-header">
+                        <h2 class="order-title">Order Completed</h2>
+                        <p class="arrival-date"><%=orderId%></p>
+                    </div>
+
+                    <div class="confirmation-content">
+                        <div class="success-icon">
+                            <div class="checkmark-circle">
+                                <i class="fas fa-check"></i>
+                            </div>
+                        </div>
+
+                        <h3 class="confirmation-title">Your order is Completed</h3>
+                        
+                        <p class="confirmation-message">
+                            Thank You for your order, Sit tight we are processing your order<br>
+                            we will update you with your order in email
+                        </p>
+
+                       <a href="/product">  <button class="continue-shopping-btn" id="continueShoppingBtn">
+                            Continue Shopping
+                        </button> </a>
+                    </div>
+                </div>
+
+                <!-- Right Section - Order Details -->
+                <div class="order-details-section">
+                <a href="/orders">   <button class="view-order-btn" id="viewOrderBtn">View order</button> </a>
+                  <% order.order_items.forEach(product=> { %>
+                    
+
+                  <div class="product-preview">
+                     <div class="product-image">
+                         <img src="<%= product.product_id.image[0] %>" alt="Ordered Product" id="productImage">
+                         <div class="quantity-badge">x<%= product.quantity %></div>
+                    </div>
+ 
+                     <div class="product-details">
+                         <span class="product-name"><%= product.product_id.product_name %></span>
+                     </div>
+                 </div>
+
+
+                  <% }) %>  
+
+                    <div class="order-info">
+                        <div class="order-info-item">
+                            <span class="info-label">Order date :</span>
+                            <span class="info-value" id="orderDate"><%=date%></span>
+                        </div>
+                        <div class="order-info-item">
+                            <span class="info-label">Order status :</span>
+                            <span class="info-value status" id="orderStatus">Pending</span>
+                        </div>
+                           <div class="order-info-item">
+                            <span class="info-label">Order method :</span>
+                            <span class="info-value status" id="orderStatus"><%=order.payment_method.method%></span>
+                        </div>
+                           <div class="order-info-item">
+                            <span class="info-label">Total :</span>
+                            <span class="info-value status" id="orderStatus"><%=order.total_price.toFixed(2)%></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4 class="footer-title">SUPPORT</h4>
+                    <ul class="footer-links">
+                        <li><a href="/privacy-policy">Privacy Policy</a></li>
+                        <li><a href="/refund-policy">Refund policy</a></li>
+                        <li><a href="/terms-conditions">Terms and Conditions</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4 class="footer-title">Company</h4>
+                    <ul class="footer-links">
+                        <li><a href="/store">Our Store</a></li>
+                        <li><a href="/about">About us</a></li>
+                        <li><a href="/contact">Contact us</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section newsletter-section">
+                    <h4 class="footer-title">SUBSCRIBE NEWSLETTERS</h4>
+                    <p class="newsletter-description">
+                        Subscribe to get special offers, free giveaways, and once-in-a-lifetime deals.
+                    </p>
+                    <div class="newsletter-form">
+                        <input type="email" placeholder="Enter your Email" class="newsletter-input" id="newsletterEmail">
+                        <button type="button" class="newsletter-btn" id="subscribeBtn">
+                            <i class="fas fa-envelope"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="social-media">
+                <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                <a href="#" class="social-link"><i class="fab fa-pinterest"></i></a>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2025 Petal & Mist</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Order Details Modal -->
+    <div class="modal-overlay" id="orderDetailsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Order Details</h3>
+                <button class="close-modal" id="closeOrderModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="order-summary">
+                    <div class="order-id">
+                        <strong>Order ID: <span id="modalOrderId">ORD123456789</span></strong>
+                    </div>
+                    
+                    <div class="order-items">
+                        <h4>Items Ordered</h4>
+                        <div class="item-list" id="modalItemList">
+                            <!-- Items will be populated here -->
+                        </div>
+                    </div>
+
+                    <div class="delivery-address">
+                        <h4>Delivery Address</h4>
+                        <div class="address-details" id="modalDeliveryAddress">
+                            <!-- Address will be populated here -->
+                        </div>
+                    </div>
+
+                    <div class="payment-details">
+                        <h4>Payment Details</h4>
+                        <div class="payment-info" id="modalPaymentInfo">
+                            <!-- Payment info will be populated here -->
+                        </div>
+                    </div>
+
+                    <div class="order-totals">
+                        <div class="total-row">
+                            <span>Subtotal:</span>
+                            <span id="modalSubtotal">₹599.00</span>
+                        </div>
+                        <div class="total-row">
+                            <span>Shipping:</span>
+                            <span id="modalShipping">₹40.00</span>
+                        </div>
+                        <div class="total-row">
+                            <span>Discount:</span>
+                            <span id="modalDiscount">-₹100.00</span>
+                        </div>
+                        <div class="total-row final-total">
+                            <span>Total:</span>
+                            <span id="modalTotal">₹539.00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/order-confirmation.js"></script>
+</body>
+</html>

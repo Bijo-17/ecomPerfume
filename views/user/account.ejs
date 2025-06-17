@@ -13,106 +13,87 @@
             </div>
             <div class="form-group">
                 <label for="lastName">Last Name</label>
-                <input type="text" id="lastName" name="lastName" value="<%= lastName %>" disabled>
+                <input type="text" id="lastName" name="lastName" value="<%=middleName + ' ' + lastName %>" disabled>
             </div>
         </div>
         
         <div class="form-row">
             <div class="form-group">
-                <label for="dob">Date Of Birth</label>
+                <label for="date_of_birth">Date Of Birth</label>
                 <div class="date-input">
-                    <input type="text" id="dob" name="dob" value="<%= user.dob %>" disabled>
+                    <input type="text" id="dob" name="date_of_birth" value="<%= user.date_of_birth? user.date_of_birth.toISOString().substring(0,10) : '' %>" disabled>
                     <i class="fas fa-calendar"></i>
                 </div>
             </div>
             <div class="form-group">
                 <label>Your Gender</label>
                 <div class="radio-group">
-                    <label class="radio-label">
-                        <input type="radio" name="gender" value="male" <%= user.gender === 'male' ? 'checked' : '' %> disabled>
+                    <label class="radio-label" for="gender">
+                      <% if(locals.user.gender === 'male') { %> 
                         <span>Male</span>
-                    </label>
-                    <label class="radio-label">
-                        <input type="radio" name="gender" value="female" <%= user.gender === 'female' ? 'checked' : '' %> disabled>
+                      <% } else {  %>    
                         <span>Female</span>
+                       <% } %>
+
                     </label>
                 </div>
             </div>
         </div>
         
-        <div class="form-row">
-            <div class="form-group">
-                <label for="city">City / District / Town</label>
-                <input type="text" id="city" name="city" value="<%= user.city %>" disabled>
-            </div>
-            <div class="form-group">
-                <label for="state">State</label>
-                <select id="state" name="state" disabled>
-                    <option value="<%= user.state %>" selected><%= user.state %></option>
-                    <option value="Tamil Nadu">Tamil Nadu</option>
-                    <option value="Karnataka">Karnataka</option>
-                    <!-- Add more states as needed -->
-                </select>
-            </div>
-        </div>
-        
-        <div class="form-row">
-            <div class="form-group full-width">
-                <label for="address">Address</label>
-                <textarea id="address" name="houseName" disabled value="<%= user.houseName %>"></textarea>
-            </div>
-        </div>
-        
-        <div class="form-row">
-            <div class="form-group">
-                <label for="pincode">Pin Code</label>
-                <input type="text" id="pincode" name="pincode" value="<%= user.pincode %>" disabled>
-            </div>
-        </div>
+           <div class="form-actions">
+       <button type="button" id="editButton" onclick="openEditDialog('editDialogPersonal')">EDIT</button>
+        <button type="submit" id="saveButton" style="display: none;">SAVE</button>
+        <button type="button" id="cancelButton" style="display: none;">CANCEL</button>
+    </div>
+  
     </div>
     
     <div class="form-section">
         <h2>Contact information</h2>
         
-        <div class="form-row">
-            <div class="form-group">
-                <label for="mobile">Mobile Number</label>
-                <input type="number" id="mobile" name="mobile" value="<%= user.phone %>" disabled>
-            </div>
+        
             <div class="form-group">
                 <label for="email">E-mail</label>
                 <input type="email" id="email" name="email" value="<%= user.email %>" disabled>
             </div>
         </div>
-        
-        <div class="form-row">
-            <div class="form-group">
-                <label for="altMobile">Alternate Number</label>
-                <input type="text" id="altMobile" name="altMobile" value="<%= user.altMobile || '' %>" disabled>
-            </div>
-        </div>
-    </div>
-    
-    <div class="form-actions">
-       <button type="button" id="editButton" onclick="openEditDialog()">EDIT</button>
+       
+         <div class="form-actions">
+       <button type="button" id="editButton" onclick="openEditDialog('editDialogContact')">EDIT</button>
         <button type="submit" id="saveButton" style="display: none;">SAVE</button>
         <button type="button" id="cancelButton" style="display: none;">CANCEL</button>
     </div>
 </form>
 
+     <div class="form-actions mt-3">
+  <button type="button" onclick="openEditDialog('editDialogPassword')">Change Password</button>
 </div>
+
+     
+    </div>
+    
+   
+
 
 
 
 <!-- Fullscreen Dialog (Overlay) -->
+<div id="editDialogPersonal" style="display: none; position: fixed; top: 0;  right: 0; 
+    width: 80%; height: 70%; background: rgba(0, 0, 0, 0.7); z-index: 9999; 
+    align-items: center; justify-content: center;"   >
 
-<div id="editDialog" style="display: none; position: fixed; top: 0;  right: 0; 
-    width: 80%; height: 80%; background: rgba(0, 0, 0, 0.7); z-index: 9999; 
-     align-items: center; justify-content: center;">
-
-  <form id="editProfileForm" action="/editAccount?_method=PATCH" method="post" style="background: white; padding: 30px; width: 90%; max-height: 90%; overflow-y: auto;">
+  <form id="editProfileForm" action="/editAccount?_method=PATCH" method="post" enctype="multipart/form-data" style="background: white; padding: 30px; width: 90%; max-height: 90%; overflow-y: auto;">
     <h2>Edit Profile</h2>
     <input type="hidden" name="_method" value="PATCH">
+
+    <!-- 👤 Profile Picture Section -->
+    <div class="form-group" style="margin-bottom: 20px;  width: 12%;" >
+      <label for="profileImage" style="cursor: pointer;">Profile Picture <br>
+      <img id="profilePreview" src="<%= user.profileImage || '/uploads/images/default-profile.png' %>" alt="Profile" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; margin-bottom: 10px;">
+      <input type="file" id="profileImage" name="profileImage" accept="image/*" onchange="previewProfileImage(event)" style="display: none;">
+    </label>
+    </div>
+
     <div class="form-row">
       <div class="form-group">
         <label for="editFirstName">First Name</label>
@@ -120,90 +101,142 @@
       </div>
       <div class="form-group">
         <label for="editLastName">Last Name</label>
-        <input type="text" id="editLastName" name="lastName" required value="<%= lastName %>" />
+        <input type="text" id="editLastName" name="lastName" required value="<%= middleName + ' ' + lastName %>" />
       </div>
     </div>
 
     <div class="form-row">
       <div class="form-group">
-        <label for="editDob">Date Of Birth</label>
-        <input type="date" id="editDob" name="dob" value="<%= user.dob ? user.dob.toISOString().substring(0,10) : '' %>" />
+        <label for="dob">Date Of Birth</label>
+        <input type="date" id="editDob" name="date_of_birth" value="<%= user.date_of_birth ? user.date_of_birth.toISOString().substring(0,10) : '' %>" />
       </div>
       <div class="form-group">
         <label>Gender</label>
-        <label><input type="radio" name="gender" value="male" <%= user.gender === "male"? selected:"" %>  > Male</label>
-        <label><input type="radio" name="gender" value="female"  <%= user.gender === "female"? selected:"" %> > Female</label>
+        <label><input type="radio" name="gender" value="male" <%= user.gender === "male"? 'checked' :"" %> > Male</label>
+        <label><input type="radio" name="gender" value="female"  <%= user.gender === "female"?  'checked' :"" %> > Female</label>
       </div>
-    </div>
-
-    <div class="form-row">
-      <div class="form-group">
-        <label for="editCity">City</label>
-        <input type="text" id="editCity" name="city" value= "<%= user.city || '' %>" />
-      </div>
-      <div class="form-group">
-        <label for="editState">State</label>
-        <select id="editState" name="state" value= "<%= user.state || '' %>">
-            <option value="Kerala">Kerala</option>
-          <option value="Tamil Nadu">Tamil Nadu</option>
-          <option value="Karnataka">Karnataka</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="form-row">
-      <div class="form-group full-width">
-        <label for="editAddress">Address</label>
-        <textarea id="editAddress" name="houseName"> <%= user.houseName || '' %></textarea>
-      </div>
-    </div>
-
-    <div class="form-row">
-      <div class="form-group">
-        <label for="editPincode">Pin Code</label>
-        <input type="text" id="editPincode" name="pincode" value="<%= user.address || '' %>" />
-      </div>
-    </div>
-
-    <div class="form-row">
-      <div class="form-group">
-        <label for="editMobile">Mobile</label>
-        <input type="number" id="editMobile" name="phone" value="<%= user.phone || '' %>" />
-      </div>
-      <div class="form-group">
-        <label for="editEmail">Email</label>
-        <input type="email" id="editEmail" name="email" value="<%= user.email %>" />
-      </div>
-    </div>
-
-    <div class="form-row">
-      <div class="form-group">
-        <label for="editAltMobile">Alternate Mobile</label>
-        <input type="text" id="editAltMobile" name="altMobile" value="<%= user.altNumber || '' %>" />
-      </div> 
     </div>
 
     <div class="form-actions">
       <button type="submit">Save</button>
-      <button type="button" onclick="closeEditDialog()">Cancel</button>
+      <button type="button" onclick="closeEditDialog('editDialogPersonal')">Cancel</button>
+    </div>
+  </form>
+</div>
+
+
+  <div id="editDialogContact" style="display: none; position: fixed; top: 40%; 
+    width: 80%; height: 20%; background: rgba(0, 0, 0, 0.7); z-index: 9999; 
+     align-items: center; justify-content: center;">
+
+    <form method="post" action="/changeEmail"> 
+      <div class="form-group">
+        <label for="editEmail">Email</label>
+        <input type="email" id="editEmail" name="email" value="<%= user.email %>" />
+      </div> <br>
+      
+      <div class="form-actions">
+         <button type="submit">Save</button>
+          <button type="button" onclick="closeEditDialog('editDialogContact')">Cancel</button>
+        </div>
+     </form>
+
+</div>
+
+<!-- Password Edit Modal -->
+<div id="editDialogPassword" style="display: none; position: fixed; top: 20%; 
+    width: 80%; max-width: 500px; background: rgba(0, 0, 0, 0.7); z-index: 9999; 
+    align-items: center; justify-content: center; padding: 20px;">
+
+  <form  style="background: white; padding: 30px; border-radius: 10px;" id="changePassword">
+    <h3>Change Password</h3>
+
+    <div class="form-group">
+      <label for="currentPassword">Current Password</label>
+      <input type="password" name="currentPassword" id="currentPassword" required />
+    </div> 
+    <div class="form-group">
+      <label for="newPassword">New Password</label>
+      <input type="password" name="newPassword" id="newPassword" required />
+      
+    </div>
+    <div class="form-group">
+      <label for="confirmPassword">Confirm New Password</label>
+      <input type="password" name="confirmPassword" id="confirmPassword" required />
+    </div> <div id="error-msg" style="color: red; font-size: 0.8rem;"></div>
+
+    <div style="margin-top: 10px;">
+      <a href="/forgot-password" style="font-size: 0.9rem;">Forgot Password?</a>
+    </div>
+
+    <div class="form-actions" style="margin-top: 15px;">
+      <button type="submit" id="updatPasswordBtn">Update Password</button>
+      <button type="button" onclick="closeEditDialog('editDialogPassword')">Cancel</button>
     </div>
   </form>
 </div>
 
 
 
+
+
+   
+
+
 <script>
-   function openEditDialog() {
+   function openEditDialog(value) {
   // Optionally fetch current values
 
     //   document.getElementById('editName').value = data.name;
     //   document.getElementById('editEmail').value = data.email;
-      document.getElementById('editDialog').style.display = 'block';
+      document.getElementById(value).style.display = 'block';
   
 }
 
-function closeEditDialog() {
-  document.getElementById('editDialog').style.display = 'none';
+function closeEditDialog(value) {
+  document.getElementById(value).style.display = 'none';
 }
+
+function previewProfileImage(event) {
+  const reader = new FileReader();
+  reader.onload = function () {
+    document.getElementById("profilePreview").src = reader.result;
+  };
+  reader.readAsDataURL(event.target.files[0]);
+}
+
+document.getElementById('changePassword').addEventListener('submit',async (e)=>{
+        e.preventDefault()
+       
+       const errorMsg = document.getElementById('error-msg')
+       const currentPassword = document.getElementById('currentPassword').value;
+      const newPassword = document.getElementById('newPassword').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+
+
+        const response = await fetch("/changePassword",{
+             method:'POST',
+             headers:{'Content-Type' : 'application/json' },
+             body: JSON.stringify({currentPassword, newPassword, confirmPassword})
+
+        })
+            
+          const data = await response.json()
+
+            if(response.ok){
+              closeEditDialog('editDialogPassword')
+               alert(data.message || "Password changed")
+
+            }else{
+                 
+                 console.log("respodne",data.message)
+                 errorMsg.innerText = data.message || "error" 
+                 errorMsg.display = 'block'
+            }
+      
+
+
+})
+
 
 </script>

@@ -294,7 +294,7 @@ const userHome = async (req,res)=>{
            if(user){
 
         const userData = await User.findOne({_id:user});
-        console.log("userData",userData)
+    
         
          res.render("landingPage",{user:userData ,product})
       }else {
