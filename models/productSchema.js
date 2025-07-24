@@ -35,10 +35,10 @@ const productSchema = new mongoose.Schema({
                           },
              stock:     { 
                          type: Number, 
-                          required:true},
+                         },
            stock_status: { 
                           type: Boolean ,
-                           required:true,
+                
                            
                           },
             regular_price: { 
@@ -63,7 +63,8 @@ const productSchema = new mongoose.Schema({
                           default:0
                         } ,            
                  image: [{ type: String }],
-                volume: [{ type: String }]
+                volume: [{ type: Number}],
+                varients_id : {type: mongoose.Schema.Types.ObjectId , ref: "Varients"}
 }, { timestamps: true });
 
 const Product = mongoose.model('Product', productSchema);

@@ -1,4 +1,4 @@
-<%-include("../partials/user/header")%>
+
 <head>
     <link rel="stylesheet" href="/css/productStyles.css" >
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -7,8 +7,14 @@
         text-decoration: none;
         color: black;
        }
+                .discount {
+           color: #4caf50;
+           font-size: 14px;
+           font-weight: 600;
+          }
     </style>
 </head>
+<%-include("../partials/user/header")%>
 <body>
     <main class="container">
         <!-- Hero Banner -->
@@ -53,27 +59,27 @@
 
             
 
-                  <form method="GET" action="/product/<%=categoryName%>" id="filterForm">
+          <form method="GET" action="/product/<%=categoryName%>?q=<%=search%>" id="filterForm">
 
-
+                 
   <!-- Price Range Filter -->
   <label>Price:</label>
   <select name="price" onchange="document.getElementById('filterForm').submit()">
     <option value="">All</option>
-    <option value="0-499" <%= price === '0-499' ? 'selected' : '' %>>Below ₹500</option>
-    <option value="500-999" <%= price === '500-999' ? 'selected' : '' %>>₹500 - ₹999</option>
-    <option value="1000-1999" <%= price === '1000-1999' ? 'selected' : '' %>>₹1000 - ₹1999</option>
-    <option value="2000+" <%= price === '2000+' ? 'selected' : '' %>>Above ₹2000</option>
+    <option value="0-499" <%= locals.price === '0-499' ? 'selected' : '' %>>Below ₹500</option>
+    <option value="500-999" <%= locals.price === '500-999' ? 'selected' : '' %>>₹500 - ₹999</option>
+    <option value="1000-1999" <%= locals.price === '1000-1999' ? 'selected' : '' %>>₹1000 - ₹1999</option>
+    <option value="2000+" <%= locals.price === '2000+' ? 'selected' : '' %>>Above ₹2000</option>
   </select>
 
   <!-- Sort Options -->
   <label>Sort by:</label>
   <select name="sort" onchange="document.getElementById('filterForm').submit()">
     <option value="">Default</option>
-    <option value="priceLow" <%= sort === 'priceLow' ? 'selected' : '' %>>Price: Low to High</option>
-    <option value="priceHigh" <%= sort === 'priceHigh' ? 'selected' : '' %>>Price: High to Low</option>
-    <option value="nameAZ" <%= sort === 'nameAZ' ? 'selected' : '' %>>Name: A-Z</option>
-    <option value="nameZA" <%= sort === 'nameZA' ? 'selected' : '' %>>Name: Z-A</option>
+    <option value="priceLow" <%= locals.sort === 'priceLow' ? 'selected' : '' %>>Price: Low to High</option>
+    <option value="priceHigh" <%= locals.sort === 'priceHigh' ? 'selected' : '' %>>Price: High to Low</option>
+    <option value="nameAZ" <%= locals.sort === 'nameAZ' ? 'selected' : '' %>>Name: A-Z</option>
+    <option value="nameZA" <%= locals.sort === 'nameZA' ? 'selected' : '' %>>Name: Z-A</option>
   </select>
 </form>
 
@@ -93,7 +99,7 @@
           <a href="/productDetails/<%= product._id %>" class="text-decoration-none text-dark">
             <img src="<%= product.image[0] %>" class="card-img-top" alt="<%= product.name %>">
             <div class="card-body">
-              <h6 class="card-subtitle text-muted mb-1"><%= product.brand_id?.name %></h6>
+              <h6 class="card-subtitle text-muted mb-1"><%= product?.brand_id?.name %></h6>
               <h5 class="card-title mb-2"><%= product.product_name %></h5>
 
               <div class="mb-2">
@@ -112,9 +118,10 @@
                 <% if (product.final_price !== product.regular_price) { %>
                   <span class="text-muted text-decoration-line-through">₹<%= product.regular_price?.toLocaleString() %></span>
                 <% } %>
+                       <span class="discount"><%= Math.round(parseFloat(1 - product.final_price/product.regular_price) * 100) %>% off</span>
               </div>
             </a>
-              <button class="btn btn-outline-primary w-100 addToCart-btn" data-id="<%=product._id%>" > ADD TO CART</button>
+              <button class="btn btn-outline-dark w-100 addToCart-btn" data-id="<%=product._id%>" > ADD TO CART</button>
             </div>
           
         </div>

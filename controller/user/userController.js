@@ -6,20 +6,32 @@ const session = require("express-session");
 const nodemailer = require("nodemailer")
 const Product = require("../../models/productSchema")
 const Category = require("../../models/categorySchema")
+const jwt = require('jsonwebtoken');
+const Coupon = require("../../models/couponSchema");
+const Cart = require("../../models/cartSchema");
 
 const pageNotFound = async (req,res)=>{
     try {
         res.render("page-404")
     } catch (error) {
-        res.redirect("/pageNotFound")
+        res.redirect("/pageError")
     }
+}
+
+const pageError = async (req,res)=>{
+   try{
+         res.render("server-error")
+   }
+   catch(error){
+          res.render("server-error")
+   }
 }
 
 const loadLogin = async (req,res)=>{
 
   try{
     if(!req.session.user){
-   
+     
       return  res.render("login", {message:"", activeTab: "login" });
     } else {
       res.redirect("/")
@@ -34,11 +46,15 @@ const loadLogin = async (req,res)=>{
 
 const loadRegister = async (req,res)=>{
     try {
+
+      const refId = req.query.ref;
+
+      req.session.ref = refId
         res.render("login", {message:"", activeTab: "register" });
 
     } catch (error) {
         conseole.log("error in loadregister",error)
-        res.status(500).send("error loading register page")
+        res.status(500).redirect("/pageError")
     }
 }
 
@@ -84,10 +100,11 @@ async function sendVerificationEmail(email,otp){
 
         const {name, email, phone, password} = req.body
         let hashedPassword;
+         
 
         try{
                
-            const existingUser = await User.findOne({email})
+            const existingUser = await User.findOne({email ,isDeleted:false})
     
             if(existingUser){
               return res.render("login" ,{message:"user already exists", activeTab:"register"})
@@ -97,14 +114,14 @@ async function sendVerificationEmail(email,otp){
     
             const otp = generateOtp();      
             
-            const otpExpiry = Date.now() + 60 * 1000; // 1 minute expiry
+            const otpExpiry = Date.now() + 60 * 1000; // 2 minute expiry
 
     
-            // const emailSent = await sendVerificationEmail(email,otp)
+            const emailSent = await sendVerificationEmail(email,otp)
            
-            // if(!emailSent){
-            //     return res.json("email.error")
-            // }
+            if(!emailSent){
+                return res.json("email.error")
+            }
     
             req.session.userOtp = otp;
             req.session.otpExpiry = otpExpiry;
@@ -117,7 +134,7 @@ async function sendVerificationEmail(email,otp){
         }
           catch(error){
             console.error("signup error",error)
-            res.redirect("/pageNotFound")
+            res.redirect("/pageError")
           }
 
 
@@ -129,7 +146,7 @@ async function sendVerificationEmail(email,otp){
 
 
             const { otp:enteredOtp } = req.body;
-            const email = req.session.email
+           
 
             const { userOtp, otpExpiry, userData } = req.session;
 
@@ -157,9 +174,57 @@ async function sendVerificationEmail(email,otp){
                               
                        const newUser = new User({name, email, phone, password:hashedPassword})
  
-                        
-
                         await newUser.save()
+
+               // check for refrals 
+
+                     const referralToken = req.session.ref;
+
+                
+
+                    let referrerId = null;
+
+                 if (referralToken) { 
+                  
+                       const decoded = jwt.verify(referralToken, process.env.JWT_SECRET);
+                       referrerId = decoded.referrerId;
+                  
+          
+                  }
+
+       let referredUser = await User.findById(referrerId)
+
+    
+
+       let offer_price = 40;
+
+  
+     
+       if(referredUser && (referredUser.referredUsers.length+1) % 5 === 0 && referredUser.referredUsers.length !==0){
+         
+                  offer_price = 100;
+               
+
+       }
+
+        if (referrerId) {
+            // Generate and assign a coupon to the referrer
+            const randomNum = Math.floor(100 + Math.random() * 900);
+            const coupon = new Coupon({
+              coupon_name : `Ref-user${randomNum}`, 
+                user_id: referrerId,
+                coupon_type: 'referal',
+                code: `REF${Date.now()}`,
+                 offer_price,
+                 minimum_price : 500,
+                expiry_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+            });
+            await coupon.save();
+
+        
+
+            await User.findByIdAndUpdate(referrerId ,{ $push: {referredUsers: {user_id: newUser._id,coupon_id:coupon._id}},$inc:{referralEarnings: offer_price}})
+        }
 
                         
 
@@ -167,7 +232,7 @@ async function sendVerificationEmail(email,otp){
                       
                         req.session.otpExpiry = null;
                         req.session.user=newUser._id
-                      // console.log("after registeration",req.session, "end")
+                   
                         return res.status(200).json({
                           success: true,
                           message: "User registered successfully",
@@ -179,15 +244,15 @@ async function sendVerificationEmail(email,otp){
     
                    catch(error){
                        console.log(error)
-                       return res.status(500).json({ success: false, message: "Internal Server Error" })
+                       return res.status(500).json({ success: false, message: "Registration failed, Try again later" })
                    }
            }
 
            const resendOtp =  async (req, res) => {
             try {
               const { userData } = req.session;
-              // const email = req.session.email
-              console.log("useData", userData)
+            
+            
           
               if(!userData || !userData.email) 
                 {
@@ -198,18 +263,18 @@ async function sendVerificationEmail(email,otp){
               const otp = generateOtp();
               const otpExpiry = Date.now() + 60 * 1000; 
           
-              // const emailSent = await sendVerificationEmail(userData.email, otp);
+              const emailSent = await sendVerificationEmail(userData.email, otp);
           
-              // if (!emailSent) {
-              //   return res.status(500).json({ success: false, message: 'Failed to send OTP. Try again later.' });
-              // }
+              if (!emailSent) {
+                return res.status(500).json({ success: false, message: 'Failed to send OTP. Try again later.' });
+              }
           
               req.session.userOtp = otp;
               req.session.otpExpiry = otpExpiry;
           
               console.log(`Resent OTP: ${otp}`);
-            //   return res.render("verifyOtp", {message: "OTP resend successfully" });
-              return res.json({ success: true, message: "OTP resent successfully" });
+         
+              return res.status(200).json({ success: true, message: "OTP resent successfully" });
           
             } catch (error) {
               console.error('Error resending OTP:', error);
@@ -222,7 +287,7 @@ async function sendVerificationEmail(email,otp){
    
     const {email , password}= req.body
     
-    console.log(email,password)
+   
     try{
           const existingUser = await User.findOne({email})
          
@@ -253,7 +318,7 @@ async function sendVerificationEmail(email,otp){
          
     }
     catch(error){
-        console.log(error)
+        console.log("error in verifying user" ,error)
         res.render("login" , {message : "login failed. Please try again later" , activeTab: "login"})
     }
 }
@@ -264,23 +329,23 @@ const loadHome = async (req,res)=>{
       
           const user = req.session.user;
          
-        console.log("Breadcrumbs:", res.locals.breadcrumbs);
+       
 
           const product = await Product.find({isDeleted:false}).sort({createdAt:-1}).populate('category_id').exec()
-      
-          // console.log('product',product)
+   
+ 
 
            if(user){
 
             return res.redirect("/home")
       }else {
-        return res.render("landingPage",{product})
+        return res.render("landingPage",{product })
       }
         
         
     } catch (error) {
         console.log("failed to load homePage", error.message)
-        return res.redirect("/pageNotFound")
+        return res.redirect("/pageError")
         
     }
 }
@@ -294,9 +359,9 @@ const userHome = async (req,res)=>{
            if(user){
 
         const userData = await User.findOne({_id:user});
-    
+        const cart = await Cart.findOne({user_id:user})
         
-         res.render("landingPage",{user:userData ,product})
+         res.render("landingPage",{user:userData ,product , cart})
       }else {
         return res.render("landingPage")
       }
@@ -305,7 +370,7 @@ const userHome = async (req,res)=>{
      } catch (error) {
 
        console.log("failed to load homePage", error.message)
-        res.status(500).send("unable to load server")
+        res.status(500).redirect("/pageError")
       
      }
 
@@ -313,8 +378,8 @@ const userHome = async (req,res)=>{
 
 
 const logout = async (req,res)=>{
-   console.log("req.session",req.session.email)
-   
+
+
    
    req.session.email=null;
    req.session.user = null;
@@ -334,7 +399,8 @@ module.exports ={
     verifyOtp,
     resendOtp,
     userHome,
-    logout
+    logout,
+    pageError
 }
 
 

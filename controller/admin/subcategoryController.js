@@ -1,101 +1,93 @@
 const Category = require("../../models/categorySchema")
 const Subcategory = require("../../models/subCategorySchema")
 
-const addSubcategory = async (req,res)=>{
+const addSubcategory = async (req, res) => {
 
-    try{ 
-    const {id } = req.params
-    const subcategory = req.body.name 
-
-    console.log("subcategory",id)
+  try {
+    const { id } = req.params
+    const subcategory = req.body.name
 
     const newSubcategory = await new Subcategory({
-        name:subcategory,
-        category_id:id
+      name: subcategory,
+      category_id: id
     })
 
     await newSubcategory.save()
     res.redirect("/admin/category")
 
-    }
-    catch(error){
-        res.redirect("/admin/pageError")
-        console.log("error adding subcategory ", error)
-    }
-    
+  }
+  catch (error) {
+    res.redirect("/admin/pageError")
+    console.log("error adding subcategory ", error)
+  }
+
 
 }
 
 
 const editSubcategory = async (req, res) => {
-    try {
-      const { id } = req.params;
-      const { name } = req.body;
-      console.log("id",id)
-      console.log("subcategory",name)
-  
-      await Subcategory.findByIdAndUpdate(id, { name: name.trim() });
-      res.redirect('/admin/category');
-    } catch (error) {
-      console.error("Error editing category:", error);
-      res.redirect('/admin/pageError');
-    }
-  };
+  try {
+    const { id } = req.params;
+    const { name } = req.body;
 
-
-  const blockSubcategory = async (req,res)=>   {
-    try {
-     let id = req.params.id;
-     console.log(id)
-     await Subcategory.updateOne({_id:id}, {$set:{status:"blocked"}});
-    
-     res.redirect("/admin/category")
-     
-    } catch (error) {
-     res.redirect("/pageError")
-     
-    }
- }
- 
- const unblockSubcategory = async (req,res)=>   {
-     try {
-      let id = req.params.id;
-      console.log("unblock id:",id)
-      await Subcategory.updateOne({_id:id}, {$set:{status:"active"}});
-   
-      res.redirect("/admin/category")
-      
-     } catch (error) {
-      res.redirect("/pageError")
-      
-     }
+    await Subcategory.findByIdAndUpdate(id, { name: name.trim() });
+    res.redirect('/admin/category');
+  } catch (error) {
+    console.error("Error editing category:", error);
+    res.redirect('/admin/pageError');
   }
- 
- 
+};
 
-  const deleteSubcategory = async (req, res) => {
-    try {
-      const  id  = req.params.id;
-      console.log("deleteid",id)
-  
-      
-      await Subcategory.findByIdAndUpdate(id, { isDeleted: true });
-  
-     
-  
-      res.redirect('/admin/category');
-    } catch (error) {
-      console.error("Error deleting category:", error);
-      res.redirect('/pageError');
-    }
-  };
-  
+
+const blockSubcategory = async (req, res) => {
+  try {
+    let id = req.params.id;
+
+    await Subcategory.updateOne({ _id: id }, { $set: { status: "blocked" } });
+
+    res.redirect("/admin/category")
+
+  } catch (error) {
+    res.redirect("/pageError")
+
+  }
+}
+
+const unblockSubcategory = async (req, res) => {
+  try {
+    let id = req.params.id;
+
+    await Subcategory.updateOne({ _id: id }, { $set: { status: "active" } });
+
+    res.redirect("/admin/category")
+
+  } catch (error) {
+    res.redirect("/pageError")
+
+  }
+}
+
+
+
+const deleteSubcategory = async (req, res) => {
+  try {
+    const id = req.params.id;
+
+    await Subcategory.findByIdAndUpdate(id, { isDeleted: true });
+
+    res.redirect('/admin/category');
+  } catch (error) {
+    console.error("Error deleting category:", error);
+    res.redirect('/pageError');
+  }
+};
+
 
 
 module.exports = {
-    addSubcategory,
-    editSubcategory,
-    blockSubcategory,
-    unblockSubcategory,
-    deleteSubcategory
+  addSubcategory,
+  editSubcategory,
+  blockSubcategory,
+  unblockSubcategory,
+  deleteSubcategory
 }

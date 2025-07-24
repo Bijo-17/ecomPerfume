@@ -15,25 +15,68 @@
 
     <div class="profile-page"> 
 
+        
+    <!-- Mobile menu header (shown only on small screens) -->
+
+    <div class="mobile-menu-header">
+  <div class="left-side">
+    <button id="mobileMenuToggle"><i class="fas fa-bars"></i></button>
+    <div class="selected-menu-label">
+      <i class="<%= active === 'account' ? 'fas fa-user-circle' :
+                active === 'order' ? 'fas fa-box' :
+                active === 'address' ? 'fas fa-map-marker-alt' :
+                active === 'wishlist' ? 'fas fa-heart' :
+                active === 'wallet' ? 'fas fa-wallet' :
+                active === 'refer' ? 'fas fa-coins' :
+                active === 'delete' ? 'fas fa-trash-alt' : '' %>"></i>
+      <span>
+        <%= active === 'account' ? 'Account' :
+            active === 'order' ? 'My Orders' :
+            active === 'address' ? 'Manage Address' :
+            active === 'wishlist' ? 'My Wishlist' :
+            active === 'wallet' ? 'Wallet' :
+            active === 'refer' ? 'Refer & Earn' :
+            active === 'delete' ? 'Delete Account' : '' %>
+      </span>
+    </div>
+  </div>
+
+  <div class="right-side user-mini">
+    <img class="mini-avatar" src="<%= user?.profileImage ? user.profileImage : '/uploads/images/avatar-img.jpg' %>" alt="User Avatar" />
+    <span><%= user?.name %></span>
+  </div>
+</div>
+
+<%
+  const profileImagePath = user?.profileImage 
+    ? user.profileImage 
+    : '/uploads/images/avatar-img.jpg';
+%>
+
 
     <div class="container">
-        <div class="sidebar">
+        <div class="sidebar collapsible-sidebar">
             <div class="profile-header">
+
                 <div class="avatar">
-                    <img src="<%=user.profileImage || '/images/avatar.png' %>" alt="User Avatar">
+                    <img src="<%= profileImagePath %>" alt="User Avatar">
                 </div>
                 <div class="user-info">
-                    <p>Hello,</p>
-                    <h3><%= user.name %></h3>
+                    <p>Hello</p>
+                    <h3><%= user?.name || 'User' %></h3>
+      
                 </div>
             </div>
+
+   
+
             
             <nav class="sidebar-menu">
                 <ul>
                     <li class="<%= active === 'account' ? 'active' : '' %>">
                         <a href="/account">
                             <i class="fas fa-user-circle"></i>
-                            <span>Account Overview</span>
+                            <span>Account </span>
                         </a>
                     </li>
                     <li class="<%= active === 'order' ? 'active' : '' %>">
@@ -60,6 +103,13 @@
                             <span>Wallet</span>
                         </a>
                     </li>
+                       <li class="<%= active === 'refer' ? 'active' : '' %>">
+                        <a href="/referandEarn">
+                            <i class="fas fa-coins"></i>
+                            <span>Refer & Earn</span>
+                        </a>
+                    </li>
+                  
                     <li class="<%= active === 'delete' ? 'active' : '' %>">
                         <a href="/delete-account">
                             <i class="fas fa-trash-alt"></i>
@@ -79,9 +129,10 @@
                <%- body %>
                    </div>
       </div>
+      
     </div>
 
-   
+
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="/js/main.js"></script>
@@ -90,11 +141,10 @@
     <% } %>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Common functionality for all pages
-        
+    
         // Mobile menu toggle
         const mobileMenuToggle = document.getElementById('mobileMenuToggle');
-        const sidebar = document.querySelector('.sidebar');
+        const sidebar = document.querySelector('.collapsible-sidebar');
         
         if (mobileMenuToggle) {
             mobileMenuToggle.addEventListener('click', function() {
@@ -102,8 +152,8 @@
             });
         }
     });
+
+
     </script>
 
 
-</body>
-</html>

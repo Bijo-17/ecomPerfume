@@ -7,6 +7,9 @@ const subcategoryController = require("../controller/admin/subcategoryController
 const productController = require("../controller/admin/productController")
 const brandController = require("../controller/admin/brandController")
 const orderController = require("../controller/admin/orderController")
+const couponController = require("../controller/admin/couponController")
+const dashboardController = require("../controller/admin/dashboardController")
+const bannerController = require("../controller/admin/bannerController")
 
 const multer = require('multer')
 
@@ -19,7 +22,8 @@ router.get("/login",adminController.loadLogin)
 router.post("/verify",adminController.verifyAdmin)
 
 router.get("/pageError",adminController.pageError)
-router.get("/",adminController.loadDashboard)
+
+// router.get("/",adminController.loadDashboard)
 
 router.get("/logout",adminAuth,adminController.logout)
 
@@ -31,7 +35,7 @@ router.get("/unblockCustomer",adminAuth,customerController.customerUnblocked)
 // category Management
 router.get("/category",adminAuth,categoryController.categoryInfo) // list with subcategories
 // router.get('/category/add', categoryController.addForm);
-router.post('/category/add', categoryController.addCategory);
+router.post('/category/add',adminAuth, categoryController.addCategory);
 
 router.post('/category/editCategory/:id', categoryController.editCategory);
 // router.post('/category/edit/:id', categoryController.updateCategory);
@@ -59,12 +63,16 @@ router.post('/addBrand',adminAuth,uploads.single('image'),brandController.addBra
 router.post('/addBrand/edit/:id',uploads.single('image'), brandController.editBrand);
 router.get('/addBrand/block/:id', brandController.blockBrand);
 router.get('/addBrand/unblock/:id', brandController.unblockBrand);
-router.get('/addBrand/delete/:id', brandController.deleteBrand);
+router.get('/addBrand/delete/:id',adminAuth, brandController.deleteBrand);
 
 router.post('/test-upload', uploads.single('image'), (req, res) => {
   console.log("FILE:", req.file);
   res.send("Received");
 });
+
+// banner mangement
+
+router.get('/banner',bannerController.loadBannerPage)
 
 
 // produc management 
@@ -72,20 +80,35 @@ router.post('/test-upload', uploads.single('image'), (req, res) => {
 router.get('/addProduct',adminAuth,productController.addProductPage)
 router.post('/addProduct',adminAuth,uploads.array("images",4),productController.addProducts)
 router.get('/products',adminAuth,productController.listProducts)
-router.get('/products/block/:id/:page',productController.blockProduct)
-router.get('/products/unblock/:id/:page',productController.unblockProduct)
-router.get('/products/delete/:id/:page',productController.deleteProduct)
+router.get('/products/block/:id/:page',adminAuth,productController.blockProduct)
+router.get('/products/unblock/:id/:page',adminAuth,productController.unblockProduct)
+router.get('/products/delete/:id/:page',adminAuth,productController.deleteProduct)
 router.post('/products/addOffer/:id',productController.addOffer)
 router.post('/products/removeOffer/:id',productController.removeOffer)
-router.patch('/products/edit/:id',uploads.array("images",4),productController.editProduct)
+router.patch('/products/edit/:id',adminAuth,uploads.array("images",4),productController.editProduct)
 
 // orders 
 
-router.get('/orderList',orderController.getOrders)
-router.get('/orderDetails/:orderId/:productId',orderController.orderDetails)
-router.post('/verifyReturn/:orderId/:productId',orderController.approveReturn)
-router.post('/cancelReturn/:orderId/:productId',orderController.cancelReturn)
-router.post('/updateOrderStatus/:orderId/:productId',orderController.updateOrderStatus)
+router.get('/orderList',adminAuth,orderController.getOrders)
+router.get('/orderDetails/:orderId/:productId',adminAuth,orderController.orderDetails)
+router.post('/verifyReturn/:orderId/:productId',adminAuth,orderController.approveReturn)
+router.post('/cancelReturn/:orderId/:productId',adminAuth,orderController.cancelReturn)
+router.post('/updateOrderStatus/:orderId/:productId',adminAuth,orderController.updateOrderStatus)
+
+// coupon
+ 
+router.get('/coupon',adminAuth,couponController.getCoupon)
+router.post('/createCoupon',adminAuth,couponController.createCoupon)
+router.get('/deleteCoupon',adminAuth,couponController.deleteCoupon)
+router.post('/editCoupon',adminAuth,couponController.editCoupon)
+
+// dashboard 
+
+router.get('/',adminAuth,dashboardController.getSalesReport)
+router.post('/generatePdf',dashboardController.exportSalesReport)
+router.get('/chart',dashboardController.getChartData)
+router.get('/topItems',dashboardController.getTopItems)
+
 
 
 module.exports = router

@@ -1,14 +1,45 @@
 </main>
-<script src="/admin-assets/js/vendors/jquery-3.6.0.min.js"></script>
-<script src="/admin-assets/js/vendors/bootstrap.bundle.min.js"></script>
-<script src="/admin-assets/js/vendors/select2.min.js"></script>
-<script src="/admin-assets/js/vendors/perfect-scrollbar.js"></script>
-<script src="/admin-assets/js/vendors/jquery.fullscreen.min.js"></script>
-<script src="/admin-assets/js/vendors/chart.js"></script>
-<script src="/admin-assets/js/main.js" type="text/javascript"></script>
-<script src="/admin-assets/js/custom-chart.js" type="text/javascript"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Flatpickr JS -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<script>
+
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const sidebarTrigger = document.querySelector('[data-trigger=".navbar-aside"]');
+    const sidebar = document.querySelector(".navbar-aside");
+    const overlay = document.querySelector(".screen-overlay");
+
+    sidebarTrigger?.addEventListener("click", function () {
+      sidebar.classList.add("open");
+      overlay.classList.add("active");
+    });
+
+    overlay?.addEventListener("click", function () {
+      sidebar.classList.remove("open");
+      overlay.classList.remove("active");
+      
+    });
+
+         closeBtn?.addEventListener("click", function () {
+        sidebar.classList.remove("open");
+        overlay.classList.remove("active");
+      });
+
+
+  });
+
+
+  
+
+
+</script>
+
+
 
 </body>
 </html>

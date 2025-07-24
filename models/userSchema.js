@@ -53,7 +53,7 @@ const userSchema = new Schema({
             type:Schema.Types.ObjectId,
             ref:"Cart",
     },
-    wallet:{
+    wallet_id:{
         type:Schema.Types.ObjectId,
         ref:"Wallet"
     },
@@ -69,23 +69,29 @@ const userSchema = new Schema({
         type:Date,
         default:Date.now,
     },
-    referalCode:{
+    referralCode:{
         type:String
     },
     redeemed:{
-        type:Boolean
+        type:Boolean,
+        default: 0
     },
+    referralEarnings:{
+                          type:Number,
+                          default:0
+                   },
+   
+    referredUsers: [{user_id:{ type: mongoose.Schema.Types.ObjectId, ref: "User" , default:null },
+                     coupon_id:{type:mongoose.Schema.Types.ObjectId, ref: "Coupon" , default:null},
+                     }],
     date_of_birth:{
-          type: Date,
+                   type: Date,
     },
     gender:{
            type: String,
            enum: ['male','female']
     },
-    redeemedUsers: [{
-        type: Schema.Types.ObjectId,
-        ref:"User"
-    }],
+
     searchHistory: [{
         category: {
             type: Schema.Types.ObjectId,
@@ -99,9 +105,19 @@ const userSchema = new Schema({
             default: Date.now
         }
     }],
-      profileImage:[{
+      profileImage:{
         type:String
-    }]
+    }, 
+
+      applied_coupons:[{
+         type:Schema.Types.ObjectId,
+         ref:"Coupon"
+         
+    }],
+    isDeleted:{
+            type:Boolean,
+            default:false
+    },
   
  }, { timestamps: true });
 

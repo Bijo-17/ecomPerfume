@@ -32,6 +32,11 @@
               <label for="subcategoryName" class="form-label">Subcategory (Optional)</label>
               <input type="text" class="form-control" name="subcategoryName" id="subcategoryName">
             </div>
+              <div class="mb-3">
+              <label for="subcategoryName" class="form-label">Add Offer (%)</label>
+              <input type="number" class="form-control" name="categoryOffer" id="categoryOffer">
+            </div>
+            
           </div>
           <div class="modal-footer">
             <button type="submit" class="btn btn-success">Add</button>
@@ -52,6 +57,7 @@
                 <tr>
                     <th>Category</th>
                     <th>Status</th>
+                    <th>Offer</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -60,6 +66,7 @@
                     <tr class="table-primary">
                         <td><strong><%= category.name %></strong></td>
                         <td><%= category.status %></td>
+                        <td><%= category.category_offer%></td>
                         <td>
 
                                 <!-- Trigger Button -->
@@ -76,6 +83,14 @@
 
       <div class="modal-body">
         <input type="text" name="name" value="<%= category.name %>" class="form-control" required />
+      </div>
+    
+       <div class="modal-header">
+        <h6 class="modal-title">Offer (%)</h6>
+     
+      </div>
+      <div class="modal-body">
+        <input type="number" name="offer" value="<%= category.category_offer %>" class="form-control"  />
       </div>
 
       <div class="modal-footer">
@@ -126,7 +141,7 @@
                             
                             
                             <!-- <a href="/admin/subcategory/add?category_id=<%= category._id %>" class="btn btn-sm btn-primary ms-2">+ Add Subcategory</a> -->
-                        </td>
+           </td>
                     </tr>
 
                     <%  if (category.subcategories?.length > 0)  { %>
@@ -135,6 +150,7 @@
                             <tr>
                                 <td class="ps-5">↳ <%= sub.name %></td>
                                 <td><%= sub.status %></td>
+                                <td></td>
                                 <td>
                                                <!-- edit subcategory Button -->
 <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editSubcategoryModal<%= sub._id %>">Edit</button>
@@ -209,8 +225,14 @@ async function validateCategoryForm(e) {
 
 const categoryName = document.getElementById("categoryName").value;
 const subcategoryName = document.getElementById("subcategoryName").value;
+const categoryOffer = Number(document.getElementById('categoryOffer').value);
 
-console.log(categoryName, subcategoryName)
+console.log("catevory offer" , categoryOffer)
+
+
+if(categoryOffer > 90 || categoryOffer < 1){
+   Swal.fire("warning","please enter a value between 1 and 90" , "warning")
+}
 
 
 try {
@@ -218,7 +240,7 @@ try {
   const response = await fetch('/admin/category/add',{
                method:'post',
                headers: {'Content-Type':'application/json'},
-               body:JSON.stringify({categoryName, subcategoryName})
+               body:JSON.stringify({categoryName, subcategoryName , categoryOffer})
   })
 
     const data = await response.json();
@@ -228,7 +250,7 @@ try {
         Swal.fire("Failed",data.message || "Brand already exists","error")
     }else{
            
-            window.location.href = "/admin/category";
+            // window.location.href = "/admin/category";
         
     }
   

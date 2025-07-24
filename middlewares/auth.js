@@ -15,6 +15,11 @@ const userAuth = async (req,res,next)=>{
          if (!user || user.isBlocked) {
             req.session.user=null; // clear session
             return res.render("login", {message:"Your account is blocked by admin", activeTab: "login" });
+        } 
+
+        if(user.isDeleted){
+             req.session.user= null;
+             return res.render("login", {message:"User not found", activeTab: "login"})
         }
 
         next();
@@ -43,7 +48,7 @@ const adminAuth = (req,res,next)=>{
     })
     .catch(error=>{
         console.log("error in adminauth middleware",error)
-        res.status(500).send("internal server error")
+        res.status(500).redirect('/pageError')
     })
 } else{
     res.redirect("/admin/login")

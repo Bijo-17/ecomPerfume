@@ -6,6 +6,11 @@
         a {
           text-decoration: none;
         }
+         .discount {
+           color: #4caf50;
+           font-size: 14px;
+           font-weight: 600;
+          }
   </style>
  </head>
 
@@ -55,9 +60,9 @@
 
 
       <!-- breadcrum -->
-  
-     <%-include("../partials/user/breadcrum")%>
-
+  <section class="container">   
+     <a href="/">Home</a>
+  </section>
       <!-- category section -->
 <section>
       <div class="container py-5">
@@ -65,7 +70,7 @@
     
         <div class="row justify-content-center">
           <div class="col-6 col-sm-4 col-md-3 col-lg-2 d-flex justify-content-center mb-4">
-           <a href="/product/men">  <div class="text-center border p-3 rounded bg-white category-card">
+           <a href="/product/Men">  <div class="text-center border p-3 rounded bg-white category-card">
               <img src="uploads/category-images/cat-men.png" alt="Earphones" class="category-image" />
               <h6 class="fw-semibold small">MEN</h6>
             </div>
@@ -73,14 +78,14 @@
           </div>
     
           <div class="col-6 col-sm-4 col-md-3 col-lg-2 d-flex justify-content-center mb-4">
-          <a href="/product/women">   <div class="text-center border p-3 rounded bg-white category-card">
+          <a href="/product/Women">   <div class="text-center border p-3 rounded bg-white category-card">
               <img src="uploads/category-images/cat-women.png" alt="Smart Phones" class="category-image" />
               <h6 class="fw-semibold small">WOMEN</h6>
             </div> </a>
           </div>
     
           <div class="col-6 col-sm-4 col-md-3 col-lg-2 d-flex justify-content-center mb-4">
-           <a href="/product/unisex">  <div class="text-center border p-3 rounded bg-white category-card">
+           <a href="/product/Unisex">  <div class="text-center border p-3 rounded bg-white category-card">
               <img src="uploads/category-images/cat-unisex.png" alt="Laptops" class="category-image" />
               <h6 class="fw-semibold small">UNISEX</h6>
             </div> </a>
@@ -154,27 +159,15 @@
                 <% } %>
                 <small class="text-muted">(<%= product.ratingCount %>)</small>
               </div>
-                <p class="mb-1 price">₹<%=p.final_price%><span class="original-price">₹<%=p.regular_price%></span></p>               
+                <p class="mb-1 price">₹<%=p.final_price%><span class="original-price">₹<%=p.regular_price%></span>
+                      <span class="discount"><%= Math.round(parseFloat(1 - p.final_price/p.regular_price) * 100) %>% off</span>
+                 </p>               
        </a>
                 <button class="btn btn-outline-dark btn-sm w-100 mt-2 addToCart-btn" data-id="<%=p._id%>" >Add to Cart</button>
               </div>
             </div>
           </div>
       
-          <!-- Repeat for other products -->
-          <!-- <div class="col-6 col-sm-4 col-md-3">
-            <div class="card product-card p-3 shadow-sm">
-              <i class="fa-regular fa-heart wishlist-icon"></i>
-              <img src="images/category-thumb-4.jpg" alt="AirPods" class="product-image mx-auto">
-              <div class="card-body text-center">
-                <h6 class="card-title"><%=p.product_name%></h6>
-                <p class="mb-1 price">₹<%=p.sales_price%><span class="original-price">₹<%=p.regular_price%></span></p>
-                <button class="btn btn-outline-dark btn-sm w-100 mt-2">Add to Cart</button>
-              </div>
-            </div>
-          </div> -->
-      
-
            <% } })%>
         </div>
      
@@ -227,7 +220,9 @@
 
 
 
-                <p class="mb-1 price">₹<%=p.final_price%><span class="original-price">₹<%=p.regular_price%></span></p>               
+                <p class="mb-1 price">₹<%=p.final_price%><span class="original-price">₹<%=p.regular_price%></span>
+                           <span class="discount"><%= Math.round(parseFloat(1 - p.final_price/p.regular_price) * 100) %>% off</span>
+                </p>               
               </a>
                 <button class="btn btn-outline-dark btn-sm w-100 mt-2 addToCart-btn" data-id="<%=p._id%>">Add to Cart</button>
               </div>
@@ -279,7 +274,9 @@
                 <% } %>
                 <small class="text-muted">(<%= product.ratingCount %>)</small>
               </div>
-                <p class="mb-1 price">₹<%=p.final_price%><span class="original-price">₹<%=p.regular_price%></span></p>               
+                <p class="mb-1 price">₹<%=p.final_price%><span class="original-price">₹<%=p.regular_price%></span>
+                       <span class="discount"><%= Math.round(parseFloat(1 - p.final_price/p.regular_price) * 100) %>% off</span>
+                </p>               
               </a>
                 <button class="btn btn-outline-dark btn-sm w-100 mt-2 addToCart-btn" data-id="<%=p._id%>">Add to Cart</button>
                

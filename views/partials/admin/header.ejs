@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Men Fashion</title>
+    <title>Petal & Mist - Admin</title>
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -16,6 +16,9 @@
 <script src="https://kit.fontawesome.com/16d4885483.js" crossorigin="anonymous"></script>
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- Flatpickr CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
+
 
 
 
@@ -47,19 +50,113 @@ body {
     color: #ffffff;
 }
 
+/* Mobile-first sidebar behavior */
+@media (max-width: 768px) {
+  .navbar-aside {
+    position: fixed;
+    top: 0;
+    left: -250px;
+    width: 250px;
+    height: 100vh;
+    background-color: #b0d5de;
+    z-index: 1000;
+    transition: left 0.3s ease-in-out;
+  }
+
+  .navbar-aside.open {
+    left: 0;
+  }
+
+  .screen-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+  }
+
+  .screen-overlay.active {
+    display: block;
+  }
+
+  .main-wrap {
+    margin-left: 0 !important;
+  }
+
+
+
+
+  .main-header .col-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+
+
+}
+
+    .screen-overlay {
+      position: fixed;
+      display: none;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      z-index: 30;
+      background-color: rgba(0, 0, 0, 0.6);
+    }
+
+    .screen-overlay.active {
+      display: block;
+    }
+
+
+
+    #offcanvas_aside.open {
+      left: 0;
+    }
+
+
+ 
+
+    @media (min-width: 769px){
+        .smallScreenNav{
+             display: none;
+        }
+    }
+
+
+
+
 </style>
 </head>
 <body>
     <div class="screen-overlay"></div>
+
+    
+
+
+
+
     <aside class="navbar-aside" id="offcanvas_aside">
         <div class="aside-top"> 
-            <a href="#" class="brand-wrap">
-                <img src="/img/logo.png"  class="logo" alt="Petal and Mist Dashboard">
+            <a href="/admin" class="brand-wrap">
+                  Petal and Mist - Admin Dashboard
             </a>
-            <div>
-                <button class="btn btn-icon btn-aside-minimize"> <i class="text-muted material-icons md-menu_open"></i> </button>
-            </div>
+
         </div>
+
+
+        
+
+
+
+
+
         <nav>
             <ul class="menu-aside">
                 <li class="menu-item">
@@ -116,16 +213,77 @@ body {
             <div class="col-search">
             </div>
             <div class="col-nav">
-                <button class="btn btn-icon btn-mobile me-auto" data-trigger="#offcanvas_aside"> <i class="material-icons md-apps"></i> </button>
+               
                 <ul class="nav">
                     <li class="dropdown nav-item">
-                        <a class="dropdown-toggle" data-bs-toggle="dropdown" href="#" id="dropdownAccount" aria-expanded="false"> <img class="img-xs rounded-circle" src="/admin-assets/imgs/people/avatar2.jpg" alt="Admin"></a>
+                        <a class="dropdown-toggle" data-bs-toggle="dropdown" href="#" id="dropdownAccount" aria-expanded="false"> <img class="img-xs rounded-circle" src="/uploads/admin-images/admin_logo.png" alt="Admin"></a>
                         <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownAccount">
                             <div class="dropdown-divider"></div>
-                            <a class="dropdown-item text-danger" href="/admin/logout"><i class="material-icons md-exit_to_app"></i>Logout</a>
+                            <a class="dropdown-item text-white" style="font-weight: bold;" href="/admin/logout"><i class="material-icons md-exit_to_app"></i>Logout</a>
                         </div>
                     </li>
                 </ul>
             </div>
         </header>
-    
+
+  <nav class="navbar navbar-expand-lg navbar-light bg-light smallScreenNav">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">Menu</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+                <li class="nav-item">
+                    <a class="nav-link active" href="/admin"> <i class="icon material-icons md-home"></i>
+                        Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/admin/users"> <i class="icon material-icons md-person"></i>
+                        <span class="text">Customers</span>
+                    </a>
+
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/admin/category"> <i class="icon material-icons md-person"></i>
+                        <span class="text">Category</span>
+                    </a>
+
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/admin/addBrand"> <i class="icon material-icons md-stars"></i>
+                        <span class="text">Brands</span> </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/admin/addProduct"> <i class="icon material-icons md-add_box"></i>
+                        <span class="text">Add product</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/admin/products"> <i class="icon material-icons md-shopping_bag"></i>
+                        <span class="text">Products</span>
+                    </a>
+                </li>
+            
+                <li class="nav-item">
+                    <a class="nav-link active" href="/admin/coupon"> <i class="icon material-icons md-class"></i>
+                        <span class="text">Coupon</span> </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/admin/banner"> <i class="icon material-icons md-photo_size_select_actual"></i>
+                        <span class="text">Banner</span> </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link active" href="/admin/orderList"> <i class="icon material-icons md-shopping_cart"></i>
+                        <span class="text">Orders</span>
+                    </a>
+                </li>
+            </ul>
+
+
+    </div>
+  </div>
+</nav>

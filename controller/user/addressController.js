@@ -14,7 +14,6 @@ const getAddress = async (req,res)=>{
  
      const address = await Address.find({user_id:user})
 
-    //  console.log(user ,"<======user\n userData======>", userData)
         
         res.render("address",{layout:"../layout/userAccount", active:"address" ,user:userData , addresses:address ,firstName,lastName})
     } catch (error) {
@@ -54,7 +53,7 @@ const addAddress = async (req,res)=>{
 
         await address.save();
 
-        console.log("saved address", address , "endedd saved address")
+  
 
         await User.findByIdAndUpdate(userId,{address:address._id})
    
@@ -63,7 +62,7 @@ const addAddress = async (req,res)=>{
 
       } catch (error) {
         console.log("error in adding address",error)
-        res.redirect("/pageNotFound")
+        res.redirect("/pageError")
       }
 }
 
@@ -73,9 +72,7 @@ const editAddress = async (req,res)=>{
 
       const editedDetails = req.body;
 
-       console.log("edi addressId",addressId)
 
-      console.log("editedDetails ", editedDetails, "endedd//////")
 
       await Address.findByIdAndUpdate(addressId, editedDetails , {new:true});
 
@@ -122,7 +119,7 @@ const setDefault = async (req, res) => {
 
   } catch (err) {
     console.error("Error setting default address:", err);
-    res.status(500).send("Something went wrong");
+    res.status(500).redirect("/pageError");
   }
 }
 
@@ -155,9 +152,7 @@ const editAddressCheckout = async (req,res)=>{
 
       const editedDetails = req.body;
 
-       console.log("edi addressId",addressId)
 
-      console.log("editedDetails ", editedDetails, "endedd//////")
 
       await Address.findByIdAndUpdate(addressId, editedDetails , {new:true});
 

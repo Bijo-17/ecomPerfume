@@ -109,7 +109,9 @@
 
     <div class="timer-text" id="timer">Resend OTP in 60s</div>
     <button class="btn-resend" id="resendBtn" style="display:none ;">Resend OTP</button>
+     <h4>OTP Only Valid for 5 minutes </h4>
   </div>
+
    
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -143,7 +145,9 @@
       if (timeLeft <= 0) {
         clearInterval(countdown);
         timerEl.style.display = 'none';
+        resendBtn.textContent = "Resend OTP"
         resendBtn.style.display = 'inline-block';
+
          
       }
     }, 1000);
@@ -153,7 +157,8 @@
   // Resend OTP Button Logic
   resendBtn.addEventListener('click', async () => {
     resendBtn.disabled = true;
-    resendBtn.style.display="none"
+    resendBtn.textContent = "Resending..."
+
     try {
       const response = await fetch('/resendOtp', {
         method: 'POST',
@@ -177,8 +182,8 @@
       
       }
     } catch (err) {
-      console.error(err);
-      Swal.fire("Error", "Something went wrong.", "error");
+     
+      Swal.fire("Error", "Something went wrong.");
       resendBtn.disabled = false;
     }
   });
@@ -214,13 +219,13 @@
       } else {
         Swal.fire({
           icon: "error",
-          title: "Invalid otp",
+          title: "Failed",
           text: response.message
         });
       }
     } catch (error) {
       Swal.fire("Server Error", "Please try again later.", "error");
-      console.error(error);
+     
     }
   });
 </script>

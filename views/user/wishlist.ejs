@@ -22,7 +22,7 @@
                             <span class="current-price">₹<%= item.product_id.final_price.toFixed(2) %></span>
                             <% if (item.product_id.regular_price > item.product_id.final_price) { %>
                                 <span class="original-price">₹<%= item.product_id.regular_price.toFixed(2) %></span>
-                                <span class="discount"><%= Math.round(parseFloat(1 - item.product_id.final_Price/item.product_id.regular_price) * 100) %>% off</span>
+                                <span class="discount"><%= Math.round(parseFloat(1 - item.product_id.final_price/item.product_id.regular_price) * 100) %>% off</span>
                             <% } %>
                         </div>
                     </div>
@@ -39,7 +39,7 @@
             </div>
             <h2>Your Wishlist is Empty</h2>
             <p>Save items you like in your wishlist. Review them anytime and easily move them to the bag.</p>
-            <button class="btn-shop">Continue Shopping</button>
+            <a href="/" > <button class="btn-shop">Continue Shopping</button> </a>
         </div>
     <% } %>
 </div>

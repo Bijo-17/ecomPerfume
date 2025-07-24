@@ -8,11 +8,13 @@ const orderSchema = new mongoose.Schema({
                     },
           coupon_id: { 
                      type: mongoose.Schema.Types.ObjectId, 
-                     ref: 'Coupon' 
+                     ref: 'Coupon',
+                     default:null
                     },
           address_id: { 
                      type: mongoose.Schema.Types.ObjectId, 
                      ref: 'Address',
+                     
                    
                     },
             order_id: { 
@@ -20,8 +22,18 @@ const orderSchema = new mongoose.Schema({
                         required:true
                     },      
           temp_address:{
-                          type: Object,
-          },        
+                              _id: mongoose.Schema.Types.ObjectId,
+                              name: String,
+                              phone_number: Number,
+                              address_name: String,
+                              locality: String,
+                              city: String,
+                              state: String,
+                              pin_code: Number,
+                              address_type: String
+                         
+
+                      },
           order_date: { 
                       type: Date, 
                       default: Date.now,
@@ -29,13 +41,16 @@ const orderSchema = new mongoose.Schema({
                     },
           order_status: { 
                      type: String, 
-                     enum: ['pending','processing', 'shipped', 'delivered', 'canceled', 'returned'], default: 'pending' 
+                     enum: ['pending','processing', 'shipped', 'delivered', 'cancelled', 'returned' ,'failed' , 'out_for_delivery'], default: 'pending' 
                     },
             total_price: { 
                      type: Number,
                      required:true  
                     },
-             
+               discount: { 
+                              type: Number,
+                              default:0,
+                      }, 
 
           order_items: [{
                          product_id: { 
@@ -46,7 +61,7 @@ const orderSchema = new mongoose.Schema({
                         delivery_charge: {type : Number},
                         order_status: { 
                                         type: String, 
-                                         enum: ['pending','processing', 'shipped', 'delivered', 'out_for_delivery', 'cancelled', 'returned'], default: 'pending' 
+                                         enum: ['pending','processing', 'shipped', 'delivered', 'out_for_delivery', 'cancelled', 'returned' , 'failed'], default: 'failed' 
                                      },
 
                         cancelled_date: {
@@ -72,7 +87,17 @@ const orderSchema = new mongoose.Schema({
                                           refundAmount: {
                                                             type: Number,
                                                          },
-                                            }           
+                                            },
+                              payment: {
+                                          method: {
+                                                     type: String ,
+                                                     enum:['cod','online']
+                                          },
+
+                                          status:{type:String , enum: [   "paid" , "unpaid"]},
+                                                order_id: {type:String},
+                                                payment_id : {type:String},
+                                     },                            
                       
                         }],
 
@@ -82,14 +107,20 @@ const orderSchema = new mongoose.Schema({
               
            estimated_delivery: {
                                   type : Date,
-                            },       
+                            },                      
            
-                          
+              isPaid: { 
+                        type: Boolean,
+                        default:false
+                     
+                     } ,          
 
         payment_method: 
                   {
                      method: { type: String },
-                     status: { type: String }
+                     status: { type: String },
+                     razorpay_payment_id : { type: String},
+                    razorpay_order_id: {type:String},
                    }
 }, { timestamps: true });
 

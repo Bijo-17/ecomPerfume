@@ -9,6 +9,45 @@
         vertical-align: middle !important;
         text-align: center;
     }
+
+  
+  .delete-btn {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background-color: red;
+    color: white;
+    border: none;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    z-index: 2;
+    box-shadow: 0 0 5px rgba(0,0,0,0.3);
+  }
+
+  .marked-for-deletion {
+    opacity: 0.5;
+    filter: grayscale(80%);
+    pointer-events: none;
+  }
+
+  .position-relative {
+  position: relative;
+}
+
+
+.cancel-btn {
+  z-index: 10;
+}
+
+
+
+
+
+
 </style>
 
 </head>
@@ -37,12 +76,13 @@
                 <th scope="col"><b>Image</b></th>
                 <th scope="col"><b>Product name</b></th>
                 <th scope="col"><b>Brand</b></th>
-                <th scope="col"><b>Category</b></th>
+                <th scope="col"><b>Category + offer(%)</b></th>
                 <th scope="col"><b>Subcategory</b></th>
                 <th scope="col"><b>Regular Price</b></th>
                 <th scope="col"><b>Sale Price</b></th>
+                <th scope="col"><b>final Price</b></th>
                 <th scope="col"><b>Offer Price</b></th>
-                <th scope="col"><b>Offer</b></th>
+                <th scope="col"><b>Offer Edit</b></th>
                 <th scope="col"><b>Quantity</b></th>
                 <th scope="col"><b>Stock</b></th>
                 
@@ -56,13 +96,13 @@
         <td><img src="<%= data[i].image[0] %>" alt="Product Image" width="100" /></td>
         <td><%= data[i].product_name %></td>
         <td><%= data[i].brand_id ? data[i].brand_id.name : 'Null' %></td>
-        <td><%= data[i].category_id?.name %></td>
+        <td><%= data[i].category_id?.name  %> <br> <%=data[i].category_id?.category_offer %> %</td>
         <td><%= data[i].subcategory_id ? data[i].subcategory_id.name : 'Null' %></td>
         <td>₹ <%= data[i].regular_price  %></td>
 
         <!-- Sales Price -->
         <td>₹ <%= data[i].sales_price %></td>
-           <td>final₹ <%= data[i].final_price %></td>
+           <td>₹ <%= data[i].final_price %></td>
         <!-- Offer Price -->
         <td>
             <% if (!data[i].offer_price) { %>
@@ -73,7 +113,7 @@
         </td>
 
         <!-- Offer Column -->
-        <td>
+        <td> 
             <% if (!data[i].offer_price) { %>
                 <button class="btn btn-info btn-sm" onclick="addOffer('<%= data[i]._id %>')">
                     <span class="text-white">Add Offer</span>
@@ -107,7 +147,7 @@
         <% } else { %>
             <a href="/admin/products/unblock/<%= data[i]._id %>/<%= currentPage %>" class="btn btn-success btn-sm">Unblock</a>
         <% } %>
-        <a href="/admin/products/delete/<%= data[i]._id %>/<%= currentPage %>" class="btn btn-warning btn-sm text-white">Delete</a>
+         <button onclick="deleteProduct('<%=data[i]._id%>','<%= currentPage%>')" class="btn btn-warning btn-sm text-white">Delete </button>
        </div>
      </td>
         
@@ -115,7 +155,7 @@
         <!-- Edit -->
         <td>
          <button type="button" class="btn btn-info btn-sm text-white"  data-bs-toggle="modal" 
-            data-bs-target="#editProudctModal<%=data[i]._id%>" >
+            data-bs-target="#editProductModal<%=data[i]._id%>" >
                 Edit
          </button>
         </td>
@@ -153,7 +193,7 @@
 
 
 <!-- Edit Product Modal -->
-<div class="modal fade" id="editProudctModal<%=data[i]._id%>" tabindex="-1" aria-labelledby="editProductLabel" aria-hidden="true">
+<div class="modal fade" id="editProductModal<%=data[i]._id%>" tabindex="-1" aria-labelledby="editProductLabel" aria-hidden="true">
   <div class="modal-dialog modal-xl">
     <div class="modal-content">
       <div class="modal-header">
@@ -162,7 +202,7 @@
       </div>
       <div class="modal-body">
         <form id="editProductForm" method="post" action="/admin/products/edit/<%=data[i]._id%>?_method=PATCH" enctype="multipart/form-data">
-          <input type="hidden" name="productId" id="productId">
+          <input type="hidden" name="productId" id="productId" value="<%=data[i]._id%>">
           <div class="mb-3">
             <label for="productName" class="form-label">Product Name</label>
             <input type="text" class="form-control" id="productName" name="product_name" value="<%=data[i].product_name%>">
@@ -188,7 +228,7 @@
         
                <div class="mb-3">
             <label for="brand" class="form-label">Category</label>
-            <select class="form-select border" style="width: 150px;" name="category_id" id="category" onchange="filterSubcategories()">
+            <select class="form-select border" style="width: 150px;" name="category_id" id="category-<%=data[i]._id%>" onchange="filterSubcategories('<%=data[i]._id%>')">
               <%  for(let c = 0; c<cat.length;c++) { %>                                    
                  <option value="<%=cat[c]._id%>"  <%= cat[c]._id.toString() === data[i].category_id?._id.toString()? 'selected' : '' %> >
                  <%=cat[c].name%>                                                     
@@ -199,7 +239,7 @@
 
             <div class="mb-3">
             <label for="brand" class="form-label">Subcategory</label>
-            <select class="form-select border" style="width: 150px;" name="subcategory_id" id="subcategory">
+            <select class="form-select border" style="width: 150px;" name="subcategory_id" id="subcategory-<%=data[i]._id%>">
              <% for(let s=0;s<subcat.length;s++) {  %>
               <option value="<%=subcat[s]._id%>" <%= subcat[s]._id.toString() === data[i].subcategory_id?._id.toString() ? 'selected': ''%> > <%=subcat[s].name%> </option>
                <% } %>
@@ -234,41 +274,56 @@
             <label class="form-label">Images</label>
             <div id="productImages" class="d-flex gap-2 flex-wrap"> 
                 <% let imageCount = 0 %>
-               <%data[i].image.forEach(img=>{ %>
-            <div style="display: inline-block; position: relative; margin-right: 10px;">
+               <%data[i].image.forEach((img,index)=>{ %>
+                <div class="position-relative d-inline-block"> 
+            <div class="image-container" style="display: inline-block; position: relative; margin-right: 10px;" data-deleteImgIndex="<%=imageCount%>">
+                <button type="button" class="delete-btn  position-absolute " onclick="toggleDelete(this)">×</button>
+
               <label style="cursor :pointer;"> 
-                 <img id="preview<%=imageCount%>" src="<%=img%> " width="260" style="border: 3px solid gray;" >
-                <input type="file" accept="image/jpg, image/jpeg, image/png, image/webp" style="display: none;" onchange="previewImage(event)">
+                 <img id="preview-<%=data[i]._id%>-<%=imageCount%>" src="<%=img%> " width="260" style="border: 3px solid gray;" >
+                <input name="images"  type="file" data-index="<%=imageCount%>" accept="image/jpg, image/jpeg, image/png, image/webp" style="display: none;" onchange="previewImage(event)">
               </label>
+
+              
                       <% imageCount++; %>
 
-            </div>      
+            </div> 
+                <button type="button" class="cancel-btn position-absolute top-0 end-0 btn btn-primary bt-lg d-none" style="background: rgb(47, 186, 47); color:black;" right: 30px;" onclick="cancelDelete(this)">
+                     &#8634;  
+              </button> 
+           
+                </div>    
               <%})%>
              
              <% if (imageCount < 4) { %>
         <% for (let k = 0; k < (4 - imageCount); k++) { %>
              <div style="display: inline-block; position: relative; margin-right: 10px;">
+              
                <label style="cursor: pointer;">
-               <img id="preview<%= k+imageCount %>" src="/uploads/images/addimage.webp" alt="add image" width="260" style="border: 3px dashed gray; opacity: 0.5;">
-               <input type="file" accept="image/jpg, image/jpeg, image/png, image/webp" style="display: none;" onchange="previewImage(event)">
+               <img id="preview-<%=data[i]._id%>-<%= k+imageCount %>" src="/uploads/images/addimage.webp" alt="add image" width="260" style="border: 3px dashed gray; opacity: 0.5;">
+               <input name="images" type="file" data-index="<%=k+imageCount%>" accept="image/jpg, image/jpeg, image/png, image/webp" style="display: none;" onchange="previewImage(event)">
              </label>
+                     <input type="hidden" name="indexs" value="<%= imageCount %>">
           </div>
           <% } %>
         <% } %>
 
-         <input type="file" id="croppedImageInput" name="images" style="display: none;" multiple>
+         <!-- <input type="file" id="croppedImageInput" name="images" style="display: none;" multiple> -->
+
+           <input type="file" id="croppedImageInput-<%= data[i]._id %>" name="images" style="display: none;" multiple 
+                      data-product-id="<%= data[i]._id %>" >
+ 
+              <input  type="hidden" id="changedIndexes-<%= data[i]._id %>" name="changedImageIndexes"  value=""
+                         data-product-id="<%= data[i]._id %>"
+  >
+
+         
      </div>
 
-<!-- Crop Modal -->
-           <!-- <div id="cropModal" style="display: none; position: fixed; top: 10%; left: 50%; transform: translateX(-50%); background: white; padding: 20px; border: 1px solid #ccc; z-index: 1000;">
-           <img id="cropperImage" style="max-width: 100%; max-height: 400px;" />
-          <br>
-           <button type="button" onclick="cropImage()">Crop & Add</button>
-          <button type="button" onclick="closeCropModal()">Cancel</button>
-         </div> -->
+
 
          <!-- Inside your loop (per product) -->
-      <div id="cropModal-<%= data[i]._id %>" class="crop-modal" style="display: none; position: fixed; top: 10%; left: 50%; transform: translateX(-50%); background: white; padding: 20px; border: 1px solid #ccc; z-index: 1000;">
+      <div id="cropModal-<%= data[i]._id %>" class="crop-modal" style="display: none; position: fixed; top: 10%; left: 50%; transform: translateX(-50%); padding: 20px; border: 1px solid #ccc; z-index: 1000;">
        <img id="cropperImage-<%= data[i]._id %>" style="max-width: 100%; max-height: 400px;" />
       <br>
        <button type="button" onclick="cropImage('<%= data[i]._id %>')">Crop & Add</button>
@@ -278,19 +333,23 @@
 
               
 
-           </div>
-          </div>
+         </div>
+   </div>
 
          
 
           <button type="submit" class="btn btn-primary">Save Changes</button>
-        </form>
+    </form>
       </div>
     </div>
   </div>
 </div>
 <%}%>
 
+
+<script type="application/json" id="subcat">
+         <%- JSON.stringify(subcat) %>
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
@@ -373,124 +432,218 @@ function addOffer(productId) {
     });
   }
 
-const allSubcategory = <%- JSON.stringify(subcat) %>;
+  const rawSubcat = document.getElementById('subcat').textContent;
+const allSubcategory = JSON.parse(rawSubcat)
 
-  console.log("allsub",allSubcategory)
-   function filterSubcategories(){
-      console.log("trigerred")
-     const selectedCategoryId = document.getElementById('category').value;
-     const subcategorySelect =  document.getElementById('subcategory')
-
-    subcategorySelect.innerHTML = '<option value="">select subcategory </option>';
-
+ 
+   function filterSubcategories(productId){
+    
+     const selectedCategoryId = document.getElementById(`category-${productId}`).value;
+     const subcategorySelect =  document.getElementById( `subcategory-${productId}`)
+ 
+          subcategorySelect.innerHTML = '<option value="">select subcategory </option>'
+ 
     const filtered = allSubcategory.filter(sub=>sub.category_id === selectedCategoryId)
-    console.log("filtered",filtered)
+  
+  
     filtered.forEach(sub=>{
         const option = document.createElement("option");
         option.value = sub._id;
         option.text = sub.name;
-        subcategorySelect.appendChild(option)
+         subcategorySelect.appendChild(option)
 
     })
+  
 
    }
 
+  async function deleteProduct(productId,page){
+     
+          swal.fire({
+                  title: "Delete product",
+                  text: "Are you sure you want to delete this product?",
+                  icon: "warning",
+                  showCancelButton:true,
+                  confirmButtonText: "Delete",
+                  confirmButtonColor:"#d33",
+                  dangerMode: true
+           }).then(result=> {
+              if(result.isConfirmed){
+                     window.location.href= `/admin/products/delete/${productId}/${page}`;
+              }
+           })
+
+           
+        
+  }
 
 
 
-//   function previewImage(input) {
-//   if (input.files && input.files[0]) {
-//     const reader = new FileReader();
-
-//     reader.onload = function (e) {
-//       // Target the <img> element before the input
-//       input.previousElementSibling.src = e.target.result;
-//       input.previousElementSibling.style.opacity = "1";
-//       input.previousElementSibling.style.border = "3px solid green";
-//     };
-
-//     reader.readAsDataURL(input.files[0]); // Converts file to base64 string
-//   }
-// }
 
 
-let croppers = {}; // Store cropper instances per product
-let croppedFiles = {};
-let currentInputIndex = {};
-let currentProductId = null;
+// // let currentProductId = null;
 
+
+let croppers = {};           
+let croppedFiles = {};    
+let changedIndexes = {};      
+let currentInputIndex = {}
 function previewImage(event) {
   const input = event.target;
-  const label = input.closest("label");
-  const img = label.querySelector("img");
+  const file = input.files[0];
+  if (!file) return;
 
-  if (!img || !input.files.length) return;
+  // figure out our product and slot
+  const productDiv = input.closest('.product-container');
+  const productId = productDiv.dataset.productId;
+  const idx = Number(input.dataset.index);
 
-  // Extract preview index
-  const match = img.id.match(/preview(\d+)/);
-  if (!match) return;
-  const index = parseInt(match[1]);
-
-  // Extract productId from nearest container or dataset
-  const productDiv = input.closest(".product-container"); // Make sure you add a class to your product wrapper div
-  const productId = productDiv?.dataset?.productId;
-  if (!productId) return;
-
-  currentInputIndex[productId] = index;
+  // store for later in cropImage()
   currentProductId = productId;
+  currentInputIndex[productId] = idx;
 
   const reader = new FileReader();
-  reader.onload = function (e) {
+  reader.onload = e => {
     const cropImg = document.getElementById(`cropperImage-${productId}`);
     cropImg.src = e.target.result;
 
-    document.getElementById(`cropModal-${productId}`).style.display = "block";
+    // show the correct modal
+    document.getElementById(`cropModal-${productId}`).style.display = 'block';
 
+   
     if (croppers[productId]) croppers[productId].destroy();
 
+    // re‑init
     croppers[productId] = new Cropper(cropImg, {
       aspectRatio: 1,
       viewMode: 1,
       autoCropArea: 1,
     });
   };
-  reader.readAsDataURL(input.files[0]);
+  reader.readAsDataURL(file);
+
+  // reset input so selecting the same file again still triggers onchange
+  input.value = '';
 }
 
 function cropImage(productId) {
+ 
   const cropper = croppers[productId];
   if (!cropper) return;
 
-  cropper.getCroppedCanvas({ width: 440, height: 440 }).toBlob((blob) => {
-    const file = new File([blob], `cropped_${Date.now()}.jpg`, { type: "image/jpeg" });
+  const idx = currentInputIndex[productId];
 
-    if (!croppedFiles[productId]) croppedFiles[productId] = [];
-    croppedFiles[productId][currentInputIndex[productId]] = file;
 
-    const preview = document.getElementById(`preview${currentInputIndex[productId]}`);
-    if (preview) {
+  cropper.getCroppedCanvas({ width: 440, height: 440 })
+    .toBlob(blob => {
+      // create a File object from the blob
+      const file = new File([blob], `cropped_${Date.now()}.jpg`, { type: 'image/jpeg' });
+
+      // store it
+      if (!croppedFiles[productId]) croppedFiles[productId] = [];
+      croppedFiles[productId][idx] = file;
+
+      // mark this index as changed
+      if (!changedIndexes[productId]) changedIndexes[productId] = new Set();
+      changedIndexes[productId].add(idx);
+
+      // update the preview thumbnail
+      const preview = document.getElementById(`preview-${productId}-${idx}`);
       preview.src = URL.createObjectURL(blob);
-      preview.style.opacity = 1;
-      preview.style.border = "3px solid green";
-    }
+      preview.style.border = '3px solid green';
 
-    const dt = new DataTransfer();
-    croppedFiles[productId].forEach((f) => f && dt.items.add(f));
+      // rebuild the FormData on the hidden file input
+      const dt = new DataTransfer();
+      croppedFiles[productId].forEach(f => f && dt.items.add(f));
+      const hiddenFileInput = document
+        .querySelector(`#croppedImageInput-${productId}[data-product-id="${productId}"]`);
+      hiddenFileInput.files = dt.files;
 
-    const input = document.querySelector(`#productImages input[type="file"][name="images"][data-product-id="${productId}"]`);
-    if (input) input.files = dt.files;
+      // write changed‐indexes into the hidden input
+      document.getElementById(`changedIndexes-${productId}`)
+        .value = Array.from(changedIndexes[productId]).join(',');
 
-    closeCropModal(productId);
-  });
+      closeCropModal(productId);
+    });
 }
 
 function closeCropModal(productId) {
-  document.getElementById(`cropModal-${productId}`).style.display = "none";
+  document.getElementById(`cropModal-${productId}`).style.display = 'none';
   if (croppers[productId]) {
     croppers[productId].destroy();
     delete croppers[productId];
   }
 }
+
+
+
+  const imagesToDelete = new Set();
+  
+
+  function toggleDelete(button) {
+
+      const wrapper = button.closest('.position-relative'); 
+    const container = button.closest('.image-container');
+
+    console.log(button , "button" , wrapper)
+
+    if(!container) return;
+
+    const deleteImgIndex = container.dataset.deleteimgindex; // it is change to lowecase
+  
+    const cancelBtn = wrapper.querySelector('.cancel-btn');
+
+    console.log("canec " , cancelBtn) 
+ 
+
+    if (container.classList.contains('marked-for-deletion')) {
+      container.classList.remove('marked-for-deletion');
+        cancelBtn.classList.add('d-none');
+      imagesToDelete.delete(deleteImgIndex);
+    } else {
+      container.classList.add('marked-for-deletion');
+        cancelBtn.classList.remove('d-none');
+      imagesToDelete.add(deleteImgIndex);
+    }
+  }
+
+  function cancelDelete(cancelBtn) {
+  const container = cancelBtn.previousElementSibling;
+  if (!container || !container.classList.contains('image-container')) return;
+
+  const deleteImgIndex = container.dataset.deleteimgindex;
+  container.classList.remove('marked-for-deletion');
+  
+  imagesToDelete.delete(deleteImgIndex);
+    showCancelButton(container, false); 
+  
+}
+
+function showCancelButton(container, show) {
+  const cancelBtn = container.parentElement.querySelector('.cancel-btn');
+  if (cancelBtn) {
+    cancelBtn.classList.toggle('d-none', !show);
+  }
+}
+
+  // When the form is submitted, append the list of deleted images
+
+
+
+  document.querySelectorAll('form').forEach(form => {
+  form.addEventListener('submit', e => {
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'imagesToDelete';
+    input.value = JSON.stringify(Array.from(imagesToDelete));
+    form.appendChild(input);
+  
+  });
+});
+
+
+
+
 
 
 

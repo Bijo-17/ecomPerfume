@@ -14,8 +14,13 @@ const orderController = require("../controller/user/orderController")
 const uploads = require("../helpers/multer")
 const walletController = require("../controller/user/walletController")
 const wishlistController = require("../controller/user/wishlistController")
+const checkoutController = require("../controller/user/checkoutController")
+const referralController = require("../controller/user/referralController")
+const searchController = require("../controller/user/searchController")
+const deleteAccountController = require("../controller/user/deleteAccountController")
 
 router.get("/pageNotFound",userController.pageNotFound)
+router.get("/pageError",userController.pageError)
 
 router.get("/",userController.loadHome)
 router.get("/home",userAuth,userController.userHome)
@@ -43,8 +48,9 @@ router.get("/auth/google/callback",passport.authenticate('google',{failureRedire
     res.redirect("/home") 
 });
 
+// search 
 
-
+router.get("/search",searchController.search)
 
 //profile management
 
@@ -59,7 +65,8 @@ router.get("/account",profileController.loadAccount)
 router.patch("/editAccount",uploads.single('profileImage'),profileController.editAccount)
 router.post('/changeEmail',profileController.changeEmail)
 router.post('/verifyChangeEmail',profileController.verifyChangeEmail)
-router.get('/changeEmail',profileController.saveNewEmail)       
+router.get('/changeEmail',profileController.saveNewEmail) 
+router.get("/verifyEmailOtp",profileController.loadEmailOtp)      
 router.post('/changePassword',userAuth,profileController.changePassword)
 
 
@@ -106,6 +113,7 @@ router.post("/addTocart/:id",cartController.addToCart)
 router.get("/cart/remove/:id",userAuth,cartController.removeProduct)
 router.post("/cart/validate-before-checkout",userAuth,cartController.validateCart)
 router.get("/checkout",userAuth,cartController.checkout)
+router.post("/updateCart",userAuth,cartController.updateCart)
 
 
 
@@ -113,19 +121,39 @@ router.get("/checkout",userAuth,cartController.checkout)
 // order 
 
 router.get("/orders",userAuth,orderController.getOrder)
-router.post("/orders/cod",userAuth,orderController.placeOrder)
+
 router.get("/orders/success",userAuth,orderController.orderPlaced)
+router.get("/orders/failed",userAuth,orderController.orderFailed)
 router.post("/orders/downloadInvoice/:orderId/:productId",orderController.generateInvoice)
 router.get("/downloadInvoice/:orderId/:productId",orderController.generateInvoice)
           
 router.post("/returnOrder/:orderId/:productId",orderController.returnProduct)
 router.post("/cancelOrder/:orderId/:productId",orderController.cancelProduct)
 
+router.post("/orders/cod",userAuth,checkoutController.placeOrder)
+router.post("/orders/razorpay",userAuth,checkoutController.razorpayPayment)
+router.post("/orders/razorpay/verify",userAuth,checkoutController.verifyRazorpayPayment)
+
+router.post("/applayCoupon",userAuth,checkoutController.applayCoupon)
+router.post("/removeCoupon",checkoutController.removeCoupon)
+
+// retry payment  
+
+router.post("/retryPayment",checkoutController.retryPayment)
+
 
 // wallet 
 
 router.get("/wallet",userAuth,walletController.getWallet)
 
+// refer and earn 
+
+router.get("/referandEarn",userAuth,referralController.getReferral)
+
+// delete account 
+
+router.get("/delete-account",userAuth,deleteAccountController.loadDeleteAccount)
+router.get("/deleteAccount",userAuth,deleteAccountController.deleteAccount)
 
 
 module.exports = router

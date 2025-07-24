@@ -1,0 +1,69 @@
+
+
+<div class="delete-account-container">
+    <div class="warning-box">
+        <div class="warning-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <h2>Are you sure you want to delete your account?</h2>
+        <p>This action cannot be undone. Once you delete your account, all your data will be permanently removed from our system.</p>
+        
+        <div class="consequences">
+            <h3>What happens when you delete your account:</h3>
+            <ul>
+                <li>Your profile information will be deleted</li>
+                <li>Your order history will be removed</li>
+                <li>Your saved addresses will be deleted</li>
+                <li>Your wishlist items will be lost</li>
+                <li>Your wallet balance will be forfeited</li>
+            </ul>
+        </div>
+        
+        <div class="confirmation-form">
+            <h3>Please confirm by typing "DELETE" below:</h3>
+            <div class="form-group">
+                <input type="text" id="deleteConfirmation" placeholder="Type DELETE here">
+            </div>
+            
+            <div class="form-group">
+                <label for="deleteReason">Tell us why you're leaving (optional):</label>
+                <select id="deleteReason">
+                    <option value="">Select a reason</option>
+                    <option value="privacy">Privacy concerns</option>
+                    <option value="experience">Bad experience</option>
+                    <option value="unused">Don't use the service anymore</option>
+                    <option value="alternative">Found an alternative service</option>
+                    <option value="other">Other reason</option>
+                </select>
+            </div>
+            
+            <div class="form-group" id="otherReasonGroup" style="display: none;">
+                <label for="otherReason">Please specify:</label>
+                <textarea id="otherReason" rows="3"></textarea>
+            </div>
+            
+            <div class="form-actions">
+                <button type="button" class="btn-cancel">CANCEL</button>
+              <a href="deleteAccount">  <button type="button" id="confirmDeleteBtn" class="btn-delete" disabled>DELETE ACCOUNT</button> </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+  
+  document.getElementById('deleteConfirmation').addEventListener('input',(event)=>{
+    console.log("called")
+    const input = event.target.value.trim();
+    const deleteBtn =  document.getElementById('confirmDeleteBtn');
+       if(input  === 'DELETE'){ 
+            deleteBtn.disabled = false;
+            deleteBtn.style.color = 'black'
+       }else{
+         deleteBtn.disabled = true;
+       }
+
+
+  })
+
+</script>

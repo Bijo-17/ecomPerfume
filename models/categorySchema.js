@@ -13,7 +13,11 @@ const categorySchema = new mongoose.Schema({
         isDeleted: {
             type: Boolean,
             default: false
-          }
+          },
+    category_offer: {
+                    type: Number,
+                    default:0
+    }      
               
 },
 

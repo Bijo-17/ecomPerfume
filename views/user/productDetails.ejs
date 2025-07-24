@@ -49,11 +49,47 @@
     padding: 0 20px;
 }
 
+.product-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.product-name {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.wishlist-btn {
+  cursor: pointer;
+  color: #dc3545; /* Bootstrap's red */
+  font-size: 1.5rem;
+  transition: transform 0.2s ease;
+}
+
+.wishlist-btn:hover {
+  transform: scale(1.1);
+  color: #bd2130;
+}
+
+.wishlist-icons {
+  pointer-events: none; /* So the parent span handles the click */
+}
+
+         .discount {
+           color: #4caf50;
+           font-size: 14px;
+           font-weight: 600;
+          }
+
+
 
   </style>
 </head>
 <body>
  
+  <section class="container"> <a href="/">Home</a> / <a href="/product">Product</a> / <%=product.product_name%> </section>
   <div class="container my-5">
   <div class="row g-5 flex-column flex-md-row">
     <!-- Left (Mobile: Bottom) — Image Gallery -->
@@ -86,9 +122,17 @@
     </div>
 
     <!-- Right (Mobile: Top) — Product Details -->
+    
     <div class="col-md-6">
-      <h2 class="fw-bold mb-2"><%=product.product_name%></h2>
-      <p class="text-muted"><%= product.brand_id.name %></p>
+  <div class="product-header d-flex justify-content-between align-items-center">
+    <h2 class="fw-bold mb-2 mb-0 product-name"><%= product.product_name %></h2>
+      <span class="wishlist-btn" data-id="<%= product._id %>">
+      <i class="fa-regular fa-heart wishlist-icons"></i> 
+    </span> 
+  </div>
+  <p class="text-muted"><%= product.brand_id.name %></p>
+
+
 
       <div class="rating">
   <% const filled = Math.floor(product.averageRating || 0); %>
@@ -107,18 +151,21 @@
 
 
 
-      <h4 class="text-success">
-        ₹<%= product.final_price %>
-        <small class="text-muted text-decoration-line-through ms-2">₹<%= product.regular_price %></small>
+      <h4 class="text-success"> 
+        ₹<%= sales_price %>
+        <small class="text-muted text-decoration-line-through ms-2">₹<%= regular_price %></small>
+         <span class="discount"><%= Math.round(parseFloat(1 - sales_price/regular_price) * 100) %>% off</span>
       </h4>
 
       <!-- Volume Variants -->
-      <div class="mb-3">
-        <label class="form-label fw-bold">Select Volume (ML):</label><br>
+      <div class="mb-3">    
+        <label class="form-label fw-bold">Select Volume (ML):</label ><br>
         <div class="btn-group" role="group">
           <% product.volume.forEach((vol, i) => { %>
-            <input type="radio" class="btn-check" name="volume" id="v<%= i %>" <%= i === 0 ? 'checked' : '' %>>
-            <label class="btn btn-outline-primary" for="v<%= i %>"><%= vol %></label>
+       
+            <input type="radio" class="btn-check" value="<%=vol%>" name="volume" id="v<%=i%>" <%=vol == volume ? 'checked' : '' %>
+                         onchange="location.href='/productDetails/<%=product._id%>?volume=<%=vol%>'">
+            <label class="btn btn-outline-primary" for="v<%= i %>" ><%= vol %></label>
           <% }) %>
         </div>
       </div>
@@ -126,17 +173,19 @@
       <!-- Quantity -->
       <div class="mb-3">
         <label class="form-label fw-bold">Quantity:</label>
-        <input type="number" class="form-control w-50 w-md-25" value="1" min="1" />
+        <select id="quantity" class=" w-25 w-md-25">
+        <option value="1">1</option> <option value="2">2</option> <option value="3">3</option> <option value="4">4</option> <option value="5">5 - max</option>
+        </select>
       </div>
 
       <!-- Coupon -->
-      <div class="mb-3">
+      <!-- <div class="mb-3">
         <label class="form-label fw-bold">Apply Coupon:</label>
         <div class="input-group">
           <input type="text" class="form-control" placeholder="Enter coupon code" />
           <button class="btn btn-outline-secondary" type="button">Apply</button>
         </div>
-      </div>
+      </div> -->
 
       <!-- Offers -->
       <div class="offer-box mb-4">
@@ -308,12 +357,18 @@
 
  document.getElementById('addToCart-btn').addEventListener('click',async ()=>{
 
-  console.log("enterd")
-   
-   const response = await fetch("/addToCart/<%= product._id%>",{
+  
+   const quantity = document.getElementById('quantity').value;
+   const volume = document.querySelector('input[name="volume"]:checked')?.value
+
+
+   console.log("volume" , volume)
+  
+   const response = await fetch(`/addToCart/<%= product._id%>`,{
          
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({quantity, volume})
    })
 
  const data = await response.json();
@@ -345,6 +400,48 @@
 
  })
 
+ 
+  document.querySelector('.wishlist-btn').addEventListener('click' , async ()=>{
+              
+
+      
+   const response = await fetch(`/addToWishlist/<%= product._id%>`,{
+         
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+   })
+
+    const data = await response.json();
+
+
+      if (data.success) {
+        Swal.fire({        
+         icon: "success",
+          title: "Item added to wishlist ",
+          showConfirmButton: false,
+            timer: 1200,
+             willClose: () => {
+                window.location.reload();
+             }
+
+        })
+    
+      }else {
+        Swal.fire({
+           icon: "error",
+            title: data.message || "something went wrong",
+            showConfirmButton:false, 
+            timer:1200, 
+             willClose: () => {
+              window.location.reload();
+             }
+        })
+      }
+
+ })
+
+
+ 
 
 
 

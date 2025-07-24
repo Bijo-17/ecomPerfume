@@ -2,6 +2,9 @@ const Category = require("../../models/categorySchema")
 const Product = require("../../models/productSchema")
 const Rating = require("../../models/ratingSchema")
 const User = require("../../models/userSchema")
+const Subcategory = require("../../models/subCategorySchema")
+const Brand = require("../../models/brandSchema")
+const Varients = require("../../models/varientsSchema")
 
 
 
@@ -16,25 +19,54 @@ const getAllProducts = async (req,res)=>{
         if(user){
            userData = await User.findOne({_id:user});
         }
+
+        let search = "";
+       const filter = { isDeleted: false ,isBlocked:false, stock_status:true };
+        
+       filter.stock = { $gt: 0 }
+   
+        if(categoryName.includes("Search")){
+           console.log("entered search" ,  categoryName)
+              search = categoryName.split("=")[1]?.trim() || ""; 
+           console.log(search , "search")
+              const brand = await Brand.find({name:{$regex: search , $options: 'i'}})
+        const brandId = brand.map(i=> i._id)
+        const category = await Category.find({name: {$regex: search , $options : 'i'}})
+         const catId = category.map(c=> c._id)
+        const subcategory = await Subcategory.find({name: {$regex: search , $options : 'i'}})
+         const subcatId = category.map(c=> c._id)
          
+        filter.$or = [
+            { product_name : { $regex : search , $options : 'i'}},
+            { brand_id :{  $in : brandId} },
+             { category_id :{  $in : catId} },
+              { subcategory_id :{  $in : subcatId} }
+        ]
+        }
+ 
         const {  price  } = req.query;
-
-        console.log('req.query', req.query);
-
-        console.log("sort Query", sortOption)    
+         
     
-        const filter = { isDeleted: false ,isBlocked:false, stock_status:true };
 
       if (categoryName) {
          const catDoc = await Category.findOne({ name:categoryName });
          if (catDoc) filter.category_id = catDoc._id;
+         if(!catDoc){ 
+                const subDoc = await Subcategory.findOne({name:categoryName})
+                if(subDoc)  filter.subcategory_id = subDoc
+             
+         } 
     }
+
+    const sub = await Subcategory.find({name:'Bath and body'})
+ 
+
         if (price) {
     if (price === "2000+") {
-      filter.sales_price = { $gte: 2000 };
+      filter.final_price = { $gte: 2000 };
     } else {
       const [min, max] = price.split("-").map(Number);
-      filter.sales_price = { $gte: min, $lte: max };
+      filter.final_price = { $gte: min, $lte: max };
     }
   }
          
@@ -44,15 +76,15 @@ const getAllProducts = async (req,res)=>{
 
     switch (sortOption) {
       case 'priceLow':
-        sortQuery = { sales_price: 1 }; // ascending
+        sortQuery = { final_price: 1 }; // ascending
         break;
       case 'priceHigh':
-        sortQuery = { sales_price: -1 }; // descending
-        console.log("entered priceHigh",sortQuery)
+        sortQuery = { final_price: -1 }; // descending
+     
         break;
       case 'nameAZ':
         sortQuery = { product_name: 1 }; // A-Z
-        console.log("asc entered",sortQuery)
+    
         break;
       case 'nameZA':
         sortQuery = { product_name: -1 }; // Z-A
@@ -76,7 +108,6 @@ const getAllProducts = async (req,res)=>{
          
         const count = await Product.countDocuments(filter);
         
-        console.log("count",count)
 
         const ratings = await Rating.find()
 
@@ -88,7 +119,8 @@ const getAllProducts = async (req,res)=>{
                                             currentPage:page,
                                            totalPages:Math.ceil(count/limit),
                                             ratings,
-                                          user:userData })
+                                          user:userData,
+                                          search   })
 
 
     } catch (error) {
@@ -104,16 +136,56 @@ const productDetails = async (req,res)=>{
     const productId = req.params.id;
     const user = req.session.user
      let userData = ''
+      let selectedVolume = req.query.volume || '';
+
+     console.log("selected Volume" , selectedVolume)
 
         if(user){
           userData = await User.findOne({_id:user});
         }
 
+        const product = await Product.findOne({_id:productId  }).populate('brand_id category_id')
+
+        const varients = await Varients.findOne({product_id:productId});
+
+        console.log("vaienddts" , varients)
+
+        let regular_price = product.regular_price;
+        let sales_price = product.sales_price;
+
+        if(product.offer_price >  sales_price){
+           sales_price = product.offer_price;
+        }
+
+        let stock_status = '';
+
+        if(selectedVolume && varients){
+            varientData = varients.inventory.find(d=> d.volume === parseInt(selectedVolume))
+            console.log("v" , varientData)
+            regular_price = varientData.regular_price;
+            sales_price = varientData.sales_price;
+            if(varientData.offer_price > sales_price){
+               sales_price = varientData.offer_price;
+            }
+
+            if(varientData.stock < 1){
+               stock_status = "Out of stock"
+            }
+        }
+
+        if(!selectedVolume){
+           selectedVolume = product?.volume[0] ? product.volume[0] : product.volume
+        }
+        
+    console.log("volume raea" , selectedVolume)
+        
+        console.log("price"  , regular_price , sales_price)
+
+
     const ratings = await Rating.find({product_id:productId}).populate('user_id')
 
-    const product = await Product.findOne({_id:productId  }).populate('brand_id category_id')
+    
 
-    // console.log("product started.........\n",product , "product ended ......");
     
     let product_status;
 
@@ -125,8 +197,11 @@ const productDetails = async (req,res)=>{
       } else {
           product_status = '';
       }
+
+      if(stock_status){
+         product_status = stock_status;
+      }
    
-    console.log("product_status",product_status)
 
      const relatedProducts = await Product.find({
           category_id: product.category_id._id,
@@ -138,7 +213,7 @@ const productDetails = async (req,res)=>{
 
      
 
-     res.render("productDetails",{product, relatedProducts , product_status , ratings, averageRating:product.averageRating ,user:userData})
+     res.render("productDetails",{product, relatedProducts, regular_price , sales_price, volume:selectedVolume , product_status , ratings, averageRating:product.averageRating ,user:userData})
 
 } catch(error){
     console.log("failed to load productDetail page",error);
@@ -147,13 +222,7 @@ const productDetails = async (req,res)=>{
 
 }
 
-const renderEditPage = async (req, res) => {
-  const products = await Product.find()
-   res.render("allProductPage", {
-      products,
-    breadcrumbs: req.breadcrumbs, // <<--- This line is required
-  });
-};
+
 
 const rateProduct =async (req,res)=>{
 
@@ -161,8 +230,7 @@ const rateProduct =async (req,res)=>{
   const userId = req.session.user;
   const { productId } = req.params;
 
-  console.log("productId",productId)
-  console.log("userId",userId)
+ 
    
   if(!userId){
     res.redirect(`/productDetails/${productId}`)
@@ -186,10 +254,9 @@ const rateProduct =async (req,res)=>{
   
   const ratings = await Rating.find({ product_id: productId });
 
-  console.log("ratings",ratings)
   const average = ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length;
 
-  console.log("averagerating",average)
+
 
   await Product.findByIdAndUpdate(productId, { averageRating: average , ratingCount:ratingCount  });
 
@@ -202,4 +269,4 @@ const rateProduct =async (req,res)=>{
 
 
 
-module.exports =  { getAllProducts , productDetails , renderEditPage , rateProduct}
+module.exports =  { getAllProducts , productDetails , rateProduct}

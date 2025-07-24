@@ -17,8 +17,17 @@ const cartSchema = new mongoose.Schema({
                      default:1,
                       required:true
 
-                 } 
+                 },
+               volume:{ type: Number},
+                regular_price : {type: Number},
+                sales_price : {type: Number}
            } ],
+
+         applied_coupon: {
+                            code:String,
+                            discountAmount : Number
+                           
+          }
       
 }, {timestamps:true})
 

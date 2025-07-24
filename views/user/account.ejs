@@ -59,9 +59,9 @@
         </div>
        
          <div class="form-actions">
-       <button type="button" id="editButton" onclick="openEditDialog('editDialogContact')">EDIT</button>
-        <button type="submit" id="saveButton" style="display: none;">SAVE</button>
-        <button type="button" id="cancelButton" style="display: none;">CANCEL</button>
+       <button type="button" id="editBtn" onclick="openEditDialog('editDialogContact')">EDIT</button>
+        <button type="submit" id="saveBtn" style="display: none;">SAVE</button>
+        <button type="button" id="cancelBtn" style="display: none;">CANCEL</button>
     </div>
 </form>
 
@@ -124,21 +124,29 @@
   </form>
 </div>
 
+<!-- email model -->
 
   <div id="editDialogContact" style="display: none; position: fixed; top: 40%; 
     width: 80%; height: 20%; background: rgba(0, 0, 0, 0.7); z-index: 9999; 
      align-items: center; justify-content: center;">
 
-    <form method="post" action="/changeEmail"> 
+    <form> 
       <div class="form-group">
         <label for="editEmail">Email</label>
-        <input type="email" id="editEmail" name="email" value="<%= user.email %>" />
+        <input type="email" id="editEmail" name="email" value="<%= user.email %>" /> 
+        <div class="form-group " id="email_error" style="background: white; color:orangered">
+      
+        </div>
       </div> <br>
+
+      
       
       <div class="form-actions">
-         <button type="submit">Save</button>
-          <button type="button" onclick="closeEditDialog('editDialogContact')">Cancel</button>
+         <button type="button"id="changeEmailBtn" onclick="changeEmail()">Save</button>
+          <button type="button"  onclick="closeEditDialogEmail('editDialogContact')">Cancel</button>
         </div>
+
+        
      </form>
 
 </div>
@@ -166,7 +174,7 @@
     </div> <div id="error-msg" style="color: red; font-size: 0.8rem;"></div>
 
     <div style="margin-top: 10px;">
-      <a href="/forgot-password" style="font-size: 0.9rem;">Forgot Password?</a>
+      <a href="/forgotPassword" style="font-size: 0.9rem;">Forgot Password?</a>
     </div>
 
     <div class="form-actions" style="margin-top: 15px;">
@@ -195,6 +203,16 @@
 
 function closeEditDialog(value) {
   document.getElementById(value).style.display = 'none';
+}
+
+function closeEditDialogEmail(value) {
+ 
+ const emailBtn =  document.getElementById('changeEmailBtn')
+      emailBtn.textContent = 'Save';
+      emailBtn.disabled = false;
+
+     document.getElementById(value).style.display = 'none';
+  
 }
 
 function previewProfileImage(event) {
@@ -237,6 +255,45 @@ document.getElementById('changePassword').addEventListener('submit',async (e)=>{
 
 
 })
+
+async function changeEmail(){
+     try {
+
+      const email = document.getElementById('editEmail').value
+      const  emailBtn = document.getElementById('changeEmailBtn')
+
+      emailBtn.textContent = 'verifying...';
+      emailBtn.disabled = true;
+
+      console.log( "email " , email)
+        const response = await fetch("/changeEmail", { 
+                  method : 'POST',
+                  headers : {'Content-Type' : 'application/json'},
+                   body: JSON.stringify({email})
+        })
+
+
+           const  data = await response.json();
+      
+
+
+        if(response.ok){
+           Swal.fire("Email changed");
+           window.location.href = "/verifyEmailOtp"
+        }else {
+          const emailError = document.getElementById('email_error')
+          const emailBtn = document.getElementById('changeEmailBtn')
+          emailError.textContent = data.message || "unabel to change email";
+           emailBtn.textContent = 'Save';
+           emailBtn.disabled = false;
+          
+        }
+      
+     } catch (error) {
+         console.log("error" , error)
+           Swal.fire("server error in changing email" , error.message)
+     }
+}
 
 
 </script>

@@ -81,6 +81,13 @@ document.addEventListener('DOMContentLoaded', function() {
   
 
         const statusClass = productItem.order_status.toLowerCase();
+
+        const address = order?.address_id || order?.temp_address
+          let displayDate = order?.delivered_date || order?.cancelled_date || order?.estimated_delivery 
+
+         if(productItem.order_status === 'cancelled'){
+            displayDate =  productItem.cancelled_date 
+         }
         
         modalBody.innerHTML = `
             <div class="order-detail-section">
@@ -92,7 +99,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                     <div class="info-item">
                         <span class="info-label">Order Date</span>
-                        <span class="info-value">${order.order_date}</span>
+                        <span class="info-value">${new Date(order?.order_date).toLocaleDateString()}</span>
                     </div>
                     <div class="info-item">
                         <span class="info-label">Status</span>
@@ -101,8 +108,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         </span>
                     </div>
                     <div class="info-item">
-                        <span class="info-label">${productItem.order_status === 'Delivered' ? 'Delivered Date' : productItem.order_status === 'Cancelled' ? 'Cancelled Date' : 'Estimated Delivery'}</span>
-                        <span class="info-value">${productItem.delivered_date || productItem.cancelled_date || productItem.estimated_delivery}</span>
+                        <span class="info-label">${productItem.order_status === 'delivered' ? 'Delivered Date' : productItem.order_status === 'cancelled' ? 'Cancelled Date' : productItem.order_status === 'failed' ? 'Failed' : 'Estimated delivery' }</span>
+                        <span class="info-value"> 
+                                                     ${displayDate ? new Date(displayDate).toLocaleDateString() : ''} 
+                          </span>
                     </div>
                 </div>
             </div>
@@ -122,15 +131,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 </div>
             </div>
-
+                  
             <div class="order-detail-section">
                 <h4>Delivery Address</h4>
                 <div class="address-details">
-                    <strong>${order.address_id.name}</strong><br>
-                    ${order.address_id.address_name}<br>
-                    ${order.address_id.city}<br>
-                    ${order.address_id.pin_code}<br>
-                    Mobile: ${order.address_id.phone_number}
+                    <strong>${address?.name}</strong><br>
+                    ${ address?.address_name}<br>
+                    ${address?.city}<br>
+                    ${address?.pin_code} <br>
+                    Mobile: ${address?.phone_number}
                 </div>
             </div>
 
@@ -139,9 +148,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="payment-details">
                     <strong>Payment Method:</strong> ${order.payment_method.method}<br>
                      <strong>Delivery:</strong> ${product.delivery_charge}<br>
+                      <strong>Discount:</strong> ${order?.discount}<br>
                        ${''? `<strong>Card:</strong> ${''}<br>` : ''}
                         ${'' ? `<strong>UPI ID:</strong> ${''}<br>` : ''}
-                     <strong>Amount :</strong> ₹${((product.product_price*product.quantity)+product.delivery_charge).toLocaleString()}
+                     <strong>Amount :</strong> ₹${((product.product_price*product.quantity)+product.delivery_charge).toFixed(2)}
                 </div>
             </div>
 
@@ -205,6 +215,17 @@ document.addEventListener('DOMContentLoaded', function() {
                      <button class="action-btn btn-primary" onclick="trackOrder('${order.order_id}')">Track Order</button>
                     <button class="action-btn btn-danger" onclick="cancelOrder('${order.order_id}','${productId}')">Cancel Order</button>
                 `;
+            case 'shipped':
+                return `
+                     <button class="action-btn btn-primary" onclick="trackOrder('${order.order_id}')">Track Order</button>
+                    <button class="action-btn btn-danger" onclick="cancelOrder('${order.order_id}','${productId}')">Cancel Order</button>
+                `;
+            case 'out_for_delivery':
+                return `
+                     <button class="action-btn btn-primary" onclick="trackOrder('${order.order_id}')">Track Order</button>
+                    <button class="action-btn btn-danger" onclick="cancelOrder('${order.order_id}','${productId}')">Cancel Order</button>
+                `;                
+
             case 'delivered':
                 return `
                     <button class="action-btn btn-primary" onclick="returnProduct('${order.order_id}','${productId}')">Return</button>
@@ -214,6 +235,10 @@ document.addEventListener('DOMContentLoaded', function() {
             case 'cancelled':
                 return `
                     <button class="action-btn btn-primary" onclick="reorderProduct('${order.order_id}')">Reorder</button>
+                `;
+                case 'failed':
+                return `
+                    <button class="action-btn btn-primary" onclick="retryPayment('${order.order_id}')">Retry</button>
                 `;
             default:
                 return '';
@@ -288,6 +313,105 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
+    window.retryPayment = function(orderId) {
+
+        showNotification("Retrying payment...","success")
+         
+        fetch("/retryPayment",{
+            method:'POST',
+            headers: {  'Content-Type' : 'application/json'},
+            body: JSON.stringify({orderId})
+        }).then(res=>{
+            if(!res.ok){
+                    showNotification("payment retrying failed" , "error") 
+            } else {
+                 return res.json();
+
+            }
+
+            })
+            .then(data => { 
+
+                console.log("data" , data)
+          const options = {
+            key: data.key,
+            amount: data.order.amount,
+            currency: "INR",    
+            name: "Petal and Mist",
+            description: "Order Payment",
+            order_id: data.order.id,
+            handler: function (response) {
+              
+                verifyPayment(response, data.order.id );
+            },
+            prefill: {
+                name: data.user.name,
+                email: data.user.email,
+                contact: data.user.phone
+            },
+            theme: {
+                color: "#3399cc"
+            }
+        };
+
+        const rzp = new Razorpay(options);
+        console.log("online payment done")
+        rzp.open();
+
+        rzp.on('payment.failed', function (response){
+            console.log(response.error);
+           window.location.href = '/orders/failed';
+       });
+
+
+            
+        }).catch(err=>{
+
+            console.log("error in loading payment" , err)
+
+            showNotification("something went wrong "+err.message , "error")
+        })
+
+           closeOrderDetailsModal()
+    }
+
+
+    
+async function verifyPayment(paymentResponse, orderId) {
+    try {
+        console.log("paymentResponse", paymentResponse , orderId)
+        const res = await fetch('/orders/razorpay/verify', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                ...paymentResponse,
+                orderId
+
+            })
+        });
+
+        const result = await res.json();
+
+        console.log("result"  , result)
+        if (result.success) {
+            showNotification("Success", "Your payment was successful!", "success")
+                window.location.href = "/orders/success"
+        } else {
+            return showNotification( result.message ,"error" || "Payment verification failed", "error")
+                window.location.reload()
+        } 
+
+    } catch (error) {
+        console.error(error);
+        return showNotification("Could not verify payment", "error");
+    }
+}
+
+
+
+
   
   let currentReturnOrderId = null;
   let currentProductId = null;
@@ -352,7 +476,7 @@ window.submitReturnReason = function() {
         
         }).then(response => {
             if (response.ok) {
-                showNotification("Downloading Invoice", "success");
+                showNotification("Downloading Invoice...", "success");
                 
             } else {
                 showNotification("Failed to download Invoice", "error");

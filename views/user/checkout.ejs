@@ -1,11 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Checkout - Petal & Mist</title>
     <link rel="stylesheet" href="/css/checkout-with-address.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+       <%-include("../partials/user/header")%> 
   <style>
      
      .total-value {
@@ -29,32 +29,151 @@
   font-size: 15px;
 }
 
+.discount-section {
+  margin-top: 20px;
+}
+
+.discount-input-container {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.discount-input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.apply-btn {
+  background-color: #28a745;
+  color: white;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.apply-btn:hover {
+  background-color: #218838;
+}
+
+.applied-coupon-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #e8f5e9;
+  border: 1px solid #c3e6cb;
+  border-radius: 6px;
+  padding: 12px 16px;
+}
+
+.coupon-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.badge-coupon {
+  background-color: #28a745;
+  color: white;
+  font-size: 0.9rem;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-weight: bold;
+  width: fit-content;
+}
+
+.coupon-message {
+  font-size: 0.85rem;
+  color: #155724;
+  margin-top: 4px;
+}
+
+.coupon-discount {
+  font-size: 0.85rem;
+  color: #155724;
+  margin-top: 2px;
+  font-weight: bold;
+}
+
+.remove-coupon-btn {
+  background: none;
+  border: none;
+  color: #dc3545;
+  font-size: 1.4rem;
+  cursor: pointer;
+  line-height: 1;
+  font-weight: bold;
+}
+
+.available-coupons-section {
+  margin-top: 1rem;
+}
+
+.show-coupons-btn {
+  background-color: #f3f3f3;
+  color: #333;
+  padding: 8px 14px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 6px;
+  transition: all 0.3s;
+}
+
+.show-coupons-btn:hover {
+  background-color: #e2e2e2;
+}
+
+.coupons-list {
+  margin-top: 0.5rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.coupon-card {
+  background: #fff8f0;
+  border: 1px solid #ffdaab;
+  padding: 12px;
+  border-radius: 8px;
+  transition: transform 0.2s;
+  cursor: pointer;
+}
+
+.coupon-card:hover {
+  transform: translateY(-3px);
+  background-color: #fff3e0;
+}
+
+.coupon-card h4 {
+  margin: 0;
+  color: #d46a00;
+}
+
+.coupon-card p {
+  margin: 4px 0 0;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+.hidden {
+  display: none;
+}
+
+
+
   </style>
 </head>
 <body>
     <div class="container">
-        <!-- Top Navigation -->
-        <nav class="top-nav">
-            <div class="nav-content">
-                <h1 class="brand-name">PETAL & MIST</h1>
-                <div class="nav-icons">
-                    <button class="nav-icon"><i class="fas fa-search"></i></button>
-                    <button class="nav-icon"><i class="fas fa-heart"></i></button>
-                    <button class="nav-icon"><i class="fas fa-shopping-bag"></i></button>
-                    <button class="nav-icon"><i class="fas fa-user"></i></button>
-                </div>
-            </div>
-        </nav>
+   
 
-        <!-- Secondary Navigation -->
-        <nav class="secondary-nav">
-            <div class="nav-links">
-                <a href="#" class="nav-link">Offers</a>
-                <a href="#" class="nav-link">category</a>
-                <a href="#" class="nav-link">Bath and Body</a>
-                <a href="#" class="nav-link">New Arrivals</a>
-            </div>
-        </nav>
 
         <!-- Main Content -->
         <main class="main-content">
@@ -177,38 +296,30 @@
                         <h3 class="section-title">Payment</h3>
                         
                         <div class="payment-options">
-                            <!-- Card Payment -->
-                            <div class="payment-option">
+
+                            <!-- wallet -->
+
+                              <div class="payment-option">
                                 <label class="payment-label">
-                                    <input type="radio" name="paymentMethod" value="card" checked>
+                                    <input type="radio" name="paymentMethod" value="wallet" >
                                     <span class="radio-button"></span>
-                                    Card
+                                      wallet (Balance: <%=wallet?.balance.toFixed(2) || 0%>)
                                 </label>
-                                <div class="payment-details card-details">
-                                    <div class="card-input-container">
-                                        <select class="card-select">
-                                            <option value="credit">Credit Card</option>
-                                            <option value="debit">Debit Card</option>
-                                        </select>
-                                        <div class="card-logo">
-                                            <img src="/placeholder.svg?height=24&width=38" alt="Mastercard" class="card-icon">
-                                        </div>
-                                    </div>
-                                </div>
+                               
                             </div>
 
-                            <!-- UPI Payment -->
+
+                            <!-- razorpay Payment -->
                             <div class="payment-option">
                                 <label class="payment-label">
-                                    <input type="radio" name="paymentMethod" value="upi">
+                                    <input type="radio" name="paymentMethod" value="online" >
                                     <span class="radio-button"></span>
-                                    UPI
+                                     Online payment by Card , Netbanking , UPI , ... 
                                 </label>
-                                <div class="payment-details upi-details" style="display: none;">
-                                    <input type="text" class="upi-input" placeholder="upi@123.com">
-                                </div>
+                               
                             </div>
 
+                            
                             <!-- COD Payment -->
                             <div class="payment-option">
                                 <label class="payment-label">
@@ -241,13 +352,63 @@
                         </div>
                     </div>
                  <% }) %>
-                    <div class="discount-section">
-                        <div class="discount-input-container">
-                            <input type="text" id="discountCode" placeholder="Discount code" class="discount-input">
-                            <button type="button" id="applyDiscount" class="apply-btn">Apply</button>
-                        </div>
-                        <div id="discount-error" style="color: red; font-size: 0.8rem;"></div>
-                    </div>
+                
+
+                 <div class="discount-section">
+
+                    <% if(appliedCoupon) { %>
+
+                           <div class="applied-coupon-box">
+                              <div class="coupon-info">
+                               <span class="badge-coupon"><%= appliedCoupon?.coupon_name?.toUpperCase()%></span>
+                               <span class="coupon-message">Coupon applied successfully!</span>
+                                <span class="coupon-discount">You saved ₹ <%= discount.toFixed(2) %></span>
+                              </div>
+                               <button type="button" class="remove-coupon-btn" id="removeCouponBtn">×</button>
+                              </div>
+                    
+                    <%}else  { %>
+        
+                  <div class="discount-input-container">
+                       <input type="text" id="discountCode" placeholder="Discount code" class="discount-input">
+                          <button type="button"  class="apply-btn" id="applayCoupon" >Apply</button>
+                      </div>
+              <div id="discount-error" style="color: red; font-size: 0.8rem;"></div>
+
+
+              
+           <div class="available-coupons-section">
+                    <button id="toggleCouponsBtn" class="show-coupons-btn">
+                      <i class="fas fa-gift"></i> Show Available Coupons
+                     </button>
+
+               <div id="couponsList" class="coupons-list hidden">
+              <!-- Dynamically add coupon items here -->
+         
+              <% coupons.forEach(coupon=>{ %>
+
+                   <div class="coupon-card" >
+                       <h4><%= coupon.coupon_name.toUpperCase() %></h4>
+                       <p>Get <%= coupon.discount_type === 'percentage' ? coupon.offer_price + ' %' : '₹ '+ coupon.offer_price %> off on order above ₹<%=coupon.minimum_price %></p>
+                      <% if(coupon.expiry_date){ %>
+                       <p>Expires at <%=coupon?.expiry_date?.toLocaleDateString()%></p>
+                       <%}%>
+                  </div>
+             <%  }) %>
+                     <%  if(!coupons || coupons.length <= 0){ %>
+                          <h5> No coupons available </h5>
+                      <% } %>
+                      
+             </div>
+
+         </div>
+
+         <%}%>
+            
+    </div>
+
+
+
 
                     <div class="order-totals">
                         <div class="total-row">
@@ -266,7 +427,7 @@
                         </div>
                         <div class="total-row discount-row"">
                             <span class="total-label">Discount</span>
-                            <span class="total-value discount" id="discount">-₹0.00</span>
+                            <span class="total-value discount" id="discount">-₹<%=discount?.toFixed(2) || 0.00 %></span>
                         </div>
                         <div class="total-row final-total">
                             <span class="total-label">Total</span>
@@ -284,9 +445,7 @@
         </main>
 
         <!-- Footer -->
-        <footer class="footer">
-            <p>Copyright © 2025 Petal & Mist. All Rights Reserved</p>
-        </footer>
+     
     </div>
 
 
@@ -318,7 +477,7 @@
             </button>
         </div>
         <div class="modal-body">
-            <form id="addressForm" class="address-form" method="post" >
+            <form id="addressForm" class="address-form" method="post" action="/address/add" >
                 <input type="hidden" id="addressId" name="addressId">
                 <div class="form-row">
                     <div class="form-group">
@@ -380,35 +539,40 @@
     </div>
 </div>
 
+<%-include("../partials/user/footer")%>
+
    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+ 
+   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 
 <script>
 
+ 
 
 document.addEventListener('DOMContentLoaded', () => {
+
     const addressModal = document.getElementById('addressModal');
     const addressFormModal = document.getElementById('addressFormModal');
     const addressList = document.getElementById('addressList');
     const selectedAddressContainer = document.getElementById('selectedAddressContainer');
     let selectedAddressId = null;
 
-    // Backend-passed address data
-    // const savedAddresses = <%- JSON.stringify(address) %>;
+   
 
       const rawData = document.getElementById('address-data').textContent;
     const savedAddresses = JSON.parse(rawData);
 
      const defaultAddress = savedAddresses.find(addr => addr.isDefault) || savedAddresses[0];
 
-     console.log("default address",defaultAddress);
+
 
         if (defaultAddress) {
           
             selectAddress(defaultAddress._id);
         }
 
-    
+ 
 
 
     // Show modal with all addresses
@@ -536,26 +700,26 @@ document.getElementById('placeOrderBtn').addEventListener('click', async () => {
     const addressId = selectedAddressId || ''; // from existing selected address logic
     const isTypedAddress  = !addressId;
     const saveForFuture = document.getElementById('saveAddressCheckbox')?.checked;
-    const discountCoupon = document.getElementById('discountCode').value.trim()
 
+    
     // If user typed a new address, get form values
     const addressForm = document.getElementById('addressForm');
     
     const total = document.getElementById('finalTotal').value
     
 
-    const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+    const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value;
 
     
-  if (paymentMethod !== 'cod') {
-        return Swal.fire("unavailable","Please select cash on Delivery to continue","warning")
+  if (!paymentMethod) {
+        return Swal.fire("Payment required","Please select any payment method to continue ","warning")
    }
 
           let payload = {
                            paymentMethod,             
                            saveForFuture,
                            isTypedAddress,
-                            discountCoupon
+                         
                         };
                           
                          
@@ -609,7 +773,18 @@ document.getElementById('placeOrderBtn').addEventListener('click', async () => {
                   }
            console.log("full payload", payload)
          
-                try {
+              if(paymentMethod === 'online'){
+                   return handleOnlinePayment(payload); // Razorpay 
+                } else {
+                     return handleCOD(payload); //   handles both cod and wallet
+                }
+
+        })
+
+
+
+       async function handleCOD(payload){
+               try {
 
                    const response = await fetch('/orders/cod', {
                          method: 'POST',
@@ -625,7 +800,7 @@ document.getElementById('placeOrderBtn').addEventListener('click', async () => {
             Swal.fire("Order Placed", "Your order has been placed successfully!", "success")
             .then(() => window.location.href = "/orders/success");
         } else {
-          return   Swal.fire("Error", data.message || "Something went wrong", "error");
+          return   Swal.fire("Failed", data.message || "Something went wrong", "error");
         }
 
                     
@@ -633,38 +808,201 @@ document.getElementById('placeOrderBtn').addEventListener('click', async () => {
                     console.log(error);
                     return Swal.fire("Server Error","Unable to submit the adddress","error");
                 }
+        }
 
-        })
 
-          document.getElementById('applyDiscount').addEventListener('click',()=>{ 
-           const discountCoupon = document.getElementById('discountCode').value.trim()
-           const total =parseFloat( document.getElementById('finalTotal').textContent.replace("₹", ""))
-           console.log("dicount", discountCoupon , total)
+    
+  async function handleOnlinePayment(payload) {
+        console.log("full payload", payload , "end of payload")
+    try {
+        const response = await fetch('/orders/razorpay', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
 
-           const isValid = discountCoupon.toLowerCase() === 'new50' ? true: false
+        const data = await response.json();
 
-           console.log(isValid , "valid")
+        if (!data.success) {
+            return Swal.fire("Failed", data.message || "Unable to initiate payment", "error");
+        }
+ 
+        console.log("amount frontend", payload.addressId)
+        // Now initiate Razorpay/PayPal flow using SDK
+        const options = {
+            key: data.key,
+            amount: data.order.amount,
+            currency: "INR",
+            name: "Petal and Mist",
+            description: "Order Payment",
+            order_id: data.order.id,
+            handler: function (response) {
+                console.log("in response" , payload.addressId)
+                verifyPayment(response, data.order.id , payload);
+            },
+            prefill: {
+                name: data.user.name,
+                email: data.user.email,
+                contact: data.user.phone
+            },
+            theme: {
+                color: "#3399cc"
+            }
+        };
 
-           if(total > 599){ 
-             if(isValid){
+        const rzp = new Razorpay(options);
+        console.log("online payment done")
+        rzp.open();
 
-                   document.getElementById('discount-error').textContent = ""
-                  const  discountTotal = total- 50  
-                   
-                   document.getElementById('discount').textContent = "-₹" + '50'
-                   document.getElementById('finalTotal').textContent =   "₹" + discountTotal
+        rzp.on('payment.failed', function (response){
+            console.log(response.error);
+           window.location.href = '/orders/failed';
+       });
+
+    } catch (error) {
+        console.error(error);
+        return Swal.fire("Payment Error", "Could not process the online payment.", "error");
+    }
+}
+
+async function verifyPayment(paymentResponse, orderId, payload) {
+    try {
+        console.log("paymentResponse", paymentResponse , orderId ,addressId)
+        const res = await fetch('/orders/razorpay/verify', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                ...paymentResponse,
+                orderId, payload,
+
+            })
+        });
+
+        const result = await res.json();
+        if (result.success) {
+            Swal.fire("Success", "Your payment was successful!", "success")
+                .then(() => window.location.href = "/orders/success");
+        } else {
+            return Swal.fire("Failed", result.message || "Payment verification failed", "error")
+             .then(()=> window.location.href = "/orders/failed" )
+        } 
+
+    } catch (error) {
+        console.error(error);
+        return Swal.fire("Error", "Could not verify payment", "error");
+    }
+}
+        
+
+ 
+
+                
+           async function applayCoupon(discountCoupon){ 
+           
+            try{ 
+             const response = await fetch("/applayCoupon",{
+                    method : 'POST',
+                    headers : {"Content-Type" : "application/json" },
+                    body : JSON.stringify({discountCoupon})
+             })
+
+             const data = await response.json()
+
+           if(response.ok){ 
+
+                   document.getElementById('discount-error').textContent = data.message                  
+                   document.getElementById('discount').textContent = "-₹" + data.discount.toFixed(2)
+                   document.getElementById('finalTotal').textContent =   "₹" + data.total.toFixed(2)
+
+                const discountSection = document.querySelector('.discount-section');
+
+
+                      discountSection.innerHTML = `
+                            <div class="applied-coupon-box">
+                              <div class="coupon-info">
+                               <span class="badge-coupon">${data.coupon_name}</span>
+                               <span class="coupon-message">Coupon applied successfully!</span>
+                                <span class="coupon-discount">You saved ₹${data.discount.toFixed(2)}</span>
+                              </div>
+                               <button type="button" class="remove-coupon-btn" id="removeCouponBtn">×</button>
+                              </div>
+                            `;
+
+                      document.getElementById('removeCouponBtn').addEventListener('click', async () => {
+                    const removeRes = await fetch('/removeCoupon', { method: 'POST' });
+                   const removeData = await removeRes.json();
+              if (removeData.success) {
+               window.location.reload(); 
+                   }
+                });
+  
 
              }else {
-                document.getElementById('discount-error').textContent = "invalid code"
+            
+                document.getElementById('discount-error').textContent = data.message
+                 document.getElementById('discount').textContent = "-₹" + data.discount
+                document.getElementById('finalTotal').textContent =   "₹" + data.total
              }
 
-            } else if(isValid) {
-                 document.getElementById('discount-error').textContent = 'Coupon applicable for order over ₹599'
-            } else {
-                 document.getElementById('discount-error').textContent = "invalid code"
+            }catch(err){
+                console.log("server error" ,error)
             }
 
-          })
+            }
+
+
+
+
+           document.querySelector('.apply-btn ')?.addEventListener('click' , async ()=> { 
+             document.getElementById('discount-error').textContent = '';
+           const discountCoupon = document.getElementById('discountCode').value.trim()
+            
+
+           if(discountCoupon){ 
+
+              applayCoupon(discountCoupon)
+           }else {
+                 document.getElementById('discount-error').textContent = 'Please enter a coupon code.'
+           }
+
+            })
+
+            document.querySelectorAll('.coupon-card').forEach(card=>{
+                  card.addEventListener('click', ()=>{
+                       document.getElementById('discount-error').textContent = '' ;
+                      const couponCode = card.querySelector('h4').innerText.trim();
+                      applayCoupon(couponCode)
+                  })
+            })
+
+          
+
+
+          // coupon section
+
+
+          document.getElementById('toggleCouponsBtn')?.addEventListener('click', () => {
+
+                  const list = document.getElementById('couponsList');
+                   list.classList.toggle('hidden');
+
+            });
+
+            // remove coupon
+
+                  document.getElementById('removeCouponBtn').addEventListener('click', async () => {
+                    console.log("called")
+                    const removeRes = await fetch('/removeCoupon', { method: 'POST' });
+                   const removeData = await removeRes.json();
+              if (removeData.success) {
+               window.location.reload(); 
+                   }
+                });
+
 
 
 
@@ -683,7 +1021,5 @@ document.getElementById('placeOrderBtn').addEventListener('click', async () => {
 </script>
 
 
-
-    <!-- <script src="/js/checkout-with-address.js"></script> -->
 </body>
 </html>

@@ -40,6 +40,7 @@ const verifyAdmin = async (req,res)=>{
   }
   catch(error){
       console.log(error)
+      res.redirect("/admin")
   }
 
 }
@@ -63,23 +64,9 @@ const loadDashboard = async (req,res)=>{
 
 
 const logout = async (req,res)=>{
-  try {
 
-    req.session.destroy((err)=>{
-      if(err){
-        res.redirect("/pageError")
-        console.log("unable to logout",err)
-      }
-        
-      res.redirect("/admin")
-
-    })
-    
-  } catch (error) {
-    res.redirect("/pageError")
-    console.log("unable to logout",error)
-     
-  }
+    req.session.admin = null;
+    res.redirect("/admin/login")
 }
 
 const pageError = async (req,res)=>{

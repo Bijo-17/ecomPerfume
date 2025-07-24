@@ -57,35 +57,19 @@
   color: #333;
   word-wrap: break-word;
 }
+
+
+
+
 </style>
 
-
-
 </head>
+
+
+
 <body>
     <div class="container">
-        <!-- Top Navigation -->
-        <nav class="top-nav">
-            <div class="nav-content">
-                <h1 class="brand-name">PETAL & MIST</h1>
-                <div class="nav-icons">
-                    <button class="nav-icon"><i class="fas fa-search"></i></button>
-                    <button class="nav-icon"><i class="fas fa-heart"></i></button>
-                    <button class="nav-icon"><i class="fas fa-shopping-bag"></i></button>
-                    <button class="nav-icon"><i class="fas fa-user"></i></button>
-                </div>
-            </div>
-        </nav>
-
-        <!-- Secondary Navigation -->
-        <nav class="secondary-nav">
-            <div class="nav-links">
-                <a href="#" class="nav-link">Offers</a>
-                <a href="#" class="nav-link">category</a>
-                <a href="#" class="nav-link">Bath and Body</a>
-                <a href="#" class="nav-link">New Arrivals</a>
-            </div>
-        </nav>
+   
 
         <!-- Main Content -->
         <main class="main-content">
@@ -158,114 +142,10 @@
                 </div>
             </div>
         </main>
-
-        <!-- Footer -->
-        <footer class="footer">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h4 class="footer-title">SUPPORT</h4>
-                    <ul class="footer-links">
-                        <li><a href="/privacy-policy">Privacy Policy</a></li>
-                        <li><a href="/refund-policy">Refund policy</a></li>
-                        <li><a href="/terms-conditions">Terms and Conditions</a></li>
-                    </ul>
-                </div>
-
-                <div class="footer-section">
-                    <h4 class="footer-title">Company</h4>
-                    <ul class="footer-links">
-                        <li><a href="/store">Our Store</a></li>
-                        <li><a href="/about">About us</a></li>
-                        <li><a href="/contact">Contact us</a></li>
-                    </ul>
-                </div>
-
-                <div class="footer-section newsletter-section">
-                    <h4 class="footer-title">SUBSCRIBE NEWSLETTERS</h4>
-                    <p class="newsletter-description">
-                        Subscribe to get special offers, free giveaways, and once-in-a-lifetime deals.
-                    </p>
-                    <div class="newsletter-form">
-                        <input type="email" placeholder="Enter your Email" class="newsletter-input" id="newsletterEmail">
-                        <button type="button" class="newsletter-btn" id="subscribeBtn">
-                            <i class="fas fa-envelope"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="social-media">
-                <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
-                <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
-                <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
-                <a href="#" class="social-link"><i class="fab fa-pinterest"></i></a>
-            </div>
-
-            <div class="footer-bottom">
-                <p>&copy; 2025 Petal & Mist</p>
-            </div>
-        </footer>
-    </div>
-
-    <!-- Order Details Modal -->
-    <div class="modal-overlay" id="orderDetailsModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Order Details</h3>
-                <button class="close-modal" id="closeOrderModal">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            
-            <div class="modal-body">
-                <div class="order-summary">
-                    <div class="order-id">
-                        <strong>Order ID: <span id="modalOrderId">ORD123456789</span></strong>
-                    </div>
-                    
-                    <div class="order-items">
-                        <h4>Items Ordered</h4>
-                        <div class="item-list" id="modalItemList">
-                            <!-- Items will be populated here -->
-                        </div>
-                    </div>
-
-                    <div class="delivery-address">
-                        <h4>Delivery Address</h4>
-                        <div class="address-details" id="modalDeliveryAddress">
-                            <!-- Address will be populated here -->
-                        </div>
-                    </div>
-
-                    <div class="payment-details">
-                        <h4>Payment Details</h4>
-                        <div class="payment-info" id="modalPaymentInfo">
-                            <!-- Payment info will be populated here -->
-                        </div>
-                    </div>
-
-                    <div class="order-totals">
-                        <div class="total-row">
-                            <span>Subtotal:</span>
-                            <span id="modalSubtotal">₹599.00</span>
-                        </div>
-                        <div class="total-row">
-                            <span>Shipping:</span>
-                            <span id="modalShipping">₹40.00</span>
-                        </div>
-                        <div class="total-row">
-                            <span>Discount:</span>
-                            <span id="modalDiscount">-₹100.00</span>
-                        </div>
-                        <div class="total-row final-total">
-                            <span>Total:</span>
-                            <span id="modalTotal">₹539.00</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+   </div>
+  
+    
+   
 
     <script src="/js/order-confirmation.js"></script>
 </body>

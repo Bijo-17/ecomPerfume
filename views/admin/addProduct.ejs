@@ -91,50 +91,114 @@
                                    rows="4"></textarea>
                                <div id="description-error" class="error-message"></div>
                            </div>
-                           <div class="row">
-                               <div class="col-lg-4">
-                                   <div class="mb-4">
-                                       <label class="form-label">Regular price</label>
-                                       <input placeholder="$" name="regularPrice" type="text"
-                                           class="form-control border">
-                                           <div id="regularPrice-error" class="error-message"></div>
-                                   </div>
-                               </div>
-                               <div class="col-lg-4">
-                                   <div class="mb-4">
-                                       <label class="form-label">Sale price</label>
-                                       <input placeholder="$" name="salesPrice" type="text" class="form-control border">
-                                       <div id="salePrice-error" class="error-message"></div>
-                                   </div>
-                                   
-                               </div>
-                               <div class="col-lg-4">
-                                   <div class="mb-4">
-                                       <label class="form-label">Quantity</label>
-                                       <input placeholder="" name="quantity" type="text" class="form-control border">
-                                       <div id="quantity-error" class="error-message"></div>
-                                   </div>
-                               </div>
-                           </div>
-                           <div class="row">
-                              
+                         
+
+                       <div class="card card-body"> 
+                           <div class="row" id="varients-field">
+                              <h4 class="mb-2">Varients </h4>
+
                             <div class="col-lg-4">
                              <div class="mb-4">
                             <label class="form-label">Volume (ML)</label>
 
-                                     <div id="volume-fields">
-                                      <div class="input-group mb-2">
-                            <input name="volume[]" type="number" id="volume" class="form-control border" placeholder="Enter volume in ML">
-                                 <button type="button" class="btn btn-outline-secondary" onclick="addVolumeField()">+</button>
+                             <div id="volume-fields">
+                                  <div class="input-group mb-2">
+                            <input name="volume" type="number" id="volume" class="form-control border" placeholder="Enter volume in ML">
+                        
                              </div>
+                                
                            </div>
 
                       <div id="volume-error" class="error-message"></div>
                          </div>
+                    </div> 
+
+                        <div class="col-lg-7">
+                             <div class="mb-4">
+                            <label class="form-label">  Stock </label>
+
+                             <div id="stock-fields">
+                                <div class="input-group mb-2">
+                            <input name="stock" type="number" id="stock" class="form-control border mr-4" placeholder="Stock">
+                                 <button type="button" class="btn btn-sm btn-outline-secondary " style="margin-left:  3rem ;" onclick="addVarient()">Add More</button>
+                             </div>
+                                          
+                           </div>
+
+                      <div id="stock-error" class="error-message"></div>
+                         </div>
                     </div>
 
-                            
+                    <div class="col-lg-4">
+                                   <div class="mb-4">
+                                       <label class="form-label">Regular price</label>
+                                       <input placeholder="₹" name="regularPrice" type="text" id="regularPrice"
+                                           class="form-control border">
+                                           <div id="regularPrice-error" class="error-message"></div>
+                                   </div>
+                                        
+                       </div>
+                               <div class="col-lg-4">
+                                   <div class="mb-4">
+                                       <label class="form-label">Sale price</label>
+                                       <input placeholder="₹" name="salesPrice" id="salesPrice" type="text" class="form-control border">
+                                       <div id="salePrice-error" class="error-message"></div>
+                                   </div>
+                                   
+                 
+                                </div>
+
+ref-uni 
+         <!-- <div class="col-md-12"> 
+
+                <div class="card " style="width: 28rem;">
+                        <div class="card-header bg-light "> <label>  Varients  </label>
+                              <button type="button" class="btn btn-sm btn-outline-danger mx-1 "  onclick="addVarient()"> x </button>
+                        </div>
+                         
+              <ul class="list-group"> 
+                  <li class="list-group-item">   
+                       <div class="row"> 
+
+                             <div class="col-md-6 mb-2">
+                                <label class="form-label">Volume (ML)</label>                    
+                                    <input name="volume[]" type="number" id="volume" class="form-control border" placeholder="Enter volume in ML">                                   
+                                 <div id="volume-error" class="error-message"></div>
+                              </div>  
+
+                            <div class="col-md-6 col-sm-8">
+                                <label class="form-label">  Stock </label>                                                     
+                                   <input name="stock" type="number" id="stock" class="form-control border"  placeholder="Stock">
+                               <div id="stock-error" class="error-message"></div>                                         
                            </div>
+
+                          <div class="col-md-6 col-sm-4">                             
+                                <label class="form-label">Regular price</label>
+                                  <input placeholder="$" name="regularPrice" type="text" class="form-control border">
+                                       <div id="regularPrice-error" class="error-message"></div>                           
+                           </div>
+
+                              <div class="col-md-6 col-sm-4">
+                                 
+                                       <label class="form-label">Sale price</label>
+                                       <input placeholder="$" name="salesPrice" type="text" class="form-control border">
+                                       <div id="salePrice-error" class="error-message"></div>
+                                  
+                              </div>
+
+                           </div>
+                           </li>
+                                     
+                               </ul>                     
+                         </div>
+                 </div> -->
+                                
+                  
+                            
+                        
+                        
+                  </div>
+                </div>
                            
                             <!-- categories -->
 
@@ -190,7 +254,7 @@
                                         </select>
                                         <div id="subcategory-error" class="error-message"></div>
                                     </div>
-
+                                      
                                    </div>
                                </div>
                            </div>
@@ -337,16 +401,29 @@ async function validateAndSubmit(){
 
   
   function addVolumeField() {
-    const container = document.getElementById("volume-fields");
+
+
+    const container = document.getElementById("varients-field");
+
+
 
     const inputGroup = document.createElement("div");
-    inputGroup.className = "input-group mb-2";
+    inputGroup.className = "input-group mb-2 col-md-6";
+    inputGroup.style.width = "320px";
 
-    const input = document.createElement("input");
+    const input = document.createElement("input");  
     input.type = "number";
-    input.name = "volume[]";
+    input.name = "volume";
     input.className = "form-control border";
     input.placeholder = "Enter volume in ML";
+
+    const input2 = document.createElement("input");
+    input2.type = "number";
+    input2.name = "stock";
+    input2.className = "form-control border";
+    input2.placeholder = "Stock";
+    input2.style.marginLeft = "1rem";
+  
 
     const removeBtn = document.createElement("button");
     removeBtn.type = "button";
@@ -355,93 +432,143 @@ async function validateAndSubmit(){
     removeBtn.onclick = () => inputGroup.remove();
 
     inputGroup.appendChild(input);
+    inputGroup.appendChild(input2)
     inputGroup.appendChild(removeBtn);
 
     container.appendChild(inputGroup);
   }
 
+  function addVarient(){
+
+
+  const container = document.getElementById("varients-field")
+       
+     const mainCard  = document.createElement("div");
+     mainCard.className = "col-md-12";
+
+     const card = document.createElement("div");
+     card.className = "card"
+     card.style.width = "28rem";
+     
+     const header = document.createElement("div");
+     header.className = "card-header bg-light"
+     const varientText = document.createElement("label")
+     varientText.innerText = "Varients";
+
+     const removeBtn = document.createElement("button");
+     removeBtn.type = "button";
+     removeBtn.className = "btn btn-sm btn-outline-danger mx-1";
+     removeBtn.innerText = "x";
+     removeBtn.onclick = ()=> mainCard.remove()
+    
+  
+     const ul = document.createElement("ul");
+     ul.className = "list-group";
+     const li = document.createElement("li");
+     li.className= "list-group-item"
+
+     const divRow = document.createElement("div");
+      divRow.className = "row"
+    
+     const colDiv1 = document.createElement("div");
+      colDiv1.className = "col-md-6 mb-2"
+
+     const volLabel = document.createElement("label")
+      volLabel.className = "form-label"
+      volLabel.innerText = "Volume (ML)"
+     
+      const volInput = document.createElement("input");
+        volInput.type = "number";
+        volInput.name = "volume";
+        volInput.className = "form-control border"
+        volInput.placeholder = "Enter volume in ML"
+
+      const volError = document.createElement("div");
+            volError.id = "volume-error";
+            volError.className = "error-message";
+
+      const colDiv2 = document.createElement("div");
+          colDiv2.className = "col-md-6";  
+       const stockLabel = document.createElement("label");
+           stockLabel.className = "form-label"
+           stockLabel.innerText = "Stock"
+       const stockInput = document.createElement("input")  
+           stockInput.type= "nubmer";
+           stockInput.name = "stock";
+           stockInput.id = "stock";
+           stockInput.className = "form-control border"
+           stockInput.placeholder = "stock"
+       const stockError = document.createElement("div")
+            stockError.id="stock-error";
+            stockError.className = "error-message";
+
+       const colDiv3 = document.createElement("div");
+          colDiv3.className = "col-md-6";  
+       const regularPriceLabel = document.createElement("label");
+            regularPriceLabel.className = "form-label"
+           regularPriceLabel.innerText = "Regular Price"
+       const regularPriceInput = document.createElement("input")  
+           regularPriceInput.type= "number";
+           regularPriceInput.name = "regularPrice";
+           regularPriceInput.id = "regularPrice";
+           regularPriceInput.className = "form-control border"
+           regularPriceInput.placeholder = "₹"
+       const regularPriceError = document.createElement("div")
+            regularPriceError.id="regularPrice-error";
+            regularPriceError.className = "error-message";
+            
+        const colDiv4 = document.createElement("div");
+          colDiv4.className = "col-md-6";  
+       const salesPriceLabel = document.createElement("label");
+            salesPriceLabel.className = "form-label"
+            salesPriceLabel.innerText = "Sales Price"
+       const salesPriceInput = document.createElement("input")  
+           salesPriceInput.type= "number";
+           salesPriceInput.name = "salesPrice";
+           salesPriceInput.id = "salesPrice";
+           salesPriceInput.className = "form-control border"
+           salesPriceInput.placeholder = "₹"
+       const salesPriceError = document.createElement("div")
+            salesPriceError.id="salesPrice-error";
+            salesPriceError.className = "error-message";    
+
+    
+         header.appendChild(varientText)
+         header.appendChild(removeBtn)
+         card.appendChild(header)  
+         card.appendChild(ul)  
+          ul.appendChild(li)
+          li.appendChild(divRow)
+          divRow.appendChild(colDiv1)
+          colDiv1.appendChild(volLabel)
+          colDiv1.appendChild(volInput)
+          colDiv1.appendChild(volError)
+  
+        
+           colDiv2.appendChild(stockLabel)
+           colDiv2.appendChild(stockInput)
+           colDiv2.appendChild(stockError)
+           divRow.appendChild(colDiv2)
+
+           colDiv3.appendChild(regularPriceLabel)
+           colDiv3.appendChild(regularPriceInput)
+           colDiv3.appendChild(regularPriceError)
+           divRow.appendChild(colDiv3)
+
+           colDiv4.appendChild(salesPriceLabel)
+           colDiv4.appendChild(salesPriceInput)
+           colDiv4.appendChild(salesPriceError)
+           divRow.appendChild(colDiv4)
+   
+         mainCard.appendChild(card)   
+        container.appendChild(mainCard);
+
+
+  }
 
 
 
 
-
-// function viewImage1(event){
-//     document.getElementById("imgView1").src = URL.createObjectURL(event.target.files[0])
-// }
-
-// function viewImage2(event){
-//     document.getElementById("imgView2").src = URL.createObjectURL(event.target.files[0])
-// }
-
-// function viewImage3(event){
-//     document.getElementById("imgView3").src = URL.createObjectURL(event.target.files[0])
-// }
-
-// function viewImage4(event){
-//     document.getElementById("imgView4").src = URL.createObjectURL(event.target.files[0])
-// }
-
-// function viewImage(event, index) {
-//     const input = event.target;
-//     if (!input.files || input.files.length === 0) return;
-
-//     const reader = new FileReader();
-
-//     reader.onload = function () {
-//         const dataURL = reader.result;
-//         const image = document.getElementById("imgView" + index);
-//         image.src = dataURL;
-
-//         // Destroy previous cropper if any
-//         if (image.cropperInstance) {
-//             image.cropperInstance.destroy();
-//         }
-
-//         const cropper = new Cropper(image, {
-//             aspectRatio: 1,
-//             viewMode: 1,
-//             guides: true,
-//             background: false,
-//             autoCropArea: 1,
-//             zoomable: true,
-//         });
-
-//         image.cropperInstance = cropper;
-
-//         const croppedContainer = document.querySelector("#croppedImg" + index).parentNode;
-//         croppedContainer.style.display = 'block';
-
-//         const saveButton = document.getElementById("saveButton" + index);
-
-//         // Remove old listeners by replacing button
-//         const newSaveButton = saveButton.cloneNode(true);
-//         saveButton.parentNode.replaceChild(newSaveButton, saveButton);
-
-//         newSaveButton.addEventListener("click", function () {
-//             const croppedCanvas = cropper.getCroppedCanvas();
-//             const croppedImage = document.getElementById("croppedImg" + index);
-//             croppedImage.src = croppedCanvas.toDataURL();
-
-//             const timestamp = new Date().getTime();
-//             const fileName = `cropped-img-${timestamp}-${index}.png`;
-
-//             croppedCanvas.toBlob((blob) => {
-//                 const imgFile = new File([blob], fileName, { type: "image/png" });
-
-//                 const inputField = document.getElementById("input" + index);
-//                 const fileList = new DataTransfer();
-//                 fileList.items.add(imgFile);
-//                 inputField.files = fileList.files;
-
-//                 croppedContainer.style.display = 'none';
-//                 cropper.destroy();
-//                 image.cropperInstance = null;
-//             }, "image/png");
-//         });
-//     };
-
-//     reader.readAsDataURL(input.files[0]);
-// }
 
 function viewImage(event, index) {
     const input = event.target;
@@ -554,17 +681,18 @@ function validateForm() {
               clearErrorMessages();
               const name = document.getElementsByName('productName')[0].value;
               const description = document.getElementById('descriptionid').value;
-              console.log(description)
+             
             //   const brand = document.getElementsByName('brand')[0].value;
-              const price = document.getElementsByName('regularPrice')[0].value;
-              const saleprice = document.getElementsByName('salesPrice')[0].value;
+              const price = document.getElementById('regularPrice').value;
+              const saleprice = document.getElementById('salesPrice').value;
               const volume = document.getElementById('volume').value;
               const category = document.getElementsByName('categoryId')[0].value;
               const images = document.getElementById('input1')
-              const quantity=document.getElementsByName('quantity')[0].value;
+              const  stock=document.getElementById('stock').value
+              
               let isValid = true
 
-              console.log("naem",name)  
+          
               if (name.trim() === "") {
       displayErrorMessage('productName-error', 'Please enter a product name.');
       isValid = false;
@@ -596,8 +724,8 @@ function validateForm() {
            
   
   
-              if ( parseInt(quantity) < 0) {
-                  displayErrorMessage('quantity-error', 'Please enter a valid non-negative quantity.');
+              if ( parseInt(stock) < 0) {
+                  displayErrorMessage('stock-error', 'Please enter a valid non-negative quantity.');
                   isValid = false;
               }
   
@@ -617,15 +745,16 @@ function validateForm() {
                   isValid = false;
               }
               if (parseFloat(price) < parseFloat(saleprice)) {
-      displayErrorMessage('salePrice-error', 'Sale price should not be greater than regular price');
-      isValid = false;
-   }
+            
+                  displayErrorMessage('salePrice-error', 'Sale price should not be greater than regular price');
+                    isValid = false;
+               }
 
-    if (quantity.trim() === "") {
-                  displayErrorMessage('quantity-error', 'Please enter the quantity.');
+    if (stock.trim() === "") {
+                  displayErrorMessage('stock-error', 'Please enter the quantity.');
                   isValid = false;
-              } else if(parseInt(quantity)<=0){
-                displayErrorMessage('quantity-error', 'Quantity must be greater than zero')
+              } else if(parseInt(stock)<=0){
+                displayErrorMessage('stock-error', 'Quantity must be greater than zero')
               }
   
   

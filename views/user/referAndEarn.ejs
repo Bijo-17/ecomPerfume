@@ -1,0 +1,166 @@
+
+<div class="refer-earn-content">
+    <div class="refer-earn-header">
+        <h2 class="section-title">Refer & Earn</h2>
+        <p class="section-subtitle">Invite friends and earn rewards for every successful referral!</p>
+     
+    </div>
+
+    <!-- Referral Stats -->
+    <div class="referral-stats">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-number" id="totalReferrals"><%= user.referredUsers.length%></div>
+                <div class="stat-label">Total Referrals</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-coins"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-number" id="totalEarnings">₹<%= user?.referralEarnings?.toFixed(2) %></div>
+                <div class="stat-label">Total Earnings</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-wallet"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-number" id="pendingEarnings">₹0</div>
+                <div class="stat-label">Pending Earnings</div>
+            </div>
+        </div>
+
+            <p class="section-subtitle">rewards can be redeemed at the time of checkout as coupons</p>  
+    </div>
+
+
+
+    <!-- Referral Code Section -->
+    <div class="referral-code-section">
+        <h3 class="section-heading">Your Referral Code</h3>
+        <div class="referral-code-card">
+            <!-- <div class="code-display">
+                <div class="code-label">Your Referral Code</div>
+                <div class="code-value" id="referralCode">BIJO2025</div>
+                <button class="copy-code-btn" id="copyCodeBtn" onclick="copyReferralCode()">
+                    <i class="fas fa-copy"></i>
+                    <span class="copy-text">Copy</span>
+                </button>
+            </div> -->
+            <div class="referral-link">
+                <div class="link-label">Referral Link</div>
+                <div class="link-input-container">
+                    <input type="text" class="referral-link-input" id="referralLink" 
+                           value="<%=referralLink%>" readonly>
+                    <button class="copy-link-btn" id="copyLinkBtn" onclick="copyReferralLink()">
+                        <i class="fas fa-link"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+   
+
+    <!-- Referral History -->
+    <div class="referral-history">
+        <div class="history-header">
+            <h3 class="section-heading">Referral History</h3>
+            <button class="view-all-btn" onclick="toggleReferralHistory()">
+                <span id="viewAllText">View All</span>
+                <i class="fas fa-chevron-down" id="viewAllIcon"></i>
+            </button>
+        </div>
+        <div class="referral-list" id="referralList">
+            <!-- Recent Referrals -->
+          <% for(let i =0 ;i < user.referredUsers.length ; i++) { %> 
+               
+            <div class="referral-item">
+                <div class="referral-info">
+                    <div class="referral-name"><%=user.referredUsers[i].user_id.name %></div>
+                    <div class="referral-date"><%= user.referredUsers[i].user_id?.createdAt?.toLocaleString()%></div>
+                    <div class="referral-status completed">
+                        <i class="fas fa-check-circle"></i>
+                        <span>verified</span>
+                    </div>
+                </div>
+                <div class="referral-earning">
+                    <div class="earning-amount">+₹<%= user?.referredUsers[i]?.coupon_id?.offer_price%></div>
+                    <div class="earning-status">Credited</div>
+                </div>
+            </div>
+           
+            <%}%>
+
+            <!-- <div class="referral-item">
+                <div class="referral-info">
+                    <div class="referral-name">Priya S</div>
+                    <div class="referral-date">Joined on 12/01/2025</div>
+                    <div class="referral-status pending">
+                        <i class="fas fa-clock"></i>
+                        <span>Pending Purchase</span>
+                    </div>
+                </div>
+                <div class="referral-earning">
+                    <div class="earning-amount">₹200</div>
+                    <div class="earning-status">Pending</div>
+                </div>
+            </div> -->
+
+           
+
+          
+   
+
+ 
+
+</div>
+
+<!-- Success Message -->
+<div class="success-toast" id="successToast" style="display: none;">
+    <i class="fas fa-check-circle"></i>
+    <span id="successMessage">Copied to clipboard!</span>
+</div>
+
+<script>
+  
+  function copyReferralLink(){ 
+  const input = document.getElementById('referralLink')
+
+    input.select();
+    input.setSelectionRange(0, 99999); 
+
+    navigator.clipboard.writeText(input.value)
+    .then(()=>{
+         showSuccessToast('Copied to clipboard')
+    })
+    .catch((err)=>{
+        console.error("failed to copy" , err)
+        showSuccessToast('Failed to copy!')
+    })
+  }
+
+ function showSuccessToast(message) {
+    const toast = document.getElementById("successToast");
+    const toastMsg = document.getElementById("successMessage");
+
+    toastMsg.textContent = message;
+    toast.style.display = "flex";
+    toast.style.opacity = 1;
+
+    setTimeout(() => {
+      toast.style.opacity = 0;
+      setTimeout(() => {
+        toast.style.display = "none";
+      }, 300); // Wait for fade out
+    }, 2000); // Show for 2 seconds
+  }
+
+
+</script>
