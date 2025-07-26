@@ -618,6 +618,8 @@ let currentCouponName = '';
  
     currentCouponName = button.dataset.coupon_name;
 
+    console.log("name " , currentCouponName)
+
     document.getElementById('couponId').value = button.dataset.id;
     document.getElementById('couponCode').value = button.dataset.coupon_name
     document.getElementById('discount').value = button.dataset.offer_price;
@@ -687,8 +689,10 @@ function validateEditForm(e){
 
   const editedCouponName = coupons.find(c=> c.coupon_name.toLowerCase() === name.toLowerCase());
 
+  console.log("edited"  , editedCouponName.coupon_name , currentCouponName.toLowerCase())
 
-   if(editedCouponName && editedCouponName.coupon_name !== currentCouponName.toLowerCase()){
+
+   if(editedCouponName && editedCouponName.coupon_name.toLowerCase() !== currentCouponName.toLowerCase()){
        document.getElementById("error-edit-couponName").innerHTML ="Coupon Name already exists";
        return false;
      
@@ -732,7 +736,9 @@ function validateEditForm(e){
         document.getElementById("error-edit-discount").innerHTML = "Enter a value between 1 and 90";
         return false;
    }
- 
+
+
+      
      return true;
 }
 

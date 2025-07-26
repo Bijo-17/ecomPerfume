@@ -72,19 +72,16 @@
     <div class="referral-history">
         <div class="history-header">
             <h3 class="section-heading">Referral History</h3>
-            <button class="view-all-btn" onclick="toggleReferralHistory()">
-                <span id="viewAllText">View All</span>
-                <i class="fas fa-chevron-down" id="viewAllIcon"></i>
-            </button>
+
         </div>
         <div class="referral-list" id="referralList">
             <!-- Recent Referrals -->
-          <% for(let i =0 ;i < user.referredUsers.length ; i++) { %> 
+          <% for(let i = user.referredUsers.length-1 ;i >= 0 ; i--) { %> 
                
             <div class="referral-item">
                 <div class="referral-info">
-                    <div class="referral-name"><%=user.referredUsers[i].user_id.name %></div>
-                    <div class="referral-date"><%= user.referredUsers[i].user_id?.createdAt?.toLocaleString()%></div>
+                    <div class="referral-name"><%=user?.referredUsers[i]?.user_id?.name %></div>
+                    <div class="referral-date"><%= user?.referredUsers[i]?.user_id?.createdAt?.toLocaleString()%></div>
                     <div class="referral-status completed">
                         <i class="fas fa-check-circle"></i>
                         <span>verified</span>
@@ -98,25 +95,6 @@
            
             <%}%>
 
-            <!-- <div class="referral-item">
-                <div class="referral-info">
-                    <div class="referral-name">Priya S</div>
-                    <div class="referral-date">Joined on 12/01/2025</div>
-                    <div class="referral-status pending">
-                        <i class="fas fa-clock"></i>
-                        <span>Pending Purchase</span>
-                    </div>
-                </div>
-                <div class="referral-earning">
-                    <div class="earning-amount">₹200</div>
-                    <div class="earning-status">Pending</div>
-                </div>
-            </div> -->
-
-           
-
-          
-   
 
  
 

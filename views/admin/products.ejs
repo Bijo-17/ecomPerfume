@@ -246,6 +246,69 @@
             </select>                                              
           </div>
 
+       <button type="button" class="btn btn-sm btn-outline-secondary mx-3 mb-2 "  onclick="addVarient()"> Add varients+ </button>
+
+        <%  for(let j=0 ;j< varient.length; j++){ %>
+
+          <% console.log("fornt" , varient[j].product_id.toString() , data[i]._id.toString() ,i, varient.length) %>
+
+            <% if(data[i]._id.toString() === varient[j].product_id.toString()) { %> 
+             <div class="row" >   
+              <% varient[j].inventory.forEach(item=> { %> 
+               
+             <div class="col-md-6"> 
+
+                <div class="card " style="width: 28rem;">
+                        <div class="card-header bg-light "> <label>  Varients  </label>
+                              <button type="button" class="btn btn-sm btn-outline-danger mx-1 "  onclick="addVarient()"> x </button>
+                        </div>
+                         
+              <ul class="list-group"> 
+                  <li class="list-group-item">   
+                       <div class="row"> 
+
+                             <div class="col-md-6 mb-2">
+                                <label class="form-label">Volume (ML)</label>                    
+                                    <input name="volume[]" type="number" id="volume" class="form-control border" placeholder="Enter volume in ML" value="<%=item.volume%>">                                   
+                                 <div id="volume-error" class="error-message"></div>
+                              </div>  
+
+                            <div class="col-md-6 col-sm-8">
+                                <label class="form-label">  Stock </label>                                                     
+                                   <input name="stock" type="number" id="stock" class="form-control border"  placeholder="Stock" value="<%=item.stock%>">
+                               <div id="stock-error" class="error-message"></div>                                         
+                           </div>
+
+                          <div class="col-md-6 col-sm-4">                             
+                                <label class="form-label">Regular price</label>
+                                  <input placeholder="$" name="regularPrice" type="text" class="form-control border" value="<%=item.regular_price%>">
+                                       <div id="regularPrice-error" class="error-message"></div>                           
+                           </div>
+
+                              <div class="col-md-6 col-sm-4">
+                                 
+                                       <label class="form-label">Sale price</label>
+                                       <input placeholder="$" name="salesPrice" type="text" class="form-control border" value="<%=item.sales_price%>" >
+                                       <div id="salePrice-error" class="error-message"></div>
+                                  
+                              </div>
+
+                           </div>
+                           </li>
+                                     
+                               </ul>                     
+                         </div>
+                 </div>
+               
+       
+                 <% }) %>
+
+              </div>
+                 <% } } %>
+                
+
+
+
          
           <div class="mb-3">
             <label for="regularPrice" class="form-label">Regular Price</label>

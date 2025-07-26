@@ -31,7 +31,7 @@ const createCoupon = async (req, res) => {
 
         const { couponName, startDate, endDate, offerPrice, minimumPrice, couponType, maxDiscount } = req.body.formData
 
-        const existingCoupon = await Coupon.findOne({ coupon_name: { $regex: couponName, '$options': 'i' } })
+        const existingCoupon = await Coupon.findOne({ coupon_name: { $regex: `^${couponName}$`, '$options': 'i' }})
 
         if (existingCoupon) {
             return res.status(400).json({ success: false, message: "Coupon already exists!" })
@@ -57,6 +57,7 @@ const createCoupon = async (req, res) => {
         res.status(500).json({ success: false, message: "Server error" + error.message })
     }
 }
+
 
 const deleteCoupon = async (req, res) => {
     try {

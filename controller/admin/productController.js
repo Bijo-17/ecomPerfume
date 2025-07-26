@@ -171,6 +171,22 @@ const listProducts = async (req, res) => {
       .populate('brand_id')
       .exec();
 
+      const varients = await Varients.find().sort({createdAt:-1})
+
+      console.log("Varients" , varients , "vvv....\n")
+
+      const varient = varients.filter((v)=> {
+        console.log("v.id" , v)
+             return  productData.some(p=> p._id.toString() === v.product_id.toString())
+      })
+
+      console.log("productData IDs:", productData.map(p => p._id.toString()));
+console.log("varient product_ids:", varients.map(v => v.product_id?.toString()));
+
+
+      console.log("vv " , varient , "vvv")
+    
+
     const count = await Product.countDocuments(filter)
 
     const category = await Category.find({ isDeleted: false });
@@ -191,6 +207,7 @@ const listProducts = async (req, res) => {
         cat: category,
         subc: subcategory ? subcategory : "",
         search,
+        varient
 
 
       })
