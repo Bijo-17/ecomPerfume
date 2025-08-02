@@ -268,7 +268,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (confirm('Are you sure you want to cancel this order?')) {
         
 
-            console.log("show orderid ", orderId)
             
               const reason = prompt("Please enter the reason for cancellation (optional):");
 
@@ -321,18 +320,24 @@ document.addEventListener('DOMContentLoaded', function() {
             method:'POST',
             headers: {  'Content-Type' : 'application/json'},
             body: JSON.stringify({orderId})
-        }).then(res=>{
+
+        }).then(async res=>{
+
+            const data = await res.json()
             if(!res.ok){
-                    showNotification("payment retrying failed" , "error") 
+                
+                    showNotification(data.message || "payment retrying failed" , "error") 
+                    return;
             } else {
-                 return res.json();
+                 return data
 
             }
 
             })
             .then(data => { 
 
-                console.log("data" , data)
+             if(data){
+
           const options = {
             key: data.key,
             amount: data.order.amount,
@@ -355,19 +360,18 @@ document.addEventListener('DOMContentLoaded', function() {
         };
 
         const rzp = new Razorpay(options);
-        console.log("online payment done")
+     
         rzp.open();
 
         rzp.on('payment.failed', function (response){
-            console.log(response.error);
+        
            window.location.href = '/orders/failed';
        });
 
-
+      }
             
         }).catch(err=>{
 
-            console.log("error in loading payment" , err)
 
             showNotification("something went wrong "+err.message , "error")
         })
@@ -379,7 +383,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
 async function verifyPayment(paymentResponse, orderId) {
     try {
-        console.log("paymentResponse", paymentResponse , orderId)
+
         const res = await fetch('/orders/razorpay/verify', {
             method: 'POST',
             headers: {
@@ -394,7 +398,6 @@ async function verifyPayment(paymentResponse, orderId) {
 
         const result = await res.json();
 
-        console.log("result"  , result)
         if (result.success) {
             showNotification("Success", "Your payment was successful!", "success")
                 window.location.href = "/orders/success"
@@ -404,7 +407,7 @@ async function verifyPayment(paymentResponse, orderId) {
         } 
 
     } catch (error) {
-        console.error(error);
+      
         return showNotification("Could not verify payment", "error");
     }
 }
@@ -419,8 +422,6 @@ async function verifyPayment(paymentResponse, orderId) {
 window.returnProduct = function(orderId ,productId) {
     currentReturnOrderId = orderId;
     currentProductId = productId
-    console.log("return submit", orderId )
-      console.log("return submit",productId)
     document.getElementById("returnModal").classList.add("active");
     document.body.style.overflow = "hidden";
 };
@@ -441,9 +442,7 @@ window.submitReturnReason = function() {
 
     // Simulated response or API call
     showNotification("Return request submitted", "success");
-    console.log(`Returned Order: ${currentReturnOrderId}, Reason: ${reason} , ${currentProductId}`);
 
-    console.log("REORDER:", currentReturnOrderId, currentProductId);
   
     
     fetch(`/returnOrder/${encodeURIComponent(currentReturnOrderId)}/${currentProductId}`, {

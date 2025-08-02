@@ -20,7 +20,8 @@ const cartSchema = new mongoose.Schema({
                  },
                volume:{ type: Number},
                 regular_price : {type: Number},
-                sales_price : {type: Number}
+                sales_price : {type: Number},
+                stock: {type:  Number}
            } ],
 
          applied_coupon: {

@@ -7,7 +7,7 @@ const transactionSchema = new mongoose.Schema({
                 },
   transaction_date: { 
                  type: Date, 
-                default: Date.now },
+                default: new Date() },
    order_id: { 
                  type: mongoose.Schema.Types.ObjectId, 
                  ref: 'Order' 

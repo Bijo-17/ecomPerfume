@@ -57,6 +57,7 @@ const orderSchema = new mongoose.Schema({
                         type: mongoose.Schema.Types.ObjectId, 
                         ref: 'Product' },
                         quantity: { type: Number },
+                        volume: {type:Number},
                         product_price:{ type: Number },
                         delivery_charge: {type : Number},
                         order_status: { 

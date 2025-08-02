@@ -13,6 +13,8 @@ const { parse } = require('url');
 const { json } = require('stream/consumers');
 const { addAddressCheckout } = require('./addressController');
 const mongoose = require('mongoose')
+const Varients = require("../../models/varientsSchema");
+const varientsSchema = require('../../models/varientsSchema');
 
 
 
@@ -26,25 +28,40 @@ function generateOrderId() {
 }
 
 
-async function updateProductStock(productId, quantityPurchased) {
+async function updateProductStock(productId, quantityPurchased , volume) {
   try{ 
-  const product = await Product.findById(productId);
+  const varient = await Varients.findOne({product_id:productId});
 
-  const newStock = product.stock - quantityPurchased;
-  const isOutOfStock = (newStock <= 0);
+ let status ;
+     varient.inventory.forEach(item => {
+    console.log("before" , item.stock  , quantityPurchased , typeof volume)
 
-console.log("product status" , !isOutOfStock)
+    if(item.volume === volume){ 
+  
+       if( item.stock >= quantityPurchased ) {  
 
-  await Product.findByIdAndUpdate(productId, {
-    stock: newStock,
-    stock_status: !isOutOfStock
-  });
+             item.stock -= quantityPurchased 
+           console.log(item.stock , "after")
+            status = true;
+
+        } else {
+           status = false;
+        }
+
+    }
+
+  })
+
+
+  await varient.save();
+  
+  return status;
 
  
 } 
 catch(error){
    console.log("error in updating the product stock",error);
-
+   return false;
 }
 }
 
@@ -143,7 +160,7 @@ const placeOrder =  async (req,res) => {
 
     const order_items = req.session.validatedCart;
 
-    console.log(order_items , "orderitems in cart")
+   
 
     const isTypedAddress = req.body.isTypedAddress;
 
@@ -209,30 +226,24 @@ let couponDiscount = 0
 
  for(let product of  order_items.items ){ 
 
-       
-
             const productFound = await Product.findOne({_id:product.product_id._id})
 
          
            
             if(productFound){ 
               
-                if( productFound.stock < product.quantity){
-                   
-                      return res.status(400).json({success:false , message: `Not Enough stock available for the product: ${product.product_id.product_name}` });
-                }else {
-
               // update quantity    
 
-                  await updateProductStock(product.product_id._id, product.quantity);                
-                    
-                }
+                const updateStatus =  await updateProductStock(product.product_id._id, product.quantity , product.volume);                
+ 
+                if(!updateStatus) return res.status(400).json({success:false , message: `Not enough stock available for ${product.product_id.product_name}` })
                
 
                 orderedProducts.push({product_id: product.product_id._id ,
                                       quantity: product.quantity ,
-                                      product_price: product.product_id.final_price,
-                                      delivery_charge:delivery
+                                      product_price: product.sales_price,
+                                      delivery_charge:delivery,
+                                      volume : product.volume
                                      });
 
 
@@ -321,20 +332,26 @@ const razorpayPayment = async (req, res) => {
       for(let product of  order_items.items ){ 
        
             const productFound = await Product.findOne({_id:product.product_id._id})
-
-           
+       
             if(productFound){ 
+
+              const varient = await Varients.findOne({product_id: product.product_id._id})
+
+               varient.inventory.forEach(item=>{
+                     
+                       if(product.volume === item.volume && item.stock < product.quantity){
+                         return res.status(400).json({success:false , message: `Not enough stock available for ${product.product_id.product_name}` })
+                       }
+               })
                         
-              if(productFound.stock < product.quantity){
-                 return res.status(400).json({success:false , message : `Not enough stock available for ${product.product_id.product_name}`})
-              }
+          
 
                 orderedProducts.push({product_id: product.product_id._id ,
                                       quantity: product.quantity ,
-                                      product_price: product.product_id.final_price,
-                                      delivery_charge:delivery
+                                      product_price: product.sales_price,
+                                      delivery_charge:delivery,
+                                       volume : product.volume
                                      });
-
 
                   
            
@@ -504,7 +521,11 @@ const verifyRazorpayPayment = async (req, res) => {
       payload,
     } = req.body;
 
-   
+    const userId = req.session.user;
+    const order_items = req.session.validatedCart;
+
+    console.log("\n\n",order_items ,"validated cart")
+      const cart = await Cart.findOne({user_id: userId})
 
 
    const orderId = req.session.orderId;
@@ -536,11 +557,9 @@ const verifyRazorpayPayment = async (req, res) => {
     }
 
     // Step 2: Get user and cart
-    const userId = req.session.user;
+    
     const user = await User.findById(userId);
 
-
- 
 
     if (!user) {
       return res.status(400).json({
@@ -549,11 +568,27 @@ const verifyRazorpayPayment = async (req, res) => {
       });
     }
 
+    for(let product of  order_items.items ){ 
 
+            const productFound = await Product.findOne({_id:product.product_id._id })
+       
+            if(productFound){ 
+              
+              // update quantity    
+
+                const updateStatus =  await updateProductStock(product.product_id._id , product.quantity , product.volume);                
+ 
+                if(!updateStatus) return res.status(400).json({success:false , message: `Not enough stock available for ${product.product_id.product_name}` })
+
+                } else {
+                   return res.status(400).json({success:false , message : 'product not available'})
+                }
+
+      }
 
     const order = await Order.findOne({order_id : orderId}).populate('order_items.product_id');
 
-    const cart = await Cart.findOne({user_id: userId})
+  
 
     //  adding coupon to user if present
 
@@ -563,35 +598,8 @@ const verifyRazorpayPayment = async (req, res) => {
         await Order.findOneAndUpdate({order_id:orderId } ,{$set: {coupon_id: cart.applied_coupon.code , total_price:amount} })
     
     }
-
-    for(let product of  order.order_items ){ 
-       
-
-            const productFound = await Product.find({_id:product.product_id._id})
-
-           
-            if(productFound){ 
-              
-                if(product.product_id.stock < product.quantity){
-                      return res.status(400).json({success:false , message: `Not Enough stock available for the product: ${product.product_id.product_name}` });
-                }else {
-
-              // update quantity    
-
-                 await updateProductStock(product.product_id._id, product.quantity);      
-                     
-                }
-               
-
-                  
-           
-        }   else {
-             return res.status(400).json({sucess:false , message: "Product not found , Please check the cart again"})
-        }
-
-     }  
-
-   
+  
+ 
         await Cart.updateOne({ user_id:userId } ,{$set:  {items: [] , applied_coupon : null} }); // Clear cart  
 
               
@@ -632,7 +640,50 @@ const retryPayment = async (req,res)=>{
 
    if(!userId){
        return res.status(400).json({message:"Please login!"})
+
    }
+
+   const validatedCart ={};
+
+   validatedCart.items = [];
+   
+   let outOfStock = false;
+   console.log("validatge cart" , validatedCart)
+
+    for(let item of retryOrder.order_items){
+          
+        const varient = await Varients.findOne({product_id: item.product_id});
+
+        const product = await Product.findOne({_id: item.product_id})
+
+        varient.inventory.forEach(element=>{
+            if(element.volume === item.volume){
+             
+              if(item.quantity > element.stock){
+                outOfStock = true;
+                
+              }
+              
+                 validatedCart.items.push({ 
+                                      product_id: product, 
+                                      quantity: item.quantity , 
+                                      volume: item.volume , 
+                                      sales_price: element.sales_price , 
+                                       stock : element.stock 
+                                  })
+            }
+        })
+       
+    }
+
+
+    if(outOfStock){
+       console.log("out" , outOfStock)
+        return res.status(400).json({ message: `Not enough stock available, Please add product to cart and try again`})
+    }
+
+     
+
 
       const cart = await Cart.findOne({user_id: userId})
 
@@ -661,7 +712,8 @@ const retryPayment = async (req,res)=>{
     const order = await razorpay.orders.create(options);
      
     req.session.orderId = retryOrder.order_id;
-   
+    
+    req.session.validatedCart = validatedCart;
 
       return res.status(200).json({
       success: true,

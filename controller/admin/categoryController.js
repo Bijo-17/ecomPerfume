@@ -96,8 +96,9 @@ const addCategory = async (req, res) => {
 const editCategory = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, offer } = req.body;
-
+    const { name } = req.body;
+      
+    const offer = req.body.offer || 0
 
     await Category.findByIdAndUpdate(id, { name: name.trim(), category_offer: offer });
 

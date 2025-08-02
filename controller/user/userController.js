@@ -9,6 +9,7 @@ const Category = require("../../models/categorySchema")
 const jwt = require('jsonwebtoken');
 const Coupon = require("../../models/couponSchema");
 const Cart = require("../../models/cartSchema");
+const Banner = require("../../models/bannerSchema")
 
 const pageNotFound = async (req,res)=>{
     try {
@@ -332,14 +333,14 @@ const loadHome = async (req,res)=>{
        
 
           const product = await Product.find({isDeleted:false}).sort({createdAt:-1}).populate('category_id').exec()
-   
+          const banner = await Banner.find({isDeleted:false})
  
 
            if(user){
 
             return res.redirect("/home")
       }else {
-        return res.render("landingPage",{product })
+        return res.render("landingPage",{product , banner })
       }
         
         
@@ -355,15 +356,16 @@ const userHome = async (req,res)=>{
       
           const user = req.session.user;
           const product = await Product.find({isDeleted:false}).sort({createdAt:-1}).populate('category_id').exec()
-
+          const banner = await Banner.find({isDeleted:false})
+         console.log(banner.length , "len")
            if(user){
 
         const userData = await User.findOne({_id:user});
         const cart = await Cart.findOne({user_id:user})
         
-         res.render("landingPage",{user:userData ,product , cart})
+         res.render("landingPage",{user:userData ,product , cart , banner})
       }else {
-        return res.render("landingPage")
+        return res.render("landingPage" , {banner})
       }
 
 

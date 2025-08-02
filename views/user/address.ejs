@@ -113,11 +113,11 @@
                         <div class="default-badge">Default</div>
                     <% } %>
                     <div class="address-header">
-                        <h3><%= address.name %></h3>
+                        <h4><%= address.name %></h4 >
                         <span class="address-type <%= address.address_type %>"><%= address.address_type %></span>
                     </div>
                     <div class="address-content">
-                        <p><strong><%=  %></strong></p>
+                     
                         <p><%= address.address_name %></p>
                         <p><%= address.locality %>, <%= address.city %></p>
                         <p><%= address.state %> - <%= address.pin_code %></p>
@@ -155,8 +155,8 @@
 
   <% addresses.forEach(address=> { %>
 
- <div id="addressEditForm-<%= address._id %>" class="address-form"   style="display: none; position: fixed; top: 0; 
-      z-index: 9999; 
+ <div id="addressEditForm-<%= address._id %>" class="address-form"   style="display: none; position: fixed; top: 1; right:0;
+      z-index: 9999; overflow-y: auto; font-size:medium;  height: 100%;
     align-items: center; justify-content: center;"  >
         <h3>Edit Address</h3>
         <form id="editAddressForm" method="post" action="/address/editAddress">

@@ -151,7 +151,7 @@ const productDetails = async (req,res)=>{
         console.log("vaienddts" , varients)
 
         let regular_price = product.regular_price;
-        let sales_price = product.sales_price;
+        let sales_price = product.final_price;
 
         if(product.offer_price >  sales_price){
            sales_price = product.offer_price;
@@ -163,7 +163,7 @@ const productDetails = async (req,res)=>{
             varientData = varients.inventory.find(d=> d.volume === parseInt(selectedVolume))
             console.log("v" , varientData)
             regular_price = varientData.regular_price;
-            sales_price = varientData.sales_price;
+            sales_price = varientData.final_price;
             if(varientData.offer_price > sales_price){
                sales_price = varientData.offer_price;
             }
@@ -190,9 +190,7 @@ const productDetails = async (req,res)=>{
     let product_status;
 
   
-  if (product.stock_status === false) {
-            product_status = 'Out of stock';
-      } else if (product.isBlocked === true) {
+    if (product.isBlocked === true) {
             product_status = 'Unavailable';
       } else {
           product_status = '';

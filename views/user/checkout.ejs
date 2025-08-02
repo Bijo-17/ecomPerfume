@@ -151,7 +151,7 @@
   background-color: #fff3e0;
 }
 
-.coupon-card h4 {
+.coupon-card h5 {
   margin: 0;
   color: #d46a00;
 }
@@ -343,10 +343,10 @@
                         </div>
                         <div class="item-details">
                             <h4 class="item-name"><%=product.product_id.product_name%></h4>
-                            <p class="item-volume"><%=product.product_id.volume %> ML</p> 
+                            <p class="item-volume"><%=product.volume %> ML</p> 
                             <div class="item-price">
-                                <span class="current-price">₹ <%=product.product_id.final_price %>  </span>
-                                <span class="original-price">₹ <%=product.product_id.regular_price%></span>
+                                <span class="current-price">₹ <%=product.sales_price %>  </span>
+                                <span class="original-price">₹ <%=product.regular_price%></span>
                                 <span class="current-price">X <%= product.quantity%></span>
                             </div>
                         </div>
@@ -388,7 +388,7 @@
               <% coupons.forEach(coupon=>{ %>
 
                    <div class="coupon-card" >
-                       <h4><%= coupon.coupon_name.toUpperCase() %></h4>
+                       <h5><%= coupon.coupon_name.toUpperCase() %></h5>
                        <p>Get <%= coupon.discount_type === 'percentage' ? coupon.offer_price + ' %' : '₹ '+ coupon.offer_price %> off on order above ₹<%=coupon.minimum_price %></p>
                       <% if(coupon.expiry_date){ %>
                        <p>Expires at <%=coupon?.expiry_date?.toLocaleDateString()%></p>
@@ -396,7 +396,7 @@
                   </div>
              <%  }) %>
                      <%  if(!coupons || coupons.length <= 0){ %>
-                          <h5> No coupons available </h5>
+                          <h6> No coupons available </h6>
                       <% } %>
                       
              </div>
@@ -417,7 +417,7 @@
                         </div>
                         <div class="total-row">
                             <span class="total-label">Shipping</span>
-                           <% if(subtotal > 500) { %>
+                           <% if(finaltotal > 500) { %>
                                  <span class="total-value waived">
                                  <del>₹40.00</del> <span class="free-text">Free</span>
                                  </span>
@@ -429,6 +429,15 @@
                             <span class="total-label">Discount</span>
                             <span class="total-value discount" id="discount">-₹<%=discount?.toFixed(2) || 0.00 %></span>
                         </div>
+                        <% if(couponDiscount ) { %> 
+                         <div class="total-row discount-row"> 
+                            <span class="total-label">Coupon discount</span>
+                            <span class="total-value discount" id="couponDiscount" >-₹<%=couponDiscount?.toFixed(2) || 0.00 %></span>
+                        </div>
+                        <% } %>
+                         <div class="total-row discount-row" id="couponDiscountDiv"> </div>
+                            
+                        
                         <div class="total-row final-total">
                             <span class="total-label">Total</span>
                             <span class="total-value" id="finalTotal">₹ <%= finaltotal.toFixed(2)%></span>
@@ -915,9 +924,11 @@ async function verifyPayment(paymentResponse, orderId, payload) {
            if(response.ok){ 
 
                    document.getElementById('discount-error').textContent = data.message                  
-                   document.getElementById('discount').textContent = "-₹" + data.discount.toFixed(2)
+                  
                    document.getElementById('finalTotal').textContent =   "₹" + data.total.toFixed(2)
 
+
+                const couponDiscountDiv = document.getElementById('couponDiscountDiv')
                 const discountSection = document.querySelector('.discount-section');
 
 
@@ -930,6 +941,13 @@ async function verifyPayment(paymentResponse, orderId, payload) {
                               </div>
                                <button type="button" class="remove-coupon-btn" id="removeCouponBtn">×</button>
                               </div>
+                            `;
+
+                            couponDiscountDiv.innerHTML = `
+                                  
+                                   <span class="total-label">Coupon discount</span>
+                                   <span class="total-value discount" id="couponDiscount">-₹${data.discount.toFixed(2)}</span>
+                                 
                             `;
 
                       document.getElementById('removeCouponBtn').addEventListener('click', async () => {
@@ -949,7 +967,7 @@ async function verifyPayment(paymentResponse, orderId, payload) {
              }
 
             }catch(err){
-                console.log("server error" ,error)
+                window.location.reload();
             }
 
             }
@@ -974,7 +992,7 @@ async function verifyPayment(paymentResponse, orderId, payload) {
             document.querySelectorAll('.coupon-card').forEach(card=>{
                   card.addEventListener('click', ()=>{
                        document.getElementById('discount-error').textContent = '' ;
-                      const couponCode = card.querySelector('h4').innerText.trim();
+                      const couponCode = card.querySelector('h5').innerText.trim();
                       applayCoupon(couponCode)
                   })
             })

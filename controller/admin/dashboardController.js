@@ -452,7 +452,7 @@ const exportSalesReport = async (req, res) => {
       endDate
     );
 
-
+ console.log('start' , startDate , endDate , singleDate , !singleDate ,  !startDate , !endDate)
     query = {
       createdAt: { $gte: start, $lte: end },
     };
@@ -506,6 +506,10 @@ const exportSalesReport = async (req, res) => {
     }
     if (startDate) {
       dateRangeStr = startDate + ' to ' + endDate;
+    }
+
+    if(!singleDate && !startDate && !endDate){
+          dateRangeStr  = 'All'
     }
 
     // Generate the appropriate file format
@@ -622,6 +626,8 @@ function getDateRange(reportType, singleDate, startDate, endDate) {
 //Export to PDF
 async function exportToPdf(res, orders, summary) {
   try {
+    
+
     // Create a new PDF document (explicitly set to portrait)
     const doc = new PDFDocument({ margin: 50, layout: "portrait" });
 
@@ -682,7 +688,7 @@ async function exportToPdf(res, orders, summary) {
       "Total",
     ];
     // Adjusted column widths to fit payment method and discount while maintaining portrait layout
-    const columnWidths = [70, 70, 80, 75, 60, 60, 65];
+    const columnWidths = [70, 70, 65 , 90, 65, 65, 65];
     let currentLeft = 50; // starting from left margin
 
     // Draw table header
@@ -757,7 +763,7 @@ async function exportToPdf(res, orders, summary) {
       // Format date
       const orderDate = new Date(order.createdAt).toLocaleDateString('en-IN');
 
-      // Draw row - UPDATED to include payment method and discount
+      // Draw row - 
       currentLeft = 50;
       [
         order._id.toString().substring(0, 6) + "...",
@@ -778,7 +784,7 @@ async function exportToPdf(res, orders, summary) {
       ].forEach((text, i) => {
         doc.text(text, currentLeft, rowTop, {
           width: columnWidths[i],
-          align: i >= 5 ? "right" : "left", // Right align monetary values
+          align: i >= 7 ? "right" : "left", // Right align monetary values
         });
         currentLeft += columnWidths[i];
       });
@@ -826,13 +832,21 @@ async function exportToPdf(res, orders, summary) {
     doc.text(`₹${summary.totalRevenue.toFixed(2)}`, totalsStartX, rowTop);
 
     // Add generation timestamp
+
+    if (doc.y + 30 > doc.page.height - 50) {
+        doc.addPage();
+    }
+
+     // Set Y to bottom minus margin
+       const footerY = doc.page.height - 30;
+
     doc
-      .fontSize(8)
+      .fontSize(8) 
       .font("Unicode")
       .text(
         `Generated on ${new Date().toLocaleString()}`,
         50,
-        doc.page.height - 30,
+        footerY,
         { align: "center" }
       );
 

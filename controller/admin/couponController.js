@@ -7,12 +7,20 @@ const getCoupon = async (req, res) => {
 
         const coupon = await Coupon.find()
 
+        const date = new Date()
+        date.setHours(0,0,0,0)
+
+        console.log("date" ,date)
+
         for (let c of coupon) {
-            if (c.expiry_date && c.expiry_date < Date.now()) {
+            if (c.expiry_date && c.expiry_date < date) {
+                console.log(c.expiry_date , date , "date")
                 c.isActive = false
                 await c.save();
             }
         };
+
+        
 
 
         res.render("coupon", { coupon })

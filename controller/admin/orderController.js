@@ -174,7 +174,7 @@ const approveReturn = async (req, res) => {
 
         } else {
 
-            await Transaction.findOneAndUpdate({ user_id: userId }, { amount: refundAmount, status: 'credited' })
+            await Transaction.findOneAndUpdate({ user_id: userId }, { amount: refundAmount, status: 'credited' , order_id:order.id , transaction_date: new Date() })
 
         }
 

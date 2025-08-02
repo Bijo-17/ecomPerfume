@@ -82,10 +82,10 @@
                   <% } %>
                   <td><%= item.product_id.product_name%> x (<%= item.quantity%>) </td>
                   <td>
-               <% if(item.order_status === 'returned'){ %> 
+               <% if(item.order_status === 'returned' || item.order_status === 'failed' ){ %> 
 
-                  <span class="badge badge-sealed" title="Returned — No further actions allowed">
-                      <i class="fas fa-lock"></i> Returned
+                  <span class="badge badge-sealed" title="No further actions allowed">
+                      <i class="fas fa-lock"></i> <%= item.order_status.toUpperCase() %>
                  </span>
 
                 <% } else {  %>

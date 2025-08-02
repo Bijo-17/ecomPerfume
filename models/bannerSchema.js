@@ -4,7 +4,7 @@ const bannerSchema = new mongoose.Schema({
         title: { 
             type: String
         },
-        banner_img: [{ type: String }],
+        banner_img: { type: String },
       start_date: { 
                     type: Date 
                 },
@@ -18,7 +18,10 @@ const bannerSchema = new mongoose.Schema({
         isDeleted:{
                     type: Boolean,
                     default:false
-                  }         
+                  },
+            link: {
+                     type: String
+            }               
 }, { timestamps: true });
 
 module.exports = mongoose.model('Banner', bannerSchema);

@@ -40,7 +40,7 @@ const addBrand = async (req, res) => {
 
       const image = req.file ? req.file.filename : null;
 
-
+console.log("imsge" , image)
       const brand = await Brand.findOne({ name: { $regex: `^${details.name.trim()}$`, $options: 'i' }, isDeleted: false })
 
 

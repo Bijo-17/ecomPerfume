@@ -268,14 +268,15 @@
 
                            <!-- // new code for croppig image -->
 
-                           <div class="row">
-  <div class="card-body align-items-center" style="margin-bottom: 20px;">
+  <div class="row">
+
+   <div class="card-body align-items-center" style="margin-bottom: 20px;">
     <input class="form-control" type="file" name="images" id="input1"
       accept="image/png, image/jpeg, image/jpg, image/webp "
       onchange="viewImage(event, 1)">
   </div>
   <div class="image-cropper d-flex align-items-center flex-column" id="cropperContainer1"
-    style="display:none; width: 300px; height: auto; margin-bottom: 20px;">
+    style=" width: 300px; height: auto; margin-bottom: 20px;">
     <img src="" id="imgView1" alt="" style="max-width: 100%;">
    
     <img src="" id="croppedImg1" alt="" style="margin-top: 10px;">
@@ -290,7 +291,7 @@
       onchange="viewImage(event, 2)">
   </div>
   <div class="image-cropper d-flex align-items-center flex-column" id="cropperContainer2"
-    style="display:none; width: 300px; height: auto; margin-bottom: 20px;">
+    style=" width: 300px; height: auto; margin-bottom: 20px;">
     <img src="" id="imgView2" alt="" style="max-width: 100%;">
    
     <img src="" id="croppedImg2" alt="" style="margin-top: 10px;">
@@ -360,6 +361,11 @@
            </div>
        </div>
    </section>
+
+   <script type="application/json" id="subcat">
+         <%- JSON.stringify(subcat) %>
+</script>
+
 <script src="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.js"></script>
 
 
@@ -377,7 +383,9 @@ async function validateAndSubmit(){
        
    // subcategory filtering
 
-   const allSubcategory = <%- JSON.stringify(subcat) %>;
+
+  const rawSubcat = document.getElementById('subcat').textContent;
+  const allSubcategory = JSON.parse(rawSubcat)
 
   
    function filterSubcategories(){
@@ -400,43 +408,7 @@ async function validateAndSubmit(){
    }
 
   
-  function addVolumeField() {
 
-
-    const container = document.getElementById("varients-field");
-
-
-
-    const inputGroup = document.createElement("div");
-    inputGroup.className = "input-group mb-2 col-md-6";
-    inputGroup.style.width = "320px";
-
-    const input = document.createElement("input");  
-    input.type = "number";
-    input.name = "volume";
-    input.className = "form-control border";
-    input.placeholder = "Enter volume in ML";
-
-    const input2 = document.createElement("input");
-    input2.type = "number";
-    input2.name = "stock";
-    input2.className = "form-control border";
-    input2.placeholder = "Stock";
-    input2.style.marginLeft = "1rem";
-  
-
-    const removeBtn = document.createElement("button");
-    removeBtn.type = "button";
-    removeBtn.className = "btn btn-outline-danger";
-    removeBtn.innerText = "-";
-    removeBtn.onclick = () => inputGroup.remove();
-
-    inputGroup.appendChild(input);
-    inputGroup.appendChild(input2)
-    inputGroup.appendChild(removeBtn);
-
-    container.appendChild(inputGroup);
-  }
 
   function addVarient(){
 
@@ -583,8 +555,7 @@ function viewImage(event, index) {
         const croppedImage = document.getElementById("croppedImg" + index);
         croppedImage.src = dataURL;
 
-        const croppedContainer = croppedImage.parentNode;
-        croppedContainer.style.display = 'flex';
+       
 
         // Destroy previous cropper if exists
         if (croppedImage.cropperInstance) {
@@ -622,7 +593,6 @@ function viewImage(event, index) {
                 fileList.items.add(imgFile);
                 inputField.files = fileList.files;
 
-                croppedContainer.style.display = 'none';
                 cropper.destroy();
                 croppedImage.cropperInstance = null;
             }, "image/png");
@@ -635,6 +605,7 @@ function viewImage(event, index) {
 
 
 const selectedImages = [];
+
 document.getElementById("input1").addEventListener("change",handleFileSelect)
 
 

@@ -102,7 +102,25 @@
 
         <!-- Sales Price -->
         <td>₹ <%= data[i].sales_price %></td>
-           <td>₹ <%= data[i].final_price %></td>
+
+         <!-- final price -->
+
+           <td>   
+                 <% for(let k = 0 ; k< varient.length ; k++){ %> 
+
+                 
+                                
+                   <% if( data[i]?.varients_id?.toString() === varient[k]?._id?.toString() ){ %>
+
+                                   
+                  <% varient[k]?.inventory.forEach(item=> { %> 
+                         ₹ <%= item.final_price %> <br>
+
+                  <% }) %>
+                  <% } %> 
+                  <% } %>
+
+             </td>
         <!-- Offer Price -->
         <td>
             <% if (!data[i].offer_price) { %>
@@ -130,12 +148,16 @@
 
         <!-- Stock -->
         <td>
-              <% if(data[i].stock === 0) {%>
-                 —
+          <% for(let k =0 ; k< varient.length ; k++){ %> 
+              <% if( data[i]?.varients_id?.toString() === varient[k]?._id?.toString() ){ %>
+                <% varient[k].inventory.forEach(item=> { %> 
+              <% if(item.stock === 0) {%>
+                 — <br>
                <%}else{%>
-                 <%=data[i].stock %>
+                 <%=item.stock %> <br>
                  <%}%>
-
+                 <% }) %>
+             <% } }  %>
         </td>
 
         <!-- Action -->
@@ -201,7 +223,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <form id="editProductForm" method="post" action="/admin/products/edit/<%=data[i]._id%>?_method=PATCH" enctype="multipart/form-data">
+        <form id="editProductForm" method="post" action="/admin/products/edit/<%=data[i]._id%>?_method=PATCH&page=<%=currentPage%>" enctype="multipart/form-data">
           <input type="hidden" name="productId" id="productId" value="<%=data[i]._id%>">
           <div class="mb-3">
             <label for="productName" class="form-label">Product Name</label>
@@ -246,21 +268,19 @@
             </select>                                              
           </div>
 
-       <button type="button" class="btn btn-sm btn-outline-secondary mx-3 mb-2 "  onclick="addVarient()"> Add varients+ </button>
-
+       <button type="button" class="btn btn-sm btn-outline-secondary mx-3 mb-2 "  onclick="addVarient('<%=i%>')"> Add varients+ </button>
+      <div class="row" id="varients-field-<%=i%>">   
         <%  for(let j=0 ;j< varient.length; j++){ %>
 
-          <% console.log("fornt" , varient[j].product_id.toString() , data[i]._id.toString() ,i, varient.length) %>
-
             <% if(data[i]._id.toString() === varient[j].product_id.toString()) { %> 
-             <div class="row" >   
+       
               <% varient[j].inventory.forEach(item=> { %> 
                
              <div class="col-md-6"> 
 
                 <div class="card " style="width: 28rem;">
                         <div class="card-header bg-light "> <label>  Varients  </label>
-                              <button type="button" class="btn btn-sm btn-outline-danger mx-1 "  onclick="addVarient()"> x </button>
+                              <button type="button" class="btn btn-sm btn-outline-danger mx-1 "  onclick="removeVarient(this)"> x </button>
                         </div>
                          
               <ul class="list-group"> 
@@ -275,20 +295,20 @@
 
                             <div class="col-md-6 col-sm-8">
                                 <label class="form-label">  Stock </label>                                                     
-                                   <input name="stock" type="number" id="stock" class="form-control border"  placeholder="Stock" value="<%=item.stock%>">
+                                   <input name="stock[]" type="number" id="stock" class="form-control border"  placeholder="Stock" value="<%=item.stock%>">
                                <div id="stock-error" class="error-message"></div>                                         
                            </div>
 
                           <div class="col-md-6 col-sm-4">                             
                                 <label class="form-label">Regular price</label>
-                                  <input placeholder="$" name="regularPrice" type="text" class="form-control border" value="<%=item.regular_price%>">
+                                  <input placeholder="$" name="regular_price[]" type="number" class="form-control border" value="<%=item.regular_price%>">
                                        <div id="regularPrice-error" class="error-message"></div>                           
                            </div>
 
                               <div class="col-md-6 col-sm-4">
                                  
                                        <label class="form-label">Sale price</label>
-                                       <input placeholder="$" name="salesPrice" type="text" class="form-control border" value="<%=item.sales_price%>" >
+                                       <input placeholder="$" name="sales_price[]" type="number" class="form-control border" value="<%=item.sales_price%>" >
                                        <div id="salePrice-error" class="error-message"></div>
                                   
                               </div>
@@ -303,14 +323,14 @@
        
                  <% }) %>
 
-              </div>
+          
                  <% } } %>
                 
-
+            </div>
 
 
          
-          <div class="mb-3">
+          <!-- <div class="mb-3">
             <label for="regularPrice" class="form-label">Regular Price</label>
             <input type="number" class="form-control" id="regularPrice" name="regular_price" value="<%=data[i].regular_price%>">
           </div>
@@ -322,13 +342,13 @@
 
           <div class="mb-3">
             <label for="volume" class="form-label">Volume (ML)</label>
-            <input type="text" class="form-control" id="volume" name="volume[]" value="<%=data[i].volume%>">
+            <input type="text" class="form-control" id="volume" name="volume" value="<%=data[i].volume%>">
           </div>
          
           <div class="mb-3">
             <label for="stock" class="form-label">Stock</label>
             <input type="number" class="form-control" id="stock" name="stock" value="<%=data[i].stock%>">
-          </div>
+          </div> -->
 
         
         <div class="product-container" data-product-id="<%= data[i]._id %>">
@@ -410,9 +430,7 @@
 <%}%>
 
 
-<script type="application/json" id="subcat">
-         <%- JSON.stringify(subcat) %>
-</script>
+
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
@@ -648,7 +666,7 @@ function closeCropModal(productId) {
       const wrapper = button.closest('.position-relative'); 
     const container = button.closest('.image-container');
 
-    console.log(button , "button" , wrapper)
+
 
     if(!container) return;
 
@@ -656,7 +674,7 @@ function closeCropModal(productId) {
   
     const cancelBtn = wrapper.querySelector('.cancel-btn');
 
-    console.log("canec " , cancelBtn) 
+  
  
 
     if (container.classList.contains('marked-for-deletion')) {
@@ -703,6 +721,185 @@ function showCancelButton(container, show) {
   
   });
 });
+
+
+
+  function addVarient(i){
+
+
+  const container = document.getElementById(`varients-field-${i}`)
+       
+     const mainCard  = document.createElement("div");
+     mainCard.className = "col-md-6";
+
+     const card = document.createElement("div");
+     card.className = "card"
+     card.style.width = "28rem";
+     
+     const header = document.createElement("div");
+     header.className = "card-header bg-light"
+     const varientText = document.createElement("label")
+     varientText.innerText = "Varients";
+
+     const removeBtn = document.createElement("button");
+     removeBtn.type = "button";
+     removeBtn.className = "btn btn-sm btn-outline-danger mx-1";
+     removeBtn.innerText = "x";
+     removeBtn.onclick = ()=> mainCard.remove()
+    
+  
+     const ul = document.createElement("ul");
+     ul.className = "list-group";
+     const li = document.createElement("li");
+     li.className= "list-group-item"
+
+     const divRow = document.createElement("div");
+      divRow.className = "row"
+    
+     const colDiv1 = document.createElement("div");
+      colDiv1.className = "col-md-6 mb-2"
+
+     const volLabel = document.createElement("label")
+      volLabel.className = "form-label"
+      volLabel.innerText = "Volume (ML)"
+     
+      const volInput = document.createElement("input");
+        volInput.type = "number";
+        volInput.name = "volume[]";
+        volInput.className = "form-control border"
+        volInput.placeholder = "Enter volume in ML"
+
+      const volError = document.createElement("div");
+            volError.id = "volume-error";
+            volError.className = "error-message";
+
+      const colDiv2 = document.createElement("div");
+          colDiv2.className = "col-md-6";  
+       const stockLabel = document.createElement("label");
+           stockLabel.className = "form-label"
+           stockLabel.innerText = "Stock"
+       const stockInput = document.createElement("input")  
+           stockInput.type= "nubmer";
+           stockInput.name = "stock[]";
+           stockInput.id = "stock";
+           stockInput.className = "form-control border"
+           stockInput.placeholder = "stock"
+       const stockError = document.createElement("div")
+            stockError.id="stock-error";
+            stockError.className = "error-message";
+
+       const colDiv3 = document.createElement("div");
+          colDiv3.className = "col-md-6";  
+       const regularPriceLabel = document.createElement("label");
+            regularPriceLabel.className = "form-label"
+           regularPriceLabel.innerText = "Regular Price"
+       const regularPriceInput = document.createElement("input")  
+           regularPriceInput.type= "number";
+           regularPriceInput.name = "regular_price[]";
+           regularPriceInput.id = "regularPrice";
+           regularPriceInput.className = "form-control border"
+           regularPriceInput.placeholder = "₹"
+       const regularPriceError = document.createElement("div")
+            regularPriceError.id="regularPrice-error";
+            regularPriceError.className = "error-message";
+            
+        const colDiv4 = document.createElement("div");
+          colDiv4.className = "col-md-6";  
+       const salesPriceLabel = document.createElement("label");
+            salesPriceLabel.className = "form-label"
+            salesPriceLabel.innerText = "Sales Price"
+       const salesPriceInput = document.createElement("input")  
+           salesPriceInput.type= "number";
+           salesPriceInput.name = "sales_price[]";
+           salesPriceInput.id = "salesPrice";
+           salesPriceInput.className = "form-control border"
+           salesPriceInput.placeholder = "₹"
+       const salesPriceError = document.createElement("div")
+            salesPriceError.id="salesPrice-error";
+            salesPriceError.className = "error-message";    
+
+    
+         header.appendChild(varientText)
+         header.appendChild(removeBtn)
+         card.appendChild(header)  
+         card.appendChild(ul)  
+          ul.appendChild(li)
+          li.appendChild(divRow)
+          divRow.appendChild(colDiv1)
+          colDiv1.appendChild(volLabel)
+          colDiv1.appendChild(volInput)
+          colDiv1.appendChild(volError)
+  
+        
+           colDiv2.appendChild(stockLabel)
+           colDiv2.appendChild(stockInput)
+           colDiv2.appendChild(stockError)
+           divRow.appendChild(colDiv2)
+
+           colDiv3.appendChild(regularPriceLabel)
+           colDiv3.appendChild(regularPriceInput)
+           colDiv3.appendChild(regularPriceError)
+           divRow.appendChild(colDiv3)
+
+           colDiv4.appendChild(salesPriceLabel)
+           colDiv4.appendChild(salesPriceInput)
+           colDiv4.appendChild(salesPriceError)
+           divRow.appendChild(colDiv4)
+   
+         mainCard.appendChild(card)   
+        container.appendChild(mainCard);
+
+
+  }
+
+  function addVarients(i) {
+    const container = document.getElementById(`varients-field-${i}`);
+
+    // Create a main wrapper
+    const mainCard = document.createElement("div");
+    mainCard.className = "col-md-6 mb-3";
+
+    mainCard.innerHTML = `
+        <div class="card" style="width: 28rem;">
+            <div class="card-header bg-light">
+                <label>Varients</label>
+                <button type="button" class="btn btn-sm btn-outline-danger mx-1" onclick="removeVarient(this)">x</button>
+            </div>
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <label class="form-label">Volume (ML)</label>
+                            <input name="volume" type="number" class="form-control border" placeholder="Enter volume in ML">
+                            <div class="error-message"></div>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <label class="form-label">Stock</label>
+                            <input name="stock" type="number" class="form-control border" placeholder="Stock">
+                            <div class="error-message"></div>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <label class="form-label">Regular Price</label>
+                            <input name="regular_price" type="text" class="form-control border" placeholder="$">
+                            <div class="error-message"></div>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <label class="form-label">Sale Price</label>
+                            <input name="sales_price" type="text" class="form-control border" placeholder="$">
+                            <div class="error-message"></div>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    `;
+
+    container.appendChild(mainCard);
+}
+
+  function removeVarient(button){ 
+      button.closest(".col-md-6").remove();
+  }
 
 
 

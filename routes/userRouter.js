@@ -110,7 +110,7 @@ router.get("/wishlist/remove/:productId",userAuth,wishlistController.removeProdu
 
 router.get("/cart",cartController.getCart);
 router.post("/addTocart/:id",cartController.addToCart)
-router.get("/cart/remove/:id",userAuth,cartController.removeProduct)
+router.get("/cart/remove/:id/:volume",userAuth,cartController.removeProduct)
 router.post("/cart/validate-before-checkout",userAuth,cartController.validateCart)
 router.get("/checkout",userAuth,cartController.checkout)
 router.post("/updateCart",userAuth,cartController.updateCart)

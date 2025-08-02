@@ -12,7 +12,7 @@ const varientSchema  = new mongoose.Schema({
                                     stock: {type: Number},
                                     regular_price: {type: Number},
                                     sales_price : {type: Number},
-                                    offer_price : {type: Number , default: 0}
+                                    final_price : {type: Number}
 
                        }],
                      

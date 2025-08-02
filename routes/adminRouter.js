@@ -72,7 +72,10 @@ router.post('/test-upload', uploads.single('image'), (req, res) => {
 
 // banner mangement
 
-router.get('/banner',bannerController.loadBannerPage)
+router.get('/banner',adminAuth,bannerController.loadBannerPage)
+router.get('/addBanner',adminAuth,bannerController.addBannerPage)
+router.post('/addBanner', adminAuth,uploads.single('image'),bannerController.addBanner)
+router.get('/deleteBanner/:id',adminAuth,bannerController.deleteBanner)
 
 
 // produc management 

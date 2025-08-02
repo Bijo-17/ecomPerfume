@@ -34,7 +34,7 @@
                     <!-- Cart Item -->
                      <% cart?.items.forEach((product, i)=> {  %>
 
-                   <div class="cart-item <%= (!product.product_id.stock_status || product.product_id.isBlocked || product.product_id.isDeleted || product.product_id.stock === 0) ? 'unavailable' : '' %>" data-product-id="<%=product.product_id._id%>">
+                   <div class="cart-item <%= (!product.product_id.stock_status || product.product_id.isBlocked || product.product_id.isDeleted || product.stock < 1) ? 'unavailable' : '' %>" data-product-id="<%=product.product_id._id%>">
                       
                    
                         <div class="product-info">
@@ -63,7 +63,7 @@
                                     <span class="rating-count">(<%=product.product_id.ratingCount%>)</span>
                                 </div> </a>
                                 <p class="product-quantity-info">Qty : <%=product.volume%> ML</p>
-                                <a href="/cart/remove/<%=product.product_id._id%>">  <button class="remove-btn">Remove</button> </a>
+                                <a href="/cart/remove/<%=product.product_id._id%>/<%=product.volume%>">  <button class="remove-btn">Remove</button> </a>
                             </div>
                         </div>  
                         <div class="product-price">
@@ -73,22 +73,22 @@
                         <div class="quantity-controls-wrapper">
                             <div class="quantity-controls d-flex gap-2 align-items-center">
                             <button class="qty-btn minus" data-action="decrease"
-                              <%= (!product.product_id.stock_status || product.product_id.isBlocked || product.product_id.isDeleted) ? 'disabled' : '' %>>-</button>
-                            <input type="number" class="qty-input" value="<%=product.quantity%>"  min="2" max="5" data-id="<%=product.product_id._id%>" data-stock="<%=product.product_id.stock%>"  data-volume="<%=product.volume%>" 
-                              <%= (!product.product_id.stock_status || product.product_id.isBlocked || product.product_id.isDeleted) ? 'disabled' : '' %> >
+                              <%= (product.stock < 1 || product.product_id.isBlocked || product.product_id.isDeleted) ? 'disabled' : '' %>>-</button>
+                            <input type="text" readonly class="qty-input" value="<%=product.quantity%>"  min="2" max="5" data-id="<%=product.product_id._id%>" data-stock="<%=product.stock%>"  data-volume="<%=product.volume%>" 
+                              <%= (product.stock < 1 || product.product_id.isBlocked || product.product_id.isDeleted) ? 'disabled' : '' %> >
                             <button class="qty-btn plus" data-action="increase" 
-                              <%= (!product.product_id.stock_status || product.product_id.isBlocked || product.product_id.isDeleted) ? 'disabled' : '' %>>+</button> 
+                              <%= (product.stock < 1 || product.product_id.isBlocked || product.product_id.isDeleted) ? 'disabled' : '' %>>+</button> 
                             </div>                      
                              <div class="quantity-error" id="quantity-error<%=product.product_id._id%><%=i%>" style="color: red; font-size: 0.8rem; display: inline-block; margin-top: 4px;" ></div>     
                         </div>
                         <div class="item-total" >
-                            <span class="total-price">₹<%= (product.quantity * product.product_id.final_price).toFixed(2)%></span>
-                            <span class="original-price">₹<%= (product.quantity * product.product_id.regular_price).toFixed(2)%></span>
+                            <span class="total-price">₹<%= (product.quantity * product.sales_price).toFixed(2)%></span>
+                            <span class="original-price">₹<%= (product.quantity * product.regular_price).toFixed(2)%></span>
                         </div>
 
                         <div class="product-error error-msg">
 
-                           <% if(!product.product_id.stock_status || product.product_id.stock === 0) { %> 
+                           <% if(product.stock < 1) { %> 
                                                            <div class="error-msg" > Out of stock   </div>
                         
                                                          <% } else if(product.product_id.isBlocked ||product.product_id.isDeleted ){ %> 
@@ -187,7 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const regularPrice = item.querySelector(".regular-price").textContent.replace("₹" ,"");
         const salesPrice = item.querySelector(".current-price").textContent.replace("₹","")
 
-        console.log("vol" , regularPrice , salesPrice)
+        console.log("vol" , regularPrice , salesPrice ,  currentQty , maxStock)
 
     
    
@@ -208,8 +208,9 @@ document.addEventListener('DOMContentLoaded', () => {
         input.value = newQty;
 
         updateItemTotal(item, newQty);
+        console.log("newqty" , newQty)
 
-        if(newQty < maxStock ){ 
+        if(newQty <= maxStock ){ 
         
         const response = await fetch('/updateCart',{
              method:'POST',
@@ -272,7 +273,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function attachEventListeners() {
         cartItems.forEach((item, index) => {
             const minusBtn = item.querySelector('.minus');
-            const plusBtn = item.querySelector('.plus');
+            const plusBtn = item.querySelector('.plus'); 
             const qtyInput = item.querySelector('.qty-input');
             
 
