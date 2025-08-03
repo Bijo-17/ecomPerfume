@@ -54,7 +54,7 @@ const addProducts = async (req, res) => {
           const originalImagePath = req.files[i].path;
           const resizedImagePath = path.join('public', 'uploads', 'product-images', req.files[i].filename);
           await sharp(originalImagePath).resize({ width: 440, height: 440 }).toFile(resizedImagePath);
-
+          fs.unlinkSync(originalImagePath)
           images.push('/uploads/images/' + req.files[i].filename);
         }
       }
@@ -384,7 +384,7 @@ const editProduct = async (req, res) => {
     const productId = req.params.id;
     const page = parseInt(req.query.page) || 1
   
-   
+   console.log("req.body" , req.body)
 
     const imageToDelete = JSON.parse(req.body.imagesToDelete || '')
 
@@ -408,7 +408,8 @@ const editProduct = async (req, res) => {
 
 
     const indexes = req.body.changedImageIndexes.split(",")
-
+  
+    console.log('req.files' , req.files)
 
     if (req.files && req.files.length > 0) {
       const images = existing.image;
@@ -418,20 +419,35 @@ const editProduct = async (req, res) => {
         await sharp(req.files[i].path)
           .resize({ width: 440, height: 440 })
           .toFile(resizedImagePath);
-
-        images[indexes[i]] = ('/uploads/images/' + req.files[i].filename);
+         
+        images[indexes[i]] = ('/uploads/product-images/' + req.files[i].filename);
+        fs.unlinkSync(req.files[i].path)
       }
       updatedFields.image = images;
     }
 
-    if (imageToDelete) {
+
+    if (imageToDelete && imageToDelete.length>0) {
       const images = existing.image;
 
       const indexesToDelete = imageToDelete.map(i => parseInt(i))
 
       const filteredImages = images.filter((_, index) => !indexesToDelete.includes(index))
- 
+     
+      const deleteImage = images.filter(( (_, index) => indexesToDelete.includes(index) ))
+   
 
+       for(let d of deleteImage){
+       
+         let imagePath  = path.join(__dirname ,'../../public', d)
+     
+         if(fs.existsSync(imagePath)){ 
+      
+            fs.unlinkSync(imagePath)
+
+           }
+           
+       }
       updatedFields.image = filteredImages;
 
     } 

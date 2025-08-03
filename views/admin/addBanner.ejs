@@ -269,19 +269,9 @@ body {
            }
 
 
-           if (!eDate) {
-               displayErrorMessage("error-end-date", 'End date is required');
-               isValid = false;
-           }
-
-
-           const sDateObj = new Date(sDate);
-           const eDateObj = new Date(eDate);
-           const todayDateObj = new Date();
-           todayDateObj.setHours(0, 0, 0, 0);
 
        
-           if (sDate > eDate) {
+           if (eDate && sDate > eDate) {
             
                displayErrorMessage('error-end-date' , 'End date should be after the start date');
                isValid = false;

@@ -11,7 +11,6 @@ const couponController = require("../controller/admin/couponController")
 const dashboardController = require("../controller/admin/dashboardController")
 const bannerController = require("../controller/admin/bannerController")
 
-const multer = require('multer')
 
 const uploads = require("../helpers/multer")
 const {adminAuth} = require("../middlewares/auth")

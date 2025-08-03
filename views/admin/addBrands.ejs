@@ -87,8 +87,8 @@
             </div>
             <label for="product_name" class="form-label">Brand Image</label>
             <div class="input-upload">
-              <img src="" alt=""/>
-              <input class="form-control border" name="image" type="file" />
+              <img src="" alt="" id="uploadImage"/>
+              <input class="form-control border" name="image" type="file" onchange="viewImage(event)" />
             </div>
             <div class="d-grid">
               <button class="btn btn-primary mt-20" type="submit">
@@ -224,8 +224,8 @@
    </div>
 
    
-        <%data.forEach(brand=>{ %>
-
+        <%data.forEach((brand, index)=>{ %>
+         <% console.log("Front end -brand"   , brand)  %>
         <div class="modal fade" id="editBrandModal<%=brand._id%>" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog">
     <form action="/admin/addBrand/edit/<%=brand._id%>" method="POST" class="modal-content" enctype="multipart/form-data">
@@ -247,8 +247,8 @@
 
      <label for="product_name" class="form-label">Brand Image</label>
            <div class="input-upload">
-            <img src="" alt=""/>
-            <input class="form-control border" name="image" type="file" />
+            <img src="/uploads/images/<%=brand.image[0]%>" alt=""/ id="editUploadImage<%=index%>">
+            <input class="form-control border" name="image" type="file" onchange="viewEditImage(event,'<%=index%>')" />
             </div>
 
 
@@ -263,10 +263,6 @@
 <%})%>
 
 
-<form method="POST" action="/admin/test-upload" enctype="multipart/form-data">
-  <input type="file" name="image" />
-  <input type="submit" value="Upload" />
-</form>
 
 
 </section>
@@ -291,7 +287,6 @@ async function validate(e){
     formData.append('offer', offer);
     formData.append('image', image);
   
-console.log("button trigerd")
 
 
     try {
@@ -345,6 +340,35 @@ console.log("button trigerd")
             window.location.href=`/admin/addBrand/delete/${id}`;
         }
      })
+ }
+
+
+ function viewImage(event)  {
+
+   const input = event.target;
+   const reader = new FileReader();
+
+
+   reader.onload = function () {
+     const dataURL = reader.result;
+       document.getElementById('uploadImage').src  = dataURL;
+   } 
+   reader.readAsDataURL(input.files[0]);
+   
+ }
+
+  function viewEditImage(event , index)  {
+
+   const input = event.target;
+   const reader = new FileReader();
+
+
+   reader.onload = function () {
+     const dataURL = reader.result;
+       document.getElementById('editUploadImage'+index).src  = dataURL;
+   } 
+   reader.readAsDataURL(input.files[0]);
+   
  }
 
 </script>

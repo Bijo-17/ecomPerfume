@@ -668,6 +668,15 @@ input[type=number]::-webkit-outer-spin-button {
   margin-right: 5px;
 }
 
+.hero-text {
+  
+    
+    color: #d4af37;
+    font-size: 2.1rem;
+    font-weight: bold;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+}
+
 @media screen and (max-width: 991px) {
   /* offcanvas menu */
   .offcanvas-body .nav-item {

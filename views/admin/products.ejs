@@ -363,7 +363,7 @@
                 <button type="button" class="delete-btn  position-absolute " onclick="toggleDelete(this)">×</button>
 
               <label style="cursor :pointer;"> 
-                 <img id="preview-<%=data[i]._id%>-<%=imageCount%>" src="<%=img%> " width="260" style="border: 3px solid gray;" >
+                 <img id="preview-<%=data[i]._id%>-<%=imageCount%>" src="<%=img%> " alt="product-img-<%=index+1%>" width="260" style="border: 3px solid gray;" >
                 <input name="images"  type="file" data-index="<%=imageCount%>" accept="image/jpg, image/jpeg, image/png, image/webp" style="display: none;" onchange="previewImage(event)">
               </label>
 
@@ -413,10 +413,9 @@
        <button type="button" onclick="closeCropModal('<%= data[i]._id %>')">Cancel</button>
     </div>
  </div>
+           
 
-              
-
-         </div>
+   </div>
    </div>
 
          
@@ -429,7 +428,9 @@
 </div>
 <%}%>
 
-
+ <script type="application/json" id="subcat">
+         <%- JSON.stringify(subcat) %>
+</script>
 
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>
@@ -569,6 +570,7 @@ let croppers = {};
 let croppedFiles = {};    
 let changedIndexes = {};      
 let currentInputIndex = {}
+
 function previewImage(event) {
   const input = event.target;
   const file = input.files[0];
@@ -675,8 +677,6 @@ function closeCropModal(productId) {
     const cancelBtn = wrapper.querySelector('.cancel-btn');
 
   
- 
-
     if (container.classList.contains('marked-for-deletion')) {
       container.classList.remove('marked-for-deletion');
         cancelBtn.classList.add('d-none');

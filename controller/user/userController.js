@@ -9,7 +9,8 @@ const Category = require("../../models/categorySchema")
 const jwt = require('jsonwebtoken');
 const Coupon = require("../../models/couponSchema");
 const Cart = require("../../models/cartSchema");
-const Banner = require("../../models/bannerSchema")
+const Banner = require("../../models/bannerSchema");
+const { dash } = require("pdfkit");
 
 const pageNotFound = async (req,res)=>{
     try {
@@ -294,10 +295,7 @@ async function sendVerificationEmail(email,otp){
          
           if(existingUser){ 
             
-            // if(existingUser.isBlocked){
-            //   return res.render("login" , {message : "User is blocked by admin " , activeTab: "login"})
-            // }
-
+         
 
             const pmatch = await bcrypt.compare(password,existingUser.password)
            
@@ -333,14 +331,22 @@ const loadHome = async (req,res)=>{
        
 
           const product = await Product.find({isDeleted:false}).sort({createdAt:-1}).populate('category_id').exec()
-          const banner = await Banner.find({isDeleted:false})
- 
+
+          const banner = await Banner.find({ isDeleted:false , 
+                                       $or : 
+                                       [  
+                                           {  end_date:{ $gte: new Date()}} ,
+                                           {end_date: { $exists:false}},
+                                           {end_date: null }
+                                          ]}).sort({createdAt:-1})
+
+           const category = await Category.find({isDeleted:false})
 
            if(user){
 
             return res.redirect("/home")
       }else {
-        return res.render("landingPage",{product , banner })
+        return res.render("landingPage",{product , banner , category })
       }
         
         
@@ -357,15 +363,16 @@ const userHome = async (req,res)=>{
           const user = req.session.user;
           const product = await Product.find({isDeleted:false}).sort({createdAt:-1}).populate('category_id').exec()
           const banner = await Banner.find({isDeleted:false})
-         console.log(banner.length , "len")
-           if(user){
+          const category = await Category.find({isDeleted:false})
+           if(user){ 
 
         const userData = await User.findOne({_id:user});
         const cart = await Cart.findOne({user_id:user})
         
-         res.render("landingPage",{user:userData ,product , cart , banner})
+         res.render("landingPage",{user:userData ,product , cart , banner ,category})
       }else {
-        return res.render("landingPage" , {banner})
+        return  res.redirect("/")
+        //  res.render("landingPage" , {banner , category , category})
       }
 
 
