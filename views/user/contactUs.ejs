@@ -1,0 +1,190 @@
+
+<%-include("../partials/user/header")%>
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
+<style> 
+
+form .form-control:focus {
+  box-shadow: none;
+  border-color: #000;
+}
+
+button.btn-dark:hover {
+  background-color: #333;
+}
+
+.custom-btn {
+  background-color: white;
+  color: black;
+  border: 2px solid black;
+  padding: 10px 20px;
+  font-weight: 500;
+  transition: 0.3s ease-in-out;
+}
+
+.custom-btn:hover {
+  background-color: black;
+  color: white;
+}
+
+.stroke-white {
+  color: white;
+  -webkit-text-stroke: 0.5px white;
+ 
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+
+</style> 
+
+
+  <div class="container py-5" style="background-color: #fff; color: #000;">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <h2 class="text-center fw-bold mb-4 border-bottom pb-2">Contact Us</h2>
+
+        <div class="shadow text-white text-center p-4 rounded mb-5" style="background-color: rgb(79, 64, 64);">
+           <h4 class="mb-3 border-bottom pb-2 stroke-white">Contact Information</h4>
+
+               <p class="mb-1">📞 Contact Number: <strong>1-888-963-8944</strong></p>
+               <p class="mb-1">📧 E-mail: <strong>petalandmist@company.com</strong></p>
+               <p class="mb-1">🕒 Monday - Friday: 6AM - 5PM IST</p>
+               <p class="mb-4">🕒 Saturday - Sunday: 6AM - 4PM IST</p>
+
+              <a href="#contactForm" class="btn custom-btn">GET IN TOUCH</a>
+     </div>
+
+
+      <form id="contactForm" action="/contact" method="POST" class="p-4 border border-dark rounded" onsubmit="return validateForm()">
+          
+        <div id="errorMessage" class="text-center text-dark fw-semibold bg-warning px-4 py-2 rounded-3 shadow-sm animate__animated d-none" style="width: 100%; max-width: 500px; margin: 0 auto;">
+           
+        </div>
+
+
+        <div class="mb-3">
+          <label for="name" class="form-label">Name</label>
+          <input type="text" class="form-control border-dark" id="name" name="name" required />
+        </div>
+
+        <div class="mb-3">
+          <label for="email" class="form-label">Email address</label>
+          <input type="email" class="form-control border-dark" id="email" name="email" required />
+        </div>
+
+        <div class="mb-3">
+          <label for="subject" class="form-label">Subject</label>
+          <input type="text" class="form-control border-dark" id="subject" name="subject" required />
+        </div>
+
+        <div class="mb-3">
+          <label for="message" class="form-label">Message</label>
+          <textarea class="form-control border-dark" id="message" name="message" rows="5" required></textarea>
+        </div>
+
+        <div class="d-grid">
+          <button class="btn btn-dark" type="button" onclick="sendForm()">Send Message</button>
+        </div> 
+      </form>
+    </div>
+  </div>
+</div>
+
+<script> 
+
+    function sendForm(){
+
+     
+         if(validateForm()){
+              Swal.fire({
+    title: '🎉 Thank You!',
+    text: 'Your message has been sent successfully. We will get back to you soon!',
+    icon: 'success',
+    confirmButtonText: 'OK',
+    background: '#fff',
+    color: '#000',
+    confirmButtonColor: '#000',
+    customClass: {
+      popup: 'rounded-4',
+      title: 'fw-bold fs-4',
+      confirmButton: 'px-4 py-2'
+    },
+    showClass: {
+      popup: 'animate__animated animate__fadeInDown'
+    },
+    hideClass: {
+      popup: 'animate__animated animate__fadeOutUp'
+    }
+  }) 
+  .then(()=> document.forms[0].submit() )
+    
+         }
+        
+    }
+
+
+  function validateForm(){
+   
+    const name = document.getElementById('name').value;
+    const email = document.getElementById('email').value;
+    const subject = document.getElementById('subject').value;
+    const message = document.getElementById('message').value;
+    const errorDiv = document.getElementById('errorMessage');
+   
+     let isValid = true;
+    if(name && email && subject && message){ 
+   
+        if(name.trim().length <3){
+             errorDiv.classList.remove('d-none');
+             errorDiv.innerText = '❌ Error: Enter a valid name'
+             isValid = false;
+             clearErrorMessage();
+             return;
+        }
+        
+         const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+           
+         if(!emailPattern.test(email)){
+            
+            errorDiv.classList.remove('d-none');
+             errorDiv.innerText = ' ❌ Error: Enter a valid email';
+             errorDiv.classList.remove('animate_fadeOutUP');
+             errorDiv.classList.add('animate_fadeInDown');
+             isValid = false;
+             clearErrorMessage();
+         }
+
+    }else{
+              errorDiv.classList.remove('d-none')
+             errorDiv.innerText = ' ❌ Error: All fields are required';
+             errorDiv.classList.remove('animate_fadeOutUP')
+             errorDiv.classList.add('animate_fadeInDown');
+        
+         isValid = false;
+         clearErrorMessage();
+     }
+        return isValid;
+
+}
+ 
+ const errorDiv = document.getElementById('errorMessage');
+
+       function clearErrorMessage() {  
+          setTimeout(()=>{
+                      
+             errorDiv.classList.remove('animate_fadeInDown');
+             errorDiv.classList.add('animate_fadeOutUP');
+             errorDiv.classList.add('d-none')
+             
+          }, 3000 )
+      }
+      
+ 
+
+
+</script>
+
+<%-include("../partials/user/footer")%>

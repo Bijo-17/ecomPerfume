@@ -15,15 +15,18 @@ const getAllProducts = async (req,res)=>{
         const page = parseInt(req.query.page) || 1;
         let sortOption = req.query.sort;
         const user = req.session.user;
+        const sub = req.query.sub || '';
         let userData = ''
         if(user){
            userData = await User.findOne({_id:user});
         }
 
+        console.log("cat" , categoryName , sub)
+
         let search = "";
-       const filter = { isDeleted: false ,isBlocked:false, stock_status:true };
+       const filter = { isDeleted: false ,isBlocked:false  };
         
-       filter.stock = { $gt: 0 }
+     
    
         if(categoryName.includes("Search")){
            console.log("entered search" ,  categoryName)
@@ -50,15 +53,36 @@ const getAllProducts = async (req,res)=>{
 
       if (categoryName) {
          const catDoc = await Category.findOne({ name:categoryName });
-         if (catDoc) filter.category_id = catDoc._id;
-         if(!catDoc){ 
+
+         if (catDoc){
+           filter.category_id = catDoc._id; 
+
+             if(sub){
+               const subdoc = await Subcategory.findOne({name:sub , category_id : catDoc._id})
+                if(subdoc) filter.subcategory_id = subdoc
+                console.log("sub" , subdoc , catDoc)
+             }
+          
+          }
+          
+           console.log("filter"  , filter)
+
+            if(!catDoc){ 
+
                 const subDoc = await Subcategory.findOne({name:categoryName})
-                if(subDoc)  filter.subcategory_id = subDoc
-             
-         } 
+                console.log("sub" , subDoc)
+                if(subDoc)  filter.subcategory_id = subDoc._id
+              
+                if(!catDoc && !subDoc){
+                    const brandDoc = await Brand.findOne({name:{$regex : categoryName , $options : 'i' }});
+                    if(brandDoc) filter.brand_id = brandDoc._id
+                  }
+           
+               } 
+          
     }
 
-    const sub = await Subcategory.find({name:'Bath and body'})
+    // const sub = await Subcategory.find({name:'Bath and body'})
  
 
         if (price) {
@@ -93,7 +117,13 @@ const getAllProducts = async (req,res)=>{
         sortQuery = {createdAt: -1}; // no sorting
     }
      
-    const categories = await Category.find({isDeleted:false});
+    const categories = await Category.find({isDeleted:false , status: 'active'});
+
+    const subcategory = await Subcategory.find({isDeleted:false , status: 'active'});
+
+      categories.forEach(category=> {
+            category.subcategories = subcategory.filter(s=> s.category_id.toString() === category._id.toString())
+      })
 
     const limit = 9;
     const skip = (page - 1) * limit;
@@ -105,13 +135,18 @@ const getAllProducts = async (req,res)=>{
          .skip(skip)
          .populate('brand_id category_id')
          .exec()
+
+         const displayProducts = products.filter(p=> p.brand_id.status === 'active' && p.category_id.status === 'active')
+
          
+         
+       
         const count = await Product.countDocuments(filter);
         
 
         const ratings = await Rating.find()
 
-         return res.render("allProductPage",{products  , 
+         return res.render("allProductPage",{products: displayProducts  , 
                                             categories , 
                                             sort:sortOption, 
                                             price , 
@@ -120,7 +155,9 @@ const getAllProducts = async (req,res)=>{
                                            totalPages:Math.ceil(count/limit),
                                             ratings,
                                           user:userData,
-                                          search   })
+                                          search,
+                                          sub   
+                                        })
 
 
     } catch (error) {

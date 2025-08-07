@@ -18,6 +18,9 @@ const checkoutController = require("../controller/user/checkoutController")
 const referralController = require("../controller/user/referralController")
 const searchController = require("../controller/user/searchController")
 const deleteAccountController = require("../controller/user/deleteAccountController")
+const categoryController = require("../controller/user/categoryController")
+const footerController = require("../controller/user/footerController")
+const offerController = require('../controller/user/offerController')
 
 router.get("/pageNotFound",userController.pageNotFound)
 router.get("/pageError",userController.pageError)
@@ -72,12 +75,21 @@ router.post('/changePassword',userAuth,profileController.changePassword)
 
 // brand management
 
-router.get("/brand",brandController.getBrand)
+router.get("/brands",brandController.getBrand)
 
+// catgeory management
+
+router.get("/category",categoryController.getCategory)
+
+// offer management 
+
+router.get("/offer-zone", offerController.getOffer)
 
 // product managemet
 
 router.get("/product/:category",productController.getAllProducts)
+
+router.get("/category/:category", productController.getAllProducts)
 
 // router.get("/product/:category/sort",productController.getAllProducts)
 
@@ -154,6 +166,15 @@ router.get("/referandEarn",userAuth,referralController.getReferral)
 
 router.get("/delete-account",userAuth,deleteAccountController.loadDeleteAccount)
 router.get("/deleteAccount",userAuth,deleteAccountController.deleteAccount)
+
+// footerController 
+
+router.get("/contact-us",footerController.contactUs);
+router.get("/about-us",footerController.aboutUs);
+router.get("/privacy-policy",footerController.privacyPolicy);
+router.get("/terms-and-condition",footerController.termsAndCondition);
+router.post("/contact",footerController.contactUsMessage)
+
 
 
 module.exports = router

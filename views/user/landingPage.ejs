@@ -116,32 +116,24 @@
               <h6 class="fw-semibold small">MEN</h6>
             </div>
            </a>
-          </div>
+           </div> -->
     
-          <div class="col-6 col-sm-4 col-md-3 col-lg-2 d-flex justify-content-center mb-4">
+           <!-- <div class="col-6 col-sm-4 col-md-3 col-lg-2 d-flex justify-content-center mb-4">
           <a href="/product/Women">   <div class="text-center border p-3 rounded bg-white category-card">
               <img src="uploads/category-images/cat-women.png" alt="Smart Phones" class="category-image" />
               <h6 class="fw-semibold small">WOMEN</h6>
             </div> </a>
-          </div>
+          </div>   -->
     
+          <% category.forEach(cat=> { %> 
           <div class="col-6 col-sm-4 col-md-3 col-lg-2 d-flex justify-content-center mb-4">
-           <a href="/product/Unisex">  <div class="text-center border p-3 rounded bg-white category-card">
-              <img src="uploads/category-images/cat-unisex.png" alt="Laptops" class="category-image" />
-              <h6 class="fw-semibold small">UNISEX</h6>
+           <a href="/product/<%=cat.name%>">  <div class="text-center border p-3 rounded bg-white category-card">
+              <img src="<%=cat?.category_image%>" alt="img..." class="category-image" />
+              <h6 class="fw-semibold small"><%=cat.name%></h6>
             </div> </a>
-          </div> -->
-
-       <% category.forEach(c=> { %> 
-          <div class="col-6 col-sm-4 col-md-3 col-lg-2 d-flex justify-content-center mb-4 align-item-center" style="align-items: center; " >
-            <div class="text-center border p-3 rounded bg-white category-card align-item-center text-align-center" ">
-             
-              <h6 class="fw-semibold small hero-text m-3" ><%=c.name%></h6>
-            </div>
-          </div>
-        <% }) %>
+          </div> 
+          <% }) %>
        
-    
         
         </div>
       </div>

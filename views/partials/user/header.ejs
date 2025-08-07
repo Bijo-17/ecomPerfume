@@ -83,7 +83,7 @@
     <nav class="header-top-nav">
       <div class="header-nav-content">
         <a href="/" class="header-brand-link">
-          <h1 class="header-brand-name">PETAL & MIST</h1>
+          <h1 class="header-brand-name" style="font-family: Scheherazade New;">PETAL & MIST</h1>
         </a>
 
         <div class="header-nav-icons">
@@ -120,16 +120,19 @@
       </div>
 
       <div class="header-search-wrapper">
+       
         <input type="text" id="searchInput" class="header-search-bar" placeholder="Search...">
         <button class="header-search-action-btn" id="searchSubmitBtn"><i class="fas fa-search"></i></button>
         <button class="header-clear-btn" id="clearSearchBtn"><i class="fas fa-times"></i></button>
+       
       </div>
     </nav>
 
     <nav class="header-secondary-nav">
       <div class="header-nav-links">
-        <a href="#" class="header-nav-link">Offers</a>
-        <a href="#" class="header-nav-link">Category</a>
+        <a href="/offer-zone" class="header-nav-link">Offers</a>
+        <a href="/category" class="header-nav-link">Category</a>
+        <a href="/brands" class="header-nav-link">Brands</a>
         <a href="/product/<%= encodeURIComponent('Bath and body') %>" class="header-nav-link">Bath and Body</a>
         <a href="/product" class="header-nav-link">New Arrivals</a>
       </div>

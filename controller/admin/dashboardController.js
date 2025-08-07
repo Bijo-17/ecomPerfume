@@ -103,7 +103,7 @@ const getSalesReport = async (req, res) => {
     const totalPages = Math.ceil(totalOrders / ITEMS_PER_PAGE);
 
 
-    res.render("salesReport", {
+    res.render("dashboard", {
       data: orders,
       salesToday: day === "salesToday",
       salesWeekly: day === "salesWeekly",

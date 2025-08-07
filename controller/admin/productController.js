@@ -19,13 +19,14 @@ const addProductPage = async (req, res) => {
 
     const subcategory = await Subcategory.find({ status: 'active' }).populate('category_id')
     const brand = await Brand.find({ status: 'active' })
-
+     const message = req.query.message;
 
     res.render("addProduct", {
-      cat: category,
-      subcat: subcategory,
-      brand
-    })
+                                cat: category,
+                                subcat: subcategory,
+                                brand,
+                                message
+               })
 
 
   } catch (error) {
@@ -40,13 +41,10 @@ const addProducts = async (req, res) => {
 
     const product = req.body;
 
-  
-
     const productExists = await Product.findOne({ product_name:{$regex: product.productName , $options: "i" }});
 
     if (!productExists) {
       const images = [];
-
 
 
       if (req.files && req.files.length > 0) {
@@ -55,7 +53,7 @@ const addProducts = async (req, res) => {
           const resizedImagePath = path.join('public', 'uploads', 'product-images', req.files[i].filename);
           await sharp(originalImagePath).resize({ width: 440, height: 440 }).toFile(resizedImagePath);
           fs.unlinkSync(originalImagePath)
-          images.push('/uploads/images/' + req.files[i].filename);
+          images.push('/uploads/product-images/' + req.files[i].filename);
         }
       }
 
@@ -84,10 +82,18 @@ let volume = [];
 
 
 product.volume.forEach((element, i) => {
-         inventory.push({volume: element , stock: product.stock[i] , regular_price: product.regularPrice[i] , sales_price: product.salesPrice[i]})
+        final_price =   category.category_offer > 0 ?  parseFloat((product.salesPrice[i] * (1 - category.category_offer / 100)).toFixed(2)) : product.salesPrice[i]
+         inventory.push({ 
+                           volume: element , 
+                           stock: product.stock[i] , 
+                           regular_price: product.regularPrice[i] , 
+                           sales_price: product.salesPrice[i] , 
+                           final_price: final_price
+                        })
+
         volume.push(element)
 
-});
+    });  
      
    
       const varients =  new Varients({
@@ -122,11 +128,11 @@ product.volume.forEach((element, i) => {
       
       await Varients.findOneAndUpdate({_id:newProduct.varients_id}, {product_id: newProduct._id});
 
-
-      return res.redirect("/admin/addProduct")
+      return res.redirect("/admin/addProduct?message=Product Added Successfully")
 
     } else {
-      return res.status(400).render("addProduct" , {message  : "product already exists" });
+      return res.status(400).redirect("/admin/addProduct?message=product already exists");
+
     }
 
 
@@ -462,24 +468,40 @@ const editProduct = async (req, res) => {
 
     updatedFields.stock = editedDetails?.stock ? editedDetails?.stock[0] :  0
 
-     const varient = await Varients.findOne({product_id: productId})
+     const varient = await Varients.findOne({product_id: productId});
+     const category = await Category.findOne({_id: editedDetails.category_id});
+     const product = await Product.findOne({_id: productId})
     
     let inventory = [];
 
     if(editedDetails.volume){ 
 
      editedDetails?.volume?.forEach((item,i)=>{
-        
+
+      let final_price = editedDetails.sales_price[i];
+        console.log("final_price" , final_price)       
+          if(category.category_offer > product.offer_price){ 
+
+                final_price = parseFloat( editedDetails.sales_price[i] * (1- category.category_offer/100)).toFixed(2);
+                console.log("category_final" , final_price) 
+
+            } else if(product.offer_price > 0){
+
+                 final_price = parseFloat(editedDetails.sales_price[i] * (1- product.offer_price/100)).toFixed(2)              
+              }
+
+         
           
-            inventory.push({   
+                 inventory.push({   
                                  volume: item , 
                                  stock: editedDetails.stock[i] , 
                                  regular_price: editedDetails.regular_price[i], 
                                  sales_price :  editedDetails.sales_price[i],
-                                 final_price : varient.inventory[i].final_price < editedDetails.sales_price[i] ? varient.inventory[i].final_price : editedDetails.sales_price[i]
-                          })
+                                 final_price : final_price
+                               })
             
-                    })
+              
+                })
             }
 
     

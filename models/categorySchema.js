@@ -17,7 +17,10 @@ const categorySchema = new mongoose.Schema({
     category_offer: {
                     type: Number,
                     default:0
-    }      
+    }  ,
+     category_image: {
+                          type: String
+     }    
               
 },
 

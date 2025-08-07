@@ -230,30 +230,25 @@ document.addEventListener("DOMContentLoaded",function(){
 
   signupform.addEventListener("submit",function(e){
 
-    console.log("entered")
-
     e.preventDefault()
 
     nameValidate()
     emailValidate()
     phoneValidate()
     passwordValidate()
-   
-    console.log("errorName",errorName.textContent,"end")
   
     if (
       errorName.textContent.trim() === "" &&
-  errorEmail.textContent.trim() === "" &&
-  errorPhone.textContent.trim() === "" &&
-  errorPassword.textContent.trim() === "" &&
-  errorCpassword.textContent.trim() === ""
-)
+      errorEmail.textContent.trim() === "" &&
+      errorPhone.textContent.trim() === "" &&
+      errorPassword.textContent.trim() === "" &&
+      errorCpassword.textContent.trim() === ""
+    )
  {
 
     loader.style.display = "block";
 
-
-            signupform.submit();
+    signupform.submit();
         
     }
 

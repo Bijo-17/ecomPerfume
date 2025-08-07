@@ -34,9 +34,9 @@ router.get("/unblockCustomer",adminAuth,customerController.customerUnblocked)
 // category Management
 router.get("/category",adminAuth,categoryController.categoryInfo) // list with subcategories
 // router.get('/category/add', categoryController.addForm);
-router.post('/category/add',adminAuth, categoryController.addCategory);
+router.post('/category/add',adminAuth, uploads.single('image'),categoryController.addCategory);
 
-router.post('/category/editCategory/:id', categoryController.editCategory);
+router.post('/category/editCategory/:id', adminAuth, uploads.single('image'), categoryController.editCategory);
 // router.post('/category/edit/:id', categoryController.updateCategory);
 
 router.get('/category/block', categoryController.blockCategory); // list/unlist
@@ -73,7 +73,7 @@ router.post('/test-upload', uploads.single('image'), (req, res) => {
 
 router.get('/banner',adminAuth,bannerController.loadBannerPage)
 router.get('/addBanner',adminAuth,bannerController.addBannerPage)
-router.post('/addBanner', adminAuth,uploads.single('image'),bannerController.addBanner)
+router.post('/addBanner', adminAuth,uploads.single('images'),bannerController.addBanner)
 router.get('/deleteBanner/:id',adminAuth,bannerController.deleteBanner)
 
 

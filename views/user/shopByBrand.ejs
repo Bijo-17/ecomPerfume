@@ -112,31 +112,21 @@
         }
     </style>
 </head>
-<body>
+
     <div class="brands-container">
         <h1 class="main-heading">BRANDS</h1>
         
         <h2 class="sub-heading">SHOP BY BRANDS</h2>
         <div class="divider"></div>
         
-        <div class="brands-grid">
-            <% const brands = [
-                { name: 'Amazfit', logo: '/images/amazfit-logo.png' },
-                { name: 'Balmain', logo: '/images/balmain-logo.png' },
-                { name: 'boAt', logo: '/images/boat-logo.png' },
-                { name: 'Casio', logo: '/images/casio-logo.png' },
-                { name: 'Longines', logo: '/images/longines-logo.png' },
-                { name: 'Noise', logo: '/images/noise-logo.png' },
-                { name: 'Seiko', logo: '/images/seiko-logo.png' },
-                { name: 'Tissot', logo: '/images/tissot-logo.png' }
-            ] %>
+        <div class="brands-grid"> 
             
             <% brands.forEach(brand => { %>
-                <a href="/brands/<%= brand.name.toLowerCase() %>" class="brand-item">
-                    <img src="<%= brand.logo %>" alt="<%= brand.name %> Logo" class="brand-logo">
+                <a href="/product/<%= brand.name.toLowerCase() %>" class="brand-item shadow">
+                    <img src="<%= brand?.image %>" alt="brandimg..." class="brand-logo" >
                 </a>
             <% }); %>
         </div>
     </div>
-</body>
+
 <%-include("../partials/user/footer")%>

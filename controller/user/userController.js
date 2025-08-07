@@ -222,9 +222,7 @@ async function sendVerificationEmail(email,otp){
                 expiry_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
             });
             await coupon.save();
-
-        
-
+            
             await User.findByIdAndUpdate(referrerId ,{ $push: {referredUsers: {user_id: newUser._id,coupon_id:coupon._id}},$inc:{referralEarnings: offer_price}})
         }
 
@@ -327,19 +325,24 @@ const loadHome = async (req,res)=>{
        try {
       
           const user = req.session.user;
-         
+          const currentDate = new Date()
+          currentDate.setHours(23,59,59,999)
        
 
           const product = await Product.find({isDeleted:false}).sort({createdAt:-1}).populate('category_id').exec()
 
-          const banner = await Banner.find({ isDeleted:false , 
-                                       $or : 
-                                       [  
-                                           {  end_date:{ $gte: new Date()}} ,
-                                           {end_date: { $exists:false}},
-                                           {end_date: null }
-                                          ]}).sort({createdAt:-1})
+          const banner = await Banner.find({ 
+                                                isDeleted:false , 
+                                                status:true,
+                                                start_date:{$lte: new Date().setHours(23,59,59,999)},
+                                           $or : [                                       
+                                                    {end_date:{ $gte: new Date().setHours(0,0,0,0)}} ,
+                                                    {end_date: { $exists:false}},
+                                                    {end_date: null }
+                                                 ]
+                                           }).sort({createdAt:-1})
 
+                        
            const category = await Category.find({isDeleted:false})
 
            if(user){
@@ -362,7 +365,17 @@ const userHome = async (req,res)=>{
       
           const user = req.session.user;
           const product = await Product.find({isDeleted:false}).sort({createdAt:-1}).populate('category_id').exec()
-          const banner = await Banner.find({isDeleted:false})
+          const banner = await Banner.find({ 
+                                                isDeleted:false , 
+                                                status:true,
+                                                start_date:{$lte: new Date().setHours(23,59,59,999)},
+                                           $or : [                                       
+                                                    {end_date:{ $gte: new Date().setHours(0,0,0,0)}} ,
+                                                    {end_date: { $exists:false}},
+                                                    {end_date: null }
+                                                 ]
+                                           }).sort({createdAt:-1})
+
           const category = await Category.find({isDeleted:false})
            if(user){ 
 
@@ -387,13 +400,10 @@ const userHome = async (req,res)=>{
 
 
 const logout = async (req,res)=>{
-
-
-   
+  
    req.session.email=null;
    req.session.user = null;
   
- 
   res.redirect("/")
 }
 

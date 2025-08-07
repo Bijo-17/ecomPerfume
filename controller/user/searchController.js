@@ -69,20 +69,28 @@ const search = async (req,res)=>{
                 sortQuery = {createdAt: -1}; // no sorting
             }
              
-          
+          const categories = await Category.find({isDeleted:false , status: 'active'});
+
+         const subcategory = await Subcategory.find({isDeleted:false , status: 'active'});
+
+      categories.forEach(category=> {
+            category.subcategories = subcategory.filter(s=> s.category_id.toString() === category._id.toString())
+      })
         
             const limit = 9;
             const skip = (page - 1) * limit;
 
-        const products = await Product.find(filter).sort(sortQuery).limit(limit).skip(skip).populate([{ path:'brand_id', select: 'name' }, {path:'category_id', select: 'name'}  ])
+        const products = await Product.find(filter).sort(sortQuery).limit(limit).skip(skip).populate([{ path:'brand_id', select: 'name status' }, {path:'category_id', select: 'name status'}  ])
 
         console.log("producst" , products)
 
           const count = await Product.countDocuments(filter);
 
           const ratings = await Rating.find()
+           
+           const displayProducts = products.filter(p=> p.brand_id.status === 'active' && p.category_id.status === 'active')
 
-        res.render("allProductPage",{ products, categoryName, search , sort:sortOption , price ,currentPage:page , totalPages: Math.ceil(count/limit) , ratings })
+        res.render("allProductPage",{ products: displayProducts , categoryName, search , sort:sortOption , price ,currentPage:page , totalPages: Math.ceil(count/limit) , ratings , categories })
 
 
     } catch (error) {

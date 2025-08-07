@@ -47,11 +47,11 @@
                    <h2 class="content-title">Add New Product</h2>
                </div>
            </div>
-
-           <% if(locals.messsge){ %>
+           <% console.log("messages" , message) %>
+           <% if(locals.message){ %>
                   <div class="col-9">
                <div class="content-header">
-                   <h5 class="content-title"><%= message %></h5>
+                   <h5 class="content-title" id="statusMessage"><%= message %></h5>
                </div>
            </div>
            
@@ -103,7 +103,7 @@
 
                              <div id="volume-fields">
                                   <div class="input-group mb-2">
-                            <input name="volume" type="number" id="volume" class="form-control border" placeholder="Enter volume in ML">
+                            <input name="volume[]" type="number" id="volume" class="form-control border" placeholder="Enter volume in ML">
                         
                              </div>
                                 
@@ -119,7 +119,7 @@
 
                              <div id="stock-fields">
                                 <div class="input-group mb-2">
-                            <input name="stock" type="number" id="stock" class="form-control border mr-4" placeholder="Stock">
+                            <input name="stock[]" type="number" id="stock" class="form-control border mr-4" placeholder="Stock">
                                  <button type="button" class="btn btn-sm btn-outline-secondary " style="margin-left:  3rem ;" onclick="addVarient()">Add More</button>
                              </div>
                                           
@@ -132,7 +132,7 @@
                     <div class="col-lg-4">
                                    <div class="mb-4">
                                        <label class="form-label">Regular price</label>
-                                       <input placeholder="₹" name="regularPrice" type="text" id="regularPrice"
+                                       <input placeholder="₹" name="regularPrice[]" type="text" id="regularPrice"
                                            class="form-control border">
                                            <div id="regularPrice-error" class="error-message"></div>
                                    </div>
@@ -141,7 +141,7 @@
                                <div class="col-lg-4">
                                    <div class="mb-4">
                                        <label class="form-label">Sale price</label>
-                                       <input placeholder="₹" name="salesPrice" id="salesPrice" type="text" class="form-control border">
+                                       <input placeholder="₹" name="salesPrice[]" id="salesPrice" type="text" class="form-control border">
                                        <div id="salePrice-error" class="error-message"></div>
                                    </div>
                                    
@@ -451,7 +451,7 @@ async function validateAndSubmit(){
      
       const volInput = document.createElement("input");
         volInput.type = "number";
-        volInput.name = "volume";
+        volInput.name = "volume[]";
         volInput.className = "form-control border"
         volInput.placeholder = "Enter volume in ML"
 
@@ -466,7 +466,7 @@ async function validateAndSubmit(){
            stockLabel.innerText = "Stock"
        const stockInput = document.createElement("input")  
            stockInput.type= "nubmer";
-           stockInput.name = "stock";
+           stockInput.name = "stock[]";
            stockInput.id = "stock";
            stockInput.className = "form-control border"
            stockInput.placeholder = "stock"
@@ -481,7 +481,7 @@ async function validateAndSubmit(){
            regularPriceLabel.innerText = "Regular Price"
        const regularPriceInput = document.createElement("input")  
            regularPriceInput.type= "number";
-           regularPriceInput.name = "regularPrice";
+           regularPriceInput.name = "regularPrice[]";
            regularPriceInput.id = "regularPrice";
            regularPriceInput.className = "form-control border"
            regularPriceInput.placeholder = "₹"
@@ -496,7 +496,7 @@ async function validateAndSubmit(){
             salesPriceLabel.innerText = "Sales Price"
        const salesPriceInput = document.createElement("input")  
            salesPriceInput.type= "number";
-           salesPriceInput.name = "salesPrice";
+           salesPriceInput.name = "salesPrice[]";
            salesPriceInput.id = "salesPrice";
            salesPriceInput.className = "form-control border"
            salesPriceInput.placeholder = "₹"
@@ -755,8 +755,6 @@ function validateForm() {
                  }
 
 
-
-
               return isValid;
           }
 
@@ -778,6 +776,17 @@ function validateForm() {
   
           }
 
+           
+          let message = document.getElementById('statusMessage')
+          console.log(message)
+     console.log("message" , message)
+          if(message.textContent.trim() !== ''){
+            console.log("eneterd")
+             setTimeout(()=>{
+                message.textContent = '';
+             },3000)
+          }
+       
 
 
 

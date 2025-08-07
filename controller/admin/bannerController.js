@@ -43,8 +43,7 @@ const addBanner = async (req, res) => {
       const image = req.file.filename; 
       
        if(req.file){
-          const bannerPath = path.join('public','uploads', 'banner-images' ,'banner-'+req.file.filename )
-         
+          const bannerPath = path.join('public','uploads', 'banner-images' ,'banner-'+req.file.filename )   
            await sharp(req.file.path).toFile(bannerPath)
             fs.unlinkSync(req.file.path)
             data.banner_img = '/uploads/banner-images/banner-'+req.file.filename;
