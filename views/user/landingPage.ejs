@@ -159,20 +159,22 @@
 
 <!-- product section -->
 
-<section> 
+ <section> 
 
     <!-- for men -->
-   
+    
+    <% for(let i=0 ; i<category.length ; i++){ %> 
     <div class="container py-5 ">
-
-        <h3 class="text-center mb-4">For Men</h3>
+     
+        <h3 class="text-center mb-4"><%=category[i].name%></h3>
     
         <div class="row g-4 justify-content-center">
-        <% let menCount = 0; %>
+        <% let count = 0; %>
          <% product.forEach((p) => { 
           
-             if (p.category_id?.name?.toLowerCase() === 'men' && menCount < 4) {
-              menCount++;
+             if (p.category_id?.name?.toLowerCase() === category[i].name.toLowerCase() && count < 4) {
+               
+              count++;
           %>
           <!-- Single Product Card -->
           <div class="col-6 col-sm-4 col-md-3">
@@ -196,140 +198,26 @@
                 <p class="mb-1 price">₹<%=p.final_price%><span class="original-price">₹<%=p.regular_price%></span>
                       <span class="discount"><%= Math.round(parseFloat(1 - p.final_price/p.regular_price) * 100) %>% off</span>
                  </p>               
-       </a>
+             </a>
                 <button class="btn btn-outline-dark btn-sm w-100 mt-2 addToCart-btn" data-id="<%=p._id%>" >Add to Cart</button>
               </div>
             </div>
           </div>
       
            <% } })%>
-        </div>
+      
      
-     
-        <div class="text-center mt-4">
-           <a href="/product/Men"> <button class="btn btn-outline-dark px-5 py-2" style="border-radius: 0; width: 200px;">
+         <div class="text-center mt-4">
+            <a href="/product/<%=category[i].name%>"> <button class="btn btn-outline-dark px-5 py-2" style="border-radius: 0; width: 200px;">
               View All
             </button>
           </a>
           </div>
 
       </div>
+       <% } %>
 
-
-      <!-- for women -->
-      
-      <div class="container pt-2 pb-5 ">
-
-        <h3 class="text-center mb-4">For Women</h3>
-
-
-        <div class="row g-4 justify-content-center">
-      
-          <% let womenCount = 0; %>
-         <% product.forEach((p) => { 
-         
-             if (p.category_id?.name?.toLowerCase() === 'women' && womenCount < 4) {
-              womenCount++;
-          %>
-          <!-- Single Product Card -->
-          <div class="col-6 col-sm-4 col-md-3">
-            <div class="card product-card p-3 shadow-sm">
-                <span class="wishlist-btn" data-id="<%= p._id %>">
-               <i class="fa-regular fa-heart wishlist-icon"></i>
-          </span>
-           <a href="/productDetails/<%=p._id%>">  <img src="<%=p.image[0]%>" alt="<%=p.product_name%>" class="product-image mx-auto">
-              <div class="card-body text-center">
-                <h6 class="card-title"><%=p.product_name%></h6>
-
-                 <div class="mb-2">
-                <% for (let i = 0; i < 5; i++) { %>
-                  <% if (i < Math.floor(p.averageRating)) { %>
-                    <span class="text-warning">★</span>
-                  <% } else { %>
-                    <span class="text-secondary">☆</span>
-                  <% } %>
-                <% } %>
-                <small class="text-muted">(<%= p.ratingCount %>)</small>
-              </div>
-
-
-
-                <p class="mb-1 price">₹<%=p.final_price%><span class="original-price">₹<%=p.regular_price%></span>
-                           <span class="discount"><%= Math.round(parseFloat(1 - p.final_price/p.regular_price) * 100) %>% off</span>
-                </p>               
-              </a>
-                <button class="btn btn-outline-dark btn-sm w-100 mt-2 addToCart-btn" data-id="<%=p._id%>">Add to Cart</button>
-              </div>
-            </div>
-          </div>
-        <% } })%>
-         
-      </div>
-        <div class="text-center mt-4">
-          <a href="/product/Women">   <button class="btn btn-outline-dark px-5 py-2" style="border-radius: 0; width: 200px;">
-              View All
-            </button>
-            </a>
-          </div>
-      </div>
-
-
-      <!-- for Unisex -->
-
-      <div class="container py-2 pb-2 ">
-         
-        <h3 class="text-center mb-4">Unisex</h3>
-
-      
-       
-      
-    <div class="row g-4 justify-content-center">
-        <% let unisexCount = 0; %>
-         <% product.forEach((p) => { 
-             if (p.category_id?.name?.toLowerCase() === 'unisex' && unisexCount < 4) {
-              unisexCount++;
-          %>
-          <!-- Single Product Card -->
-          <div class="col-6 col-sm-4 col-md-3">
-            <div class="card product-card p-3 shadow-sm">
-                 <span class="wishlist-btn" data-id="<%= p._id %>">
-               <i class="fa-regular fa-heart wishlist-icon"></i>
-          </span>
-              <a href="/productDetails/<%=p._id%>"><img src="<%=p.image[0]%>" alt="<%=p.product_name%>" class="product-image mx-auto">
-              <div class="card-body text-center">
-                <h6 class="card-title"><%=p.product_name%></h6>
-                <div class="mb-2">
-                <% for (let i = 0; i < 5; i++) { %>
-                  <% if (i < Math.floor(p.averageRating)) { %>
-                    <span class="text-warning">★</span>
-                  <% } else { %>
-                    <span class="text-secondary">☆</span>
-                  <% } %>
-                <% } %>
-                <small class="text-muted">(<%= product.ratingCount %>)</small>
-              </div>
-                <p class="mb-1 price">₹<%=p.final_price%><span class="original-price">₹<%=p.regular_price%></span>
-                       <span class="discount"><%= Math.round(parseFloat(1 - p.final_price/p.regular_price) * 100) %>% off</span>
-                </p>               
-              </a>
-                <button class="btn btn-outline-dark btn-sm w-100 mt-2 addToCart-btn" data-id="<%=p._id%>">Add to Cart</button>
-               
-              </div>
-            </div>
-          </div>
-  
-        <% } })%>
-         
-       </div>
-    
-      
-        <div class="text-center mt-4">
-            <a href="/product/Unisex"> <button class="btn btn-outline-dark px-5 py-2" style="border-radius: 0; width: 200px;">
-              View All
-            </button>
-            </a>
-          </div>
-      </div>
+     
 
 </section>
 

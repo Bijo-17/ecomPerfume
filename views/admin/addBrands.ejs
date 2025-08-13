@@ -88,8 +88,14 @@
             <label for="product_name" class="form-label">Brand Image</label>
             <div class="input-upload">
               <img src="" alt="" id="uploadImage"/>
-              <input class="form-control border" name="image" type="file" onchange="viewImage(event)" />
+              <input class="form-control border" id="inputFile" name="image" type="file" onchange="viewImage(event)" />
             </div>
+
+            <div class="input-upload" style="display: none;"> 
+               <img id="cropImage">
+               <button class="btn btn-sm btn-info" type="button" id="cropBtn">Crop</button>
+            </div>
+
             <div class="d-grid">
               <button class="btn btn-primary mt-20" type="submit">
                 Add Brand
@@ -170,7 +176,6 @@
                           <!-- edit button Modal -->
                   
         
-
            <button type="button" class="btn btn-md btn-warning text-dark" style="width: 90px" data-bs-toggle="modal" 
             data-bs-target="#editBrandModal<%=data[i]._id%>" >
                     Edit
@@ -223,11 +228,12 @@
         </nav>
    </div>
 
+   <!-- edit brand model -->
    
         <%data.forEach((brand, index)=>{ %>
      
-        <div class="modal fade" id="editBrandModal<%=brand._id%>" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog">
+    <div class="modal fade" id="editBrandModal<%=brand._id%>" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
     <form action="/admin/addBrand/edit/<%=brand._id%>" method="POST" class="modal-content" enctype="multipart/form-data">
       <div class="modal-header">
         <h5 class="modal-title">Edit Brand</h5>
@@ -247,10 +253,18 @@
 
      <label for="product_name" class="form-label">Brand Image</label>
            <div class="input-upload">
-            <img src="<%=brand.image%>" alt=""/ id="editUploadImage<%=index%>">
-            <input class="form-control border" name="image" type="file" id="editImage<%=index%>" onchange="viewEditImage(event,'<%=index%>')" />
+            <img src="<%=brand.image%>" alt=""/ id="viewEditImage<%=index%>">
+             
             </div>
-
+             <label> 
+               <h5 class="btn btn-sm btn-light"> Change Image</h5>
+             
+            <input class="form-control border d-none" name="image" type="file" id="editInputFile<%=index%>" onchange="viewEditImage(event,'<%=index%>')" />
+             </label>
+            <div class="input-upload" style="display: none;"> 
+               <img id="cropEditImage<%=index%>">
+             <button class="btn btn-sm btn-info" type="button" id="editCropBtn<%=index%>">Crop</button>
+            </div>
 
       <div class="modal-footer">
         <button type="button" class="btn btn-primary" onclick="editData('<%=brand._id%>' , '<%=index%>')">Save</button>
@@ -270,6 +284,8 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 
 <script>
  
@@ -292,7 +308,6 @@ async function validate(e){
     try {
     const response = await fetch("/admin/addBrand",{
               method:'post',
-  
               body: formData
     })
 
@@ -323,9 +338,9 @@ async function validate(e){
  async function editData(brandId,index){
   
 
-  const name = document.getElementById('editName'+index).value;
+    const name = document.getElementById('editName'+index).value;
     const offer= document.getElementById('editOffer'+index).value;
-    const image = document.getElementById('editImage'+index).files[0]
+    const image = document.getElementById('editInputFile'+index).files[0]
 
     console.log("edit image" , image)
 
@@ -379,31 +394,140 @@ async function validate(e){
 
  function viewImage(event)  {
 
-   const input = event.target;
-   const reader = new FileReader();
+           const input = event.target;
+           const reader = new FileReader();
 
+              reader.onload = function () {
 
-   reader.onload = function () {
-     const dataURL = reader.result;
-       document.getElementById('uploadImage').src  = dataURL;
-   } 
-   reader.readAsDataURL(input.files[0]);
+               let dataURL = reader.result;
+               let image = document.getElementById('cropImage');
+                 image.src = dataURL;
+
+               let cropContainer = image.parentNode;
+                cropContainer.style.display = 'inline-block';
+
+               if(image.cropperInstance){
+                  image.cropperInstance.destroy()
+               }
+             
+
+               let cropper = new Cropper(image, {
+                   aspectRatio: 440/240,
+                   viewMode: 1,
+                   guides: true,
+                   background: false,
+                   autoCropArea: 0.8,
+                   zoomable: true
+               });
+               
+                image.cropperInstance = cropper;
+               
+                const cropBtn = document.querySelector('#cropBtn');
+                const viewImage = document.getElementById('uploadImage')
+              
+               cropBtn.addEventListener('click',  function () {
+                             
+                   let croppedCanvas = cropper.getCroppedCanvas();         
+                    const croppedDataURL  = croppedCanvas.toDataURL('image/jpeg', 1.0);
+                   let timestamp = new Date().getTime();
+                   let fileName = `cropped-img-${timestamp}.png`;
+                   
+
+                   croppedCanvas.toBlob(blob => {
+
+                       let inputField = document.getElementById('inputFile')
+                       let imgFile = new File([blob], fileName, {type: "image/png"});
+
+                       const fileList = new DataTransfer();
+                       fileList.items.add(imgFile);
+                       inputField.files = fileList.files
+                      cropContainer.style.display = 'none'
+                       cropper.destroy();
+                       image.cropperInstance = null;
+                        viewImage.src = croppedDataURL;
+                   } , "image/png");
+                   
+               });
+           };
+       reader.readAsDataURL(input.files[0]);
+       input.value='';
    
- }
+    }
 
-  function viewEditImage(event , index)  {
+//   function viewEditImage(event , index)  {
 
-   const input = event.target;
-   const reader = new FileReader();
+//    const input = event.target;
+//    const reader = new FileReader();
 
 
-   reader.onload = function () {
-     const dataURL = reader.result;
-       document.getElementById('editUploadImage'+index).src  = dataURL;
-   } 
-   reader.readAsDataURL(input.files[0]);
+//    reader.onload = function () {
+//      const dataURL = reader.result;
+//        document.getElementById('editUploadImage'+index).src  = dataURL;
+//    } 
+//    reader.readAsDataURL(input.files[0]);
    
- }
+//  }
+
+  
+function viewEditImage(event , index) {
+
+           let input = event.target;
+           let reader = new FileReader();
+
+           reader.onload = function () {
+               let dataURL = reader.result;
+               let image = document.getElementById('cropEditImage'+index);
+                 image.src = dataURL;
+
+               let cropContainer = image.parentNode;
+                cropContainer.style.display = 'inline-block';
+
+               if(image.cropperInstance){
+                  image.cropperInstance.destroy()
+               }
+             
+
+               let cropper = new Cropper(image, {
+                   aspectRatio: 440/240,
+                   viewMode: 1,
+                   guides: true,
+                   background: false,
+                   autoCropArea: 0.8,
+                   zoomable: true
+               });
+               
+                image.cropperInstance = cropper;
+               
+                const cropBtn = document.querySelector('#editCropBtn'+index);
+                const viewImage = document.getElementById('viewEditImage'+index)
+              
+               cropBtn.addEventListener('click',  function () {
+                             
+                   let croppedCanvas = cropper.getCroppedCanvas();         
+                    const croppedDataURL  = croppedCanvas.toDataURL('image/jpeg', 1.0);
+                   let timestamp = new Date().getTime();
+                   let fileName = `cropped-img-${timestamp}-${index}.png`;
+                   
+
+                   croppedCanvas.toBlob(blob => {
+
+                       let inputField = document.getElementById('editInputFile'+index)
+                       let imgFile = new File([blob], fileName, {type: "image/png"});
+
+                       const fileList = new DataTransfer();
+                       fileList.items.add(imgFile);
+                       inputField.files = fileList.files
+                      cropContainer.style.display = 'none'
+                       cropper.destroy();
+                       image.cropperInstance = null;
+                        viewImage.src = croppedDataURL;
+                   } , "image/png");
+                   
+               });
+           };
+           reader.readAsDataURL(input.files[0]);
+           input.value='';
+       }
 
 </script>
 

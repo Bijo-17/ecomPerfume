@@ -90,7 +90,7 @@
 
                 <% } else {  %>
 
-          <form method="POST" action="/admin/updateOrderStatus/<%= order._id %>/<%= item.product_id._id %>">
+          <form method="POST" action="/admin/updateOrderStatus/<%= order._id %>/<%= item._id %>">
             <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
               <option value="pending" <%= item.order_status === 'pending' ? 'selected' : '' %>>Pending</option>
               <option value="shipped" <%= item.order_status === 'shipped' ? 'selected' : '' %>>Shipped</option>

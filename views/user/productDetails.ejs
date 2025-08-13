@@ -198,11 +198,11 @@
 
       <!-- Buttons -->
 
-       <% if(product_status === 'Out of stock' || product.stock === 0 ) { %> 
+       <% if(product_status === 'Out of stock' ) { %> 
         <div class="d-grid gap-2 d-md-flex">        
            <h4>Out of stock</h4>
         </div>
-        <% } else if(product.isBlocked) {%>
+        <% } else if(product_status === 'Unavailable') {%>
          <div class="d-grid gap-2 d-md-flex"> 
           <h4>Unavailable</h4>
          </div>

@@ -67,6 +67,34 @@ const addBanner = async (req, res) => {
    }
 }
 
+const editBanner = async (req,res)=>{
+    try{
+
+      const data = req.body;
+      console.log("req.body" , req.body, "\n")
+       console.log('req.file', req.file)
+     
+     const banner = await Banner.findByIdAndUpdate(data.banner_id,data)
+
+      if(req.file){
+          const bannerPath = path.join('public','uploads', 'banner-images', 'banner-'+req.file.filename);
+          await sharp(req.file.path).toFile(bannerPath)
+            fs.unlinkSync(req.file.path);
+            const bannerImg = '/uploads/banner-images/banner-'+req.file.filename;
+            await Banner.findByIdAndUpdate(data.banner_id, {banner_img : bannerImg})
+
+       }
+        
+       res.redirect("/admin/banner")
+
+    }
+    catch(error){
+       console.log("error in editing banner", error);
+       res.redirect("/admin/pageError")
+      
+    }
+}
+
 const deleteBanner = async (req,res)=>{
     try{
 
@@ -85,5 +113,7 @@ const deleteBanner = async (req,res)=>{
     }
 }
 
-module.exports = { loadBannerPage, addBannerPage , addBanner , deleteBanner }
+
+
+module.exports = { loadBannerPage, addBannerPage , addBanner , deleteBanner , editBanner}
 

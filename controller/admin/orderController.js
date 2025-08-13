@@ -206,11 +206,15 @@ const updateOrderStatus = async (req, res) => {
 
         let order = await Order.findOne({ _id: orderId }).populate('order_items.product_id')
 
-        order.order_status = status
+
+
+     
         if (order.order_status === 'delivered') {
-            order.delivered_date = new Date()
+            order.delivered_date = new Date();
+               order.order_status = status
+
         }
-        const currentItem = order.order_items.find(product => product.product_id._id == productId)
+        const currentItem = order.order_items.find(product => product._id.toString() === productId.toString())
 
         currentItem.order_status = status;
 

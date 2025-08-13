@@ -95,7 +95,7 @@
 <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editCategoryModal<%= category._id %>">Edit</button>
 
 
-<!-- Modal -->
+<!--edit category Modal -->
 <div class="modal fade" id="editCategoryModal<%= category._id %>" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog">
     <form action="/admin/category/editCategory/<%= category._id %>?page=<%=currentPage%>" method="post" enctype="multipart/form-data" class="modal-content">

@@ -47,14 +47,12 @@
                    <h2 class="content-title">Add New Product</h2>
                </div>
            </div>
-           <% console.log("messages" , message) %>
            <% if(locals.message){ %>
                   <div class="col-9">
                <div class="content-header">
                    <h5 class="content-title" id="statusMessage"><%= message %></h5>
                </div>
-           </div>
-           
+           </div>         
          <%  } %>
            <div class="col-lg-6">
                <div class="card mb-4">
@@ -386,7 +384,8 @@ async function validateAndSubmit(){
 
   const rawSubcat = document.getElementById('subcat').textContent;
   const allSubcategory = JSON.parse(rawSubcat)
-
+ 
+  console.log("allsub" , allSubcategory)
   
    function filterSubcategories(){
 
@@ -395,7 +394,9 @@ async function validateAndSubmit(){
 
     subcategorySelect.innerHTML = '<option value="">select subcategory </option>';
 
-    const filtered = allSubcategory.filter(sub=>sub.category_id._id === selectedCategoryId)
+    const filtered = allSubcategory.filter(sub=>sub?.category_id?._id.toString() === selectedCategoryId.toString())
+
+    console.log("filtered" , filtered)
     
     filtered.forEach(sub=>{
         const option = document.createElement("option");
@@ -778,9 +779,8 @@ function validateForm() {
 
            
           let message = document.getElementById('statusMessage')
-          console.log(message)
-     console.log("message" , message)
-          if(message.textContent.trim() !== ''){
+     
+          if(message && message?.textContent.trim() !== ''){
             console.log("eneterd")
              setTimeout(()=>{
                 message.textContent = '';

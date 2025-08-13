@@ -329,7 +329,19 @@ const loadHome = async (req,res)=>{
           currentDate.setHours(23,59,59,999)
        
 
-          const product = await Product.find({isDeleted:false}).sort({createdAt:-1}).populate('category_id').exec()
+          let product = await Product.find({isDeleted:false , isBlocked : false}).populate('category_id brand_id subcategory_id varients_id').exec()
+
+ 
+           product = product.filter(product=>{
+
+                                             const stock = !product.varients_id.inventory.some(s=> s.stock < 1) 
+                                             const brandStatus = product.brand_id.status === 'active' && product.brand_id.isDeleted === false;
+                                                                    
+                                        return stock && brandStatus
+                                         
+                             })
+
+
 
           const banner = await Banner.find({ 
                                                 isDeleted:false , 
@@ -343,7 +355,7 @@ const loadHome = async (req,res)=>{
                                            }).sort({createdAt:-1})
 
                         
-           const category = await Category.find({isDeleted:false})
+           const category = await Category.find({isDeleted:false , status: 'active'})
 
            if(user){
 
@@ -354,7 +366,7 @@ const loadHome = async (req,res)=>{
         
         
     } catch (error) {
-        console.log("failed to load homePage", error.message)
+        console.log("failed to load homePage", error)
         return res.redirect("/pageError")
         
     }

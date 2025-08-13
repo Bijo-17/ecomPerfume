@@ -32,7 +32,6 @@ const categoryInfo = async (req, res) => {
       );
     });
  
-     console.log("categery" , categories)
 
     res.render('category', {
       categories,
@@ -70,13 +69,12 @@ const addCategory = async (req, res) => {
                 //  fs.unlinkSync(req.file.path)
                 category_image = '/uploads/category-images/category-'+req.file.filename;
            }
-        console.log("image" , category_image);
+     
 
     if (!category && categoryName.trim() !== "") {
       category = await new Category({ name: categoryName.trim(), category_offer: categoryOffer || 0 , category_image }).save();
     }
 
-    console.log("category" , category)
 
     if (subcategoryName && subcategoryName.trim() !== "") {
       await new Subcategory({
@@ -98,13 +96,11 @@ const addCategory = async (req, res) => {
 const editCategory = async (req, res) => {
 
   try {
-    console.log("req.body" , req.body)
-    console.log("req.file" , req.file)
+
     const { id } = req.params;
     const { name } = req.body;
     const page = parseInt(req.query.page);
 
-    console.log("page" , page , req.query , req.params)
     
     const offer = req.body.offer || 0
 

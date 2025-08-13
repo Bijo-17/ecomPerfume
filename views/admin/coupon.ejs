@@ -429,6 +429,7 @@
 
   </div>
 </div>
+
 <script type="application/json" id="couponData">
        <%- JSON.stringify(coupon) %>
 </script>
@@ -614,8 +615,9 @@ let currentCouponName = '';
      }
     const startDate = correctDate(button.dataset.start_date);
     const endDate = correctDate(button.dataset.expiry_date)
-
- 
+     
+    document.querySelectorAll(".error-message").forEach(element=> element.innerHTML='');
+   
     currentCouponName = button.dataset.coupon_name;
 
     console.log("name " , currentCouponName)

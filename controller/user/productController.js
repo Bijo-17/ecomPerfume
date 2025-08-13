@@ -14,6 +14,7 @@ const getAllProducts = async (req,res)=>{
         const categoryName = req.params.category || '';
         const page = parseInt(req.query.page) || 1;
         let sortOption = req.query.sort;
+         const {  price  } = req.query;
         const user = req.session.user;
         const sub = req.query.sub || '';
         let userData = ''
@@ -24,7 +25,7 @@ const getAllProducts = async (req,res)=>{
         console.log("cat" , categoryName , sub)
 
         let search = "";
-       const filter = { isDeleted: false ,isBlocked:false  };
+       const filter = { isDeleted:false , isBlocked: false  };
         
      
    
@@ -47,9 +48,10 @@ const getAllProducts = async (req,res)=>{
         ]
         }
  
-        const {  price  } = req.query;
+       
          
-    
+     console.log("price" , price)
+  let subcategoryProducts;
 
       if (categoryName) {
          const catDoc = await Category.findOne({ name:categoryName });
@@ -69,18 +71,32 @@ const getAllProducts = async (req,res)=>{
 
             if(!catDoc){ 
 
-                const subDoc = await Subcategory.findOne({name:categoryName})
-                console.log("sub" , subDoc)
-                if(subDoc)  filter.subcategory_id = subDoc._id
+                const subDoc = await Subcategory.find({name:categoryName})
               
-                if(!catDoc && !subDoc){
+                if(subDoc && subDoc.length>0){
+              
+                   subcategoryProducts = [];
+                   for(let s of subDoc){
+                          const subProducts = await Product.find({subcategory_id: s._id , isDeleted:false , isBlocked: false}).populate('brand_id varients_id')
+                        subcategoryProducts.push(subProducts)
+                           
+                      }
+
+                   }
+                 
+                 
+                
+                if(!catDoc && subDoc.length<1){
+               
                     const brandDoc = await Brand.findOne({name:{$regex : categoryName , $options : 'i' }});
                     if(brandDoc) filter.brand_id = brandDoc._id
                   }
+
+              }
            
-               } 
+          } 
           
-    }
+     console.log("subcatprooducts" , subcategoryProducts?.flat())
 
     // const sub = await Subcategory.find({name:'Bath and body'})
  
@@ -128,35 +144,87 @@ const getAllProducts = async (req,res)=>{
     const limit = 9;
     const skip = (page - 1) * limit;
 
+    let displayProducts;
+  
+    if(!subcategoryProducts){ 
+    
          const products = await Product.find(filter)
          .collation({ locale: 'en', strength: 2 })
          .sort(sortQuery)
-         .limit(limit)
-         .skip(skip)
-         .populate('brand_id category_id')
-         .exec()
+         .populate('brand_id category_id varients_id')
+         .exec();
+    
+         displayProducts = products.filter(p=> p.brand_id?.status === 'active' && p.category_id?.status === 'active')
 
-         const displayProducts = products.filter(p=> p.brand_id.status === 'active' && p.category_id.status === 'active')
+    }
+         
+         if(subcategoryProducts){
 
+            displayProducts = subcategoryProducts.flat();
+
+             switch(sortOption){
+
+                case 'priceLow':  {
+                                      displayProducts.sort((a,b)=> a.final_price - b.final_price);
+                                      break;
+                                  }
+                case 'priceHigh': {
+                                      displayProducts.sort((a,b)=> b.final_price - a.final_price);
+                                      break;
+                                  }  
+                case 'nameAZ' :   {
+                                      displayProducts.sort((a,b)=> a.product_name.localeCompare(b.product_name , 'en' ,{sensitivity:'base'} ) );
+                                      break;
+                                  }  
+                 case 'nameZA' :  {
+                                       displayProducts.sort((a,b)=> b.product_name.localeCompare(a.product_name , 'en', {sensitivity: 'base'} ));
+                                       break;
+                                  }                                         
+               }
+
+                if(price){
+                       
+                            if(price === '2000+'){ 
+                               displayProducts =  displayProducts.filter(p=> p.final_price >= 2000); 
+                            } else {
+                                const [min , max] = price.split('-').map(Number)
+                                displayProducts = displayProducts.filter(p=> p.final_price >= min && p.final_price <=max);
+                            }
+                                                           
+                                          
+                       }
+                
+
+         }
+
+
+         // remove out of stock products
+
+
+       displayProducts = displayProducts.filter(product => {
+            
+                                        return !product.varients_id.inventory.some(s=> s.stock < 1);
+                               })
          
-         
-       
-        const count = await Product.countDocuments(filter);
+                  
         
+         const count = displayProducts.length;
+         
+         const paginatedProducts = displayProducts.slice(skip, skip + limit);
 
         const ratings = await Rating.find()
 
-         return res.render("allProductPage",{products: displayProducts  , 
+         return res.render("allProductPage",{products: paginatedProducts  , 
                                             categories , 
                                             sort:sortOption, 
                                             price , 
                                             categoryName , 
                                             currentPage:page,
-                                           totalPages:Math.ceil(count/limit),
+                                            totalPages:Math.ceil(count/limit),
                                             ratings,
-                                          user:userData,
-                                          search,
-                                          sub   
+                                            user:userData,
+                                            search,
+                                            sub   
                                         })
 
 
@@ -190,20 +258,14 @@ const productDetails = async (req,res)=>{
         let regular_price = product.regular_price;
         let sales_price = product.final_price;
 
-        if(product.offer_price >  sales_price){
-           sales_price = product.offer_price;
-        }
 
         let stock_status = '';
 
         if(selectedVolume && varients){
-            varientData = varients.inventory.find(d=> d.volume === parseInt(selectedVolume))
-            console.log("v" , varientData)
+           const varientData = varients.inventory.find(d=> d.volume === parseInt(selectedVolume))
+         
             regular_price = varientData.regular_price;
             sales_price = varientData.final_price;
-            if(varientData.offer_price > sales_price){
-               sales_price = varientData.offer_price;
-            }
 
             if(varientData.stock < 1){
                stock_status = "Out of stock"
@@ -211,7 +273,14 @@ const productDetails = async (req,res)=>{
         }
 
         if(!selectedVolume){
-           selectedVolume = product?.volume[0] ? product.volume[0] : product.volume
+
+            selectedVolume = varients.inventory[0].volume;  
+            regular_price = varients.inventory[0].regular_price;
+            sales_price = varients.inventory[0].final_price;
+
+            if(varients.inventory[0].stock < 1){
+               stock_status = "Out of stock"
+            }
         }
         
     console.log("volume raea" , selectedVolume)
@@ -222,20 +291,19 @@ const productDetails = async (req,res)=>{
     const ratings = await Rating.find({product_id:productId}).populate('user_id')
 
     
-
-    
-    let product_status;
-
-  
-    if (product.isBlocked === true) {
-            product_status = 'Unavailable';
-      } else {
-          product_status = '';
-      }
+    let product_status = '';
 
       if(stock_status){
          product_status = stock_status;
       }
+  
+    if (product.isBlocked === true ||  
+             (product.brand_id.status === 'block' && product.brand_id.isDeleted === false) || 
+             (product.category_id.status === 'blocked' && product.category_id.isDeleted === false) 
+        ) {
+            product_status = 'Unavailable';
+      } 
+
    
 
      const relatedProducts = await Product.find({

@@ -55,21 +55,25 @@ console.log("imsge" , image)
 
 
       if (brand) {
-
+          
+          if(image){
+             fs.unlinkSync(req.file.path)
+          }
          return res.status(400).json("Brand already exists")
 
       } 
 
         if(image){
-            const originalImagePath = req.file.path
-            await sharp(originalImagePath).resize({width:440 , height:440});
-            image ='uploads/images/'+req.file.filename
+            const brandImagePath = path.join('public', 'uploads' , 'brand-images' ,  'brand-'+req.file.filename);
+            await sharp(req.file.path).resize({width:440 , height:440}).toFile(brandImagePath);
+             fs.unlinkSync(req.file.path)
+            image ='/uploads/brand-images/brand-'+req.file.filename;
                    
         }
 
          const newBrand = await new Brand({
             name: details.name.trim(),
-            offer: details.offer || null,
+            offer: details.offer || 0,
             image:  image
          })
 
@@ -96,20 +100,22 @@ const editBrand = async (req, res) => {
       const currentBrand = await Brand.findOne({_id: id})
       const brand = await Brand.findOne({ name: { $regex: `^${data.name.trim()}$`, $options: 'i' }, isDeleted: false })
        
-      console.log("currenBrand" , currentBrand.name , brand.name)
 
-      if (brand.name.toLowerCase() !== currentBrand.name.toLowerCase()) {
+      if (brand && brand.name.toLowerCase() !== currentBrand.name.toLowerCase()) {
          return res.status(400).json({success: false , message:"Brand Already exists" });
       } 
+   
 
-        
-
-         await Brand.findByIdAndUpdate(id, { name: data.name.trim(), offer: data.offer.trim()})
+         await Brand.findByIdAndUpdate(id, { name: data.name.trim(), offer: data.offer.trim() || 0})
        
          if(image){
-               const originalImagePath = req.file.path
-                await sharp(originalImagePath).resize({width:440 , height:440});
-                image = '/uploads/images/'+req.file.filename;
+               
+                 const brandImagePath = path.join('public', 'uploads' , 'brand-images' ,  'brand-'+req.file.filename);
+                await sharp(req.file.path).toFile(brandImagePath)
+                 fs.unlinkSync(req.file.path)
+                 fs.unlinkSync(path.join('public',currentBrand.image));
+                 await currentBrand.save();
+                image = '/uploads/brand-images/brand-'+req.file.filename;
                await Brand.findByIdAndUpdate(id, {  image : image })
         }
 

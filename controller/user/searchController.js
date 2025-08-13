@@ -23,9 +23,10 @@ const search = async (req,res)=>{
         const brand = await Brand.find({name:{$regex: search , $options: 'i'}})
         const brandId = brand.map(i=> i._id)
         const category = await Category.find({name: {$regex: search , $options : 'i'}})
+       
          const catId = category.map(c=> c._id)
         const subcategory = await Subcategory.find({name: {$regex: search , $options : 'i'}})
-         const subcatId = category.map(c=> c._id)
+         const subcatId = subcategory.map(c=> c._id)
          
         filter.$or = [
             { product_name : { $regex : search , $options : 'i'}},
@@ -82,7 +83,7 @@ const search = async (req,res)=>{
 
         const products = await Product.find(filter).sort(sortQuery).limit(limit).skip(skip).populate([{ path:'brand_id', select: 'name status' }, {path:'category_id', select: 'name status'}  ])
 
-        console.log("producst" , products)
+      
 
           const count = await Product.countDocuments(filter);
 

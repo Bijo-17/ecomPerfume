@@ -37,7 +37,8 @@
             <aside class="sidebar">
                 <div class="filter-section">
                     <h3>Categories</h3>
-                    <div class="category-group">
+
+                    <!-- <div class="category-group">
                       <a href="/product/Men">  <h4>MEN <% if(categoryName === 'Men') { %>
                               <i class="fas fa-chevron-right"></i> 
                             <% } %>    </h4> </a>
@@ -61,7 +62,7 @@
                             <li>Perfume</li>
                             <li>Bath and Body</li>
                        
-                    </div>
+                    </div> -->
                   
                     <% categories.forEach(category=> { %> 
                      <div class="category-group">
@@ -69,19 +70,21 @@
                               <i class="fas fa-chevron-right"></i> 
                             <% } %>    </h4> </a>
                        
+                          <ul class="list-unstyled"> 
                               <% category?.subcategories.forEach(subcat=>{ %> 
-                           <a href="/product/<%=category.name%>?sub=<%=subcat.name%>">
+                             <a href="/product/<%=category.name%>?sub=<%=subcat.name%>">
                               
-                                <div style="font-size: 1rem;">
-                                  <span style="margin-left: 6px; margin-right: 6px;">•</span>
-                                   <span style=" font-weight: <%= category.name === categoryName && sub ==  subcat.name ? 'bold' : '500' %>;">
+                                  <li class="mb-2">
+                                 
+                                 
+                                   <span class=" fs-6 <%= category.name === categoryName && sub ==  subcat.name ? 'fw-bold text-primary' : 'fw-medium text-dark' %>">
                                    <%= subcat.name %>
                                   </span>
-                                </div>
-                             
+                                  </li>             
 
                             </a>
-                            <% }) %>                     
+                            <% }) %>      
+                          </ul>               
 
                                    
                     </div>
@@ -184,7 +187,8 @@
             <a href="?page=<%= currentPage-1%>" class="prev-page"><i class="fas fa-chevron-left"></i></a>
             <% } %>
             <% for (let i = 1; i <= totalPages; i++) { %>   
-            <a href="?page=<%= i %>" class="page-number <%=(i === currentPage) ? 'active' : '' %>" ><%= i %></a>
+            <a href="?page=<%=i%><%=price? '&price='+price : ''%><%=sort? '&sort='+sort : ''%> " class="page-number <%=(i === currentPage) ? 'active' : '' %>" ><%= i %></a>
+             
              <% } %>
              <% if(currentPage < totalPages){  %>
             <a href="?page=<%= currentPage+1%>" class="next-page"><i class="fas fa-chevron-right"></i></a>

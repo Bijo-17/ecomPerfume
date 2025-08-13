@@ -1,12 +1,120 @@
 <%- include("../../views/partials/admin/header") %>
 
-  <div class="content-header row">
+<head>
+    <style>
+
+         .modal-overlay-banner {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.02);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    /* Modal Box */
+    .modal-box-banner {
+      background: #fff;
+      border-radius: 12px;
+      padding: 25px 30px;
+      width: 100%;
+      max-width: 500px;
+      
+    }
+
+    .modal-box-banner h2 {
+      margin-bottom: 18px;
+      font-size: 22px;
+      color: #222;
+    }
+
+    .label-banner {
+      display: block;
+      margin-top: 10px;
+      font-weight: 500;
+      font-size: 14px;
+    }
+
+    .input-banner {
+      width: 100%;
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-top: 5px;
+      font-size: 14px;
+    }
+
+    .modal-actions {
+      margin-top: 20px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .save-btn,
+    .cancel-btn {
+      padding: 8px 18px;
+      border: none;
+      border-radius: 20px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s ease;
+      font-size: 14px;
+    }
+
+    .save-btn {
+      background-color: #4CAF50;
+      color: #fff;
+    }
+
+    .cancel-btn {
+      background-color: #f44336;
+      color: #fff;
+    }
+
+    .date-row {
+         display: flex;
+        gap: 10px;
+         padding: 5px;
+         margin-top: 10px;
+         justify-content: space-around;
+        
+    }
+
+    .input-date {
+       width: 100%;
+       height: 90%;
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-top: 5px;
+      font-size: 14px;
+    
+      min-width: 120px;
+    }
+
+    @media (max-width: 480px) {
+  .date-row {
+    gap: 5px;
+     }
+   .input-date {
+    max-width: 140px; /* shrink them */
+    font-size: 14px;  /* make text fit */
+    }
+  }
+
+
+    </style>
+</head>
+
+  <div class="content-header row ml-5">
       <div class="d-flex justify-content-between align-items-center">
           <h2 class="content-title card-title">Banners</h2>
       </div>
   </div>
   </div>
-  <div class="right mt-5">
+  <div class="right mt-5 ml-5">
       <table class="table table-striped">
           <thead>
               <tr>
@@ -39,15 +147,82 @@
                                   <% } %>
                           </td>
 
+                          <td class="action" data-title="Remove">
+                             <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editBannerModal<%=i%>">Edit</button>
+                            <button onclick="deleteBanner('<%=banner[i]._id%>')" class="btn btn-sm btn-danger"><i class="icon material-icons md-delete btn-danger "></i> Delete </button>
+                        </td>
 
-                          <td class="action" data-title="Remove"><a href="/admin/deleteBanner/<%=banner[i]._id%>" class="btn btn-sm btn-danger"><i class="icon material-icons md-delete btn-danger "></i> Delete </a></td>
-                      </tr>
+                      </tr> 
+
+             <!-- edit modal      -->
+                       
+             <div id="editBannerModal<%=i%>" class="modal fade" tabindex="-1"  aria-hidden="true" >
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content modal-box-banner">
+                  <h2>Edit banner</h2>
+      
+          <form id="editCouponForm" onsubmit="return validateEditForm(event)" method="post" action="/admin/editBanner" enctype="multipart/form-data">
+            
+             <input type="hidden" id="bannerId" name="banner_id" value="<%=banner[i]._id%>">
+
+             <label for="bannerName" class="label-banner">Banner title:</label>
+             <input type="text" id="bannerName" name="title" class="input-banner" value="<%= banner[i].title%>" required>
+             <div id="error-edit-couponName" class="error-message"></div>
+             
+             <div class="date-row"> 
+             <label for="banner_startDate" >Start Date:</label>
+             <input type="date" id="banner_startDate" name="start_date" class="input-date" value="<%= new Date(banner[i].start_date)?.toISOString().split('T')[0] %>" required>
+             <div id="error-edit-couponName" class="error-message"></div>
+
+             <label for="banner_endDate" >End Date:</label>
+             <input type="date" id="banner_endDAte" name="end_date" class="input-date" value="<%= banner[i].end_date ? new Date(banner[i].end_date)?.toISOString().split('T')[0] : '' %>" required>
+             <div id="error-edit-couponName" class="error-message"></div>
+             </div>
+
+             <label for="banner_status" class="label-banner">Status:</label>
+             <input type="text" id="banner_status" name="status" class="input-banner" value="<%= banner[i].status%>" required>
+             <div id="error-edit-couponName" class="error-message"></div>
+
+             <label class="label-banner">Banner Image:</label>
+             <img class="input-banner" src="<%=banner[i].banner_img%>" alt="Image..." id="editBannerImage<%=i%>">
+             <div id="error-edit-couponName" class="error-message" ></div>
+              <button class="btn btn-sm btn-primary m-5 mt-2 mb-0" type="button" onclick="editImage('<%=i%>')">Edit Image</button>
+             
+             <label class="btn btn-sm btn-info mt-2" style="width: 25%;"> Change Image               
+                <input type="file" id="bannerFileInput<%=i%>" name="image" accept="image/*" style="display:none;" onchange="viewImage(event, '<%=i%>')">
+             </label>
+             
+
+              
+                <!--crop Modal -->
+                
+                    <div id="cropContainer<%=i%>"  style="display: none; position: fixed; top: 10%; left: 50%; transform: translateX(-50%); padding: 20px; border: 1px solid #ccc; z-index: 1000; background: rgba(159, 148, 148, 0.5);">
+                         <img id="changeCropImage<%=i%>"  style="max-width:300px; max-height: 400px;">                         
+                         <button id="cropSaveBtn<%=i%>" class="btn btn-sm btn-info mb-1" type="button">Crop</button>
+                         <button id="cropCancelBtn<%=i%>" class="btn btn-sm btn-warning mb-1" type="button">Cancel</button>
+                    </div>
+
+             <div class="modal-actions">
+               <button type="submit" class="save-btn">Save</button>
+               <button type="button" onclick="closeEditModal()" data-bs-dismiss="modal" class="cancel-btn">Cancel</button>
+            </div>  
+
+         </form>
+        </div>
+      </div>
+    </div>
+                    
+
                       <%  } } %> 
 
                 
           </tbody>
       </table>
   </div>
+
+
+
+
   <div class="container mt-3">
       <div class="row justify-content-center">
           <div class="col-md-6 text-center">
@@ -58,4 +233,212 @@
       </div>
   </div>
   </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+  <script>
+
+  
+ let cropper;
+ let originalImageSrc = null;
+   function editImage(index){
+      const bannerImg = document.getElementById('editBannerImage'+index)
+      const cropContainer = document.getElementById('cropContainer' + index); 
+      const saveButton = document.getElementById('cropSaveBtn' + index);
+      const cancelBtn = document.getElementById('cropCancelBtn' + index);
+      const viewImage = document.getElementById('editBannerImage' + index);
+      const fileInput = document.getElementById('bannerFileInput'+ index); 
+     
+  
+          let cropImg = document.getElementById('cropImage' + index);    
+
+          if(cropImg){
+            
+             if(cropImg.cropperInstance)   cropImg.cropperInstance.destroy()
+             cropImg.remove()
+          }
+         
+           cropContainer.style.display = 'block'
+           
+             const image = document.createElement('img');
+               image.id = 'cropImage' + index;
+               image.style.maxWidth = '300px';
+               image.style.maxHeight = '400px';
+               image.src = bannerImg.getAttribute('src'); 
+               cropContainer.appendChild(image);
+
+
+             const cropper = new Cropper(image, {
+                aspectRatio: 1920 / 720,
+                viewMode: 1
+             });
+
+             image.cropperInstance = cropper
+             
+
+               saveButton.onclick =  function () {
+
+                    saveButton.disabled = true;
+                           
+                    const croppedCanvas = cropper.getCroppedCanvas();         
+
+                    if(!croppedCanvas){
+                        saveButton.disabled = false;
+                        return;
+                    }
+
+                    const croppedDataURL  = croppedCanvas.toDataURL('image/jpeg', 1.0);
+                    const timestamp = new Date().getTime();
+                    const fileName = `cropped-img-${timestamp}-${index}.png`;
+
+                   croppedCanvas.toBlob(blob => {
+
+                   
+                       const imgFile = new File([blob], fileName, {type: "image/png"});
+
+                       const fileList = new DataTransfer();
+                       fileList.items.add(imgFile);
+                       fileInput.files = fileList.files
+
+                       viewImage.src= croppedDataURL
+                       
+                       cropper.destroy();
+                       image.cropperInstance = null;
+                       image.remove();
+                       cropContainer.style.display = 'none';
+                       
+                        saveButton.disabled = false
+                     
+                   } , "image/png");
+                   
+               };
+
+          
+                cancelBtn.onclick = function() {
+                  
+                   cropper.clear();
+                   cropper.destroy();
+                   image.cropperInstance = null;
+                   image.remove();
+            
+                   cropContainer.style.display='none';
+                 
+                  }
+
+       
+   }
+
+    
+
+
+    function viewImage(event, index) {
+           let input = event.target;
+           let reader = new FileReader();
+
+
+           reader.onload = function () {
+               let dataURL = reader.result;
+               let image = document.getElementById('changeCropImage' + index);
+                 image.src = dataURL;
+
+               let croppedContainer = image.parentNode;
+               croppedContainer.style.display = 'block';
+               
+
+               if(image.cropperInstance){
+                  image.cropperInstance.destroy()
+               }
+             
+
+                 const cropper = new Cropper(image, {
+                   aspectRatio:1920 / 720,
+                   viewMode: 1,
+                   guides: true,
+                   background: false,
+                   autoCropArea: 0.8,
+                   zoomable: true
+               });
+               
+                image.cropperInstance = cropper;
+               
+               let saveButton = document.querySelector('#cropSaveBtn' + index);
+                const viewImage = document.querySelector('#editBannerImage' + index);
+
+               saveButton.addEventListener('click', handleSaveClick ) ;
+               
+                   function handleSaveClick(){
+                      
+              
+                   let croppedCanvas = cropper.getCroppedCanvas();         
+                    const croppedDataURL  = croppedCanvas.toDataURL('image/jpeg', 1.0);
+                   let timestamp = new Date().getTime();
+                   let fileName = `cropped-img-${timestamp}-${index}.png`;
+
+
+                   croppedCanvas.toBlob(blob => {
+
+                       let inputField = document.getElementById('bannerFileInput'+index)
+                       let imgFile = new File([blob], fileName, {type: "image/png"});
+
+                       const fileList = new DataTransfer();
+                       fileList.items.add(imgFile);
+                       inputField.files = fileList.files
+
+                       croppedContainer.style.display = 'none';
+                       cropper.destroy();
+                       image.cropperInstance = null;
+                        viewImage.src = croppedDataURL;
+                   } , "image/png");
+                   
+               };
+
+              const cancelBtn = document.getElementById('cropCancelBtn'+index)
+
+                  function handleCancelClick() {
+                   saveButton.removeEventListener('click', handleSaveClick);
+                   cancelBtn.removeEventListener('click' , handleCancelClick);
+                   croppedContainer.style.display='none';
+                   cropper.destroy();
+                   image.cropperInstance = null;
+                   image.src = '';
+                   input.value = '';
+
+                  }
+
+                  cancelBtn.addEventListener('click',handleCancelClick);
+                  saveButton.addEventListener('click',handleSaveClick);
+
+           };
+           reader.readAsDataURL(input.files[0]);
+           input.value='';
+       }
+
+
+    
+          
+          function  deleteBanner (bannerId){
+               
+                  Swal.fire({
+                  title: "Are you sure?",
+                   text: "You won't be able to revert this!",
+                   icon: "warning",
+                   showCancelButton: true,
+                   confirmButtonColor: "#d33",
+                   cancelButtonColor: "#3085d6",
+                   confirmButtonText: "Yes, delete it!",
+              })
+              .then((result)=>{
+                     if(result.isConfirmed){
+                        window.location.href = '/admin/deleteBanner/'+bannerId;
+                     }
+                 })
+
+           }
+
+     
+
+  </script>
+
+
   <%- include("../../views/partials/admin/footer") %>

@@ -367,7 +367,7 @@ const generateInvoice = async (req, res) => {
     // Row data
     let y = tableTop + 20;
     order.order_items.forEach((item, i) => {
-      const productName = item.product_id?.product_name || "Product";
+      const productName = item.product_id?.product_name+' ('+item.volume+' ML)' || "Product";
       const isEven = i % 2 === 0;
 
       if (isEven) {
@@ -422,7 +422,7 @@ const generateInvoice = async (req, res) => {
     order.order_items.forEach((item, i) => {
 
 
-      if(item.product_id._id == productId ){ 
+      if(item.product_id._id.toString() === productId.toString() ){ 
 
      doc
       .fillColor("#000000")
