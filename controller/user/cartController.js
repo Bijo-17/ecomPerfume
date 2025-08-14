@@ -49,10 +49,7 @@ const getCart = async (req, res) => {
 
     await cart.save();
 
-console.log("cart" , cart , " \n\n cart")
     res.render('cart', { cart, user });
-
-
 
   } catch (error) {
     console.log("failed to load cart", error);
@@ -84,14 +81,9 @@ const addToCart = async (req, res) => {
 
     const productInventory = await Varient.findOne({ product_id: productId });
 
-
-
-
     let varient = productInventory.inventory.find(s => s.volume === parseInt(volume));
 
     product.stock = varient.stock;
-
-
 
     if (!product || product.isBlocked || product.category_id.isDeleted || product.category_id.status === 'blocked' || !product.stock_status || product.stock < 1) {
       return res.status(400).json({ success: false, message: "Product cannot be added" });
@@ -100,7 +92,6 @@ const addToCart = async (req, res) => {
     if (product.stock < quantity) {
       return res.status(400).json({ success: false, message: `Only ${product.stock} left` })
     }
-
 
 
     let cart = await Cart.findOne({ user_id: userId });
@@ -113,8 +104,6 @@ const addToCart = async (req, res) => {
     }
 
     const existingItem = cart.items.find(item => item.product_id.toString() === productId && item.volume === parseInt(volume));
-
-
 
     if (existingItem) {
       product.stock < parseInt(existingItem.quantity + quantity) ? existingItem.quantity = product.stock : existingItem.quantity += quantity
@@ -156,7 +145,6 @@ const removeProduct = async (req, res) => {
 
     await Cart.updateOne({ user_id: userId }, { $pull: { items: { product_id: productId, volume: volume } } });
 
-
     res.redirect('/cart');
 
   } catch (error) {
@@ -165,6 +153,7 @@ const removeProduct = async (req, res) => {
   }
 
 };
+
 
 const validateCart = async (req, res) => {
   try {
@@ -205,9 +194,7 @@ const validateCart = async (req, res) => {
 
             if (product.sales_price !== item.final_price) product.sales_price = item.final_price;
 
-
             total += item.final_price * product.quantity;
-
 
           }
 
@@ -216,19 +203,11 @@ const validateCart = async (req, res) => {
 
     }
 
-
     req.session.total = total.toFixed(2);
-
-
 
     await cart.save()
     req.session.validatedCart = cart;
-
-
     res.json({ success: true });
-
-
-
 
   } catch (error) {
     console.error("Validation of cart error:", error);
@@ -250,7 +229,7 @@ const getCoupon = async (userId) => {
     const notUsedCoupons = coupons.filter(coupon => {
       const appliedCoupon = user.applied_coupons.some(usedId => usedId.toString() === coupon._id.toString())
       const inactiveCoupon = coupon.isActive === false
-      const expiredCoupon = coupon.expiry_date && new Date(coupon.expiry_date) < new Date().setHours(0,0,0,0)
+      const expiredCoupon = coupon.expiry_date && new Date(coupon.expiry_date) < new Date().setHours(0, 0, 0, 0)
 
       return !appliedCoupon && !inactiveCoupon && !expiredCoupon
 
@@ -262,8 +241,6 @@ const getCoupon = async (userId) => {
     console.log("error while loading coupons", error)
   }
 }
-
-
 
 
 const checkout = async (req, res) => {
@@ -282,7 +259,6 @@ const checkout = async (req, res) => {
       return res.redirect("/cart");
     }
 
-   
 
     function calculateSubtotal(item) {
 
@@ -290,24 +266,23 @@ const checkout = async (req, res) => {
 
     }
 
-    function calculateTotal(item){
-        return item.items.reduce((sum, item) => sum + item.quantity * item.sales_price, 0);
+    function calculateTotal(item) {
+      return item.items.reduce((sum, item) => sum + item.quantity * item.sales_price, 0);
     }
 
     //calculating delivery
 
-    let cartTotal =  calculateSubtotal(validatedItems)
+    let cartTotal = calculateSubtotal(validatedItems)
     let finalPrice = calculateTotal(validatedItems)
- 
-     let discount = cartTotal - finalPrice;
 
-     let delivery_charge = 0;
+    let discount = cartTotal - finalPrice;
 
-    if(finalPrice <  500){
-      finalPrice  = finalPrice + 40
+    let delivery_charge = 0;
+
+    if (finalPrice < 500) {
+      finalPrice = finalPrice + 40
       delivery_charge = 40
-       }
-
+    }
 
 
     const wallet = await Wallet.findOne({ user_id: userId })
@@ -316,9 +291,8 @@ const checkout = async (req, res) => {
 
     const appliedCouponId = cart.applied_coupon.code;
 
-
     const appliedCoupon = await Coupon.findById(appliedCouponId)
-   let couponDiscount = null;
+    let couponDiscount = null;
     if (appliedCoupon) {
       if (appliedCoupon.discount_type === 'percentage') {
         couponDiscount = Number((finalPrice * appliedCoupon.offer_price) / 100)
@@ -333,8 +307,6 @@ const checkout = async (req, res) => {
     } else {
       req.session.coupon = false;
     }
-
-
 
 
     res.render("checkout", {

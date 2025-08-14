@@ -3,7 +3,6 @@ const express = require("express")
 const router = express.Router()
 const userController = require("../controller/user/userController")
 const profileController = require("../controller/user/profileController")
-const User = require("../models/userSchema")
 const passport = require("passport")
 const {userAuth} = require("../middlewares/auth")
 const brandController = require("../controller/user/brandController")
@@ -38,15 +37,11 @@ router.post('/resendOtp',userController.resendOtp)
 router.post("/verify",userController.verifyUser)
 
 
-
-
 router.get("/logout",userController.logout);
 
 router.get("/auth/google",passport.authenticate('google',{scope: ['profile','email']}));
 
 router.get("/auth/google/callback",passport.authenticate('google',{failureRedirect: '/register'}),(req,res)=>{
-    console.log("sesssion",req.session,"\n end of session........")
-    console.log("req.session.passport",req.session.passport.user)
     req.session.user = req.session.passport.user
     res.redirect("/home") 
 });
@@ -88,15 +83,9 @@ router.get("/offer-zone", offerController.getOffer)
 // product managemet
 
 router.get("/product/:category",productController.getAllProducts)
-
 router.get("/category/:category", productController.getAllProducts)
-
-// router.get("/product/:category/sort",productController.getAllProducts)
-
 router.get("/product",productController.getAllProducts)
-
 router.get("/productDetails/:id",productController.productDetails)
-
 router.post('/rateProduct/:productId',productController.rateProduct);
 
 
@@ -107,7 +96,6 @@ router.post("/address/addAddress",userAuth,addressController.addAddress)
 router.post("/address/editAddress",userAuth,addressController.editAddress)
 router.delete("/address/:id",addressController.deleteAddress)
 router.post("/address/setDefault/:id",userAuth,addressController.setDefault)
-
 router.post("/address/add",userAuth,addressController.addAddressCheckout)
 router.post("/address/edit",userAuth,addressController.editAddressCheckout)
 
@@ -128,24 +116,18 @@ router.get("/checkout",userAuth,cartController.checkout)
 router.post("/updateCart",userAuth,cartController.updateCart)
 
 
-
-
 // order 
 
 router.get("/orders",userAuth,orderController.getOrder)
-
 router.get("/orders/success",userAuth,orderController.orderPlaced)
 router.get("/orders/failed",userAuth,orderController.orderFailed)
 router.post("/orders/downloadInvoice/:orderId/:productId",orderController.generateInvoice)
-router.get("/downloadInvoice/:orderId/:productId",orderController.generateInvoice)
-          
+router.get("/downloadInvoice/:orderId/:productId",orderController.generateInvoice)          
 router.post("/returnOrder/:orderId/:productId",orderController.returnProduct)
 router.post("/cancelOrder/:orderId/:productId",orderController.cancelProduct)
-
 router.post("/orders/cod",userAuth,checkoutController.placeOrder)
 router.post("/orders/razorpay",userAuth,checkoutController.razorpayPayment)
 router.post("/orders/razorpay/verify",userAuth,checkoutController.verifyRazorpayPayment)
-
 router.post("/applayCoupon",userAuth,checkoutController.applayCoupon)
 router.post("/removeCoupon",checkoutController.removeCoupon)
 

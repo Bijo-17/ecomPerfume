@@ -15,19 +15,19 @@ const { verifyRazorpayPayment } = require("../user/checkoutController")
 const addProductPage = async (req, res) => {
   try {
 
-    const category = await Category.find({ status: 'active' , isDeleted:false })
+    const category = await Category.find({ status: 'active', isDeleted: false })
 
-    const subcategory = await Subcategory.find({ status: 'active' , isDeleted:false }).populate('category_id')
+    const subcategory = await Subcategory.find({ status: 'active', isDeleted: false }).populate('category_id')
     const brand = await Brand.find({ status: 'active' })
-     const message = req.query.message;
+    const message = req.query.message;
 
     res.render("addProduct", {
-                                cat: category,
-                                subcat: subcategory,
-                                brand,
-                                message
-                })
- 
+      cat: category,
+      subcat: subcategory,
+      brand,
+      message
+    })
+
 
   } catch (error) {
     res.redirect("/admin/pageError")
@@ -41,7 +41,7 @@ const addProducts = async (req, res) => {
 
     const product = req.body;
 
-    const productExists = await Product.findOne({ product_name:{$regex: product.productName , $options: "i" }});
+    const productExists = await Product.findOne({ product_name: { $regex: product.productName, $options: "i" } });
 
     if (!productExists) {
       const images = [];
@@ -76,31 +76,31 @@ const addProducts = async (req, res) => {
 
       }
 
-let inventory = [];
-let volume = [];
+      let inventory = [];
+      let volume = [];
 
 
 
-product.volume.forEach((element, i) => {
-        final_price =   category.category_offer > 0 ?  parseFloat((product.salesPrice[i] * (1 - category.category_offer / 100)).toFixed(2)) : product.salesPrice[i]
-         inventory.push({ 
-                           volume: element , 
-                           stock: product.stock[i] , 
-                           regular_price: product.regularPrice[i] , 
-                           sales_price: product.salesPrice[i] , 
-                           final_price: final_price
-                        })
+      product.volume.forEach((element, i) => {
+        final_price = category.category_offer > 0 ? parseFloat((product.salesPrice[i] * (1 - category.category_offer / 100)).toFixed(2)) : product.salesPrice[i]
+        inventory.push({
+          volume: element,
+          stock: product.stock[i],
+          regular_price: product.regularPrice[i],
+          sales_price: product.salesPrice[i],
+          final_price: final_price
+        })
 
         volume.push(element)
 
-    });  
-     
-   
-      const varients =  new Varients({
-              inventory : inventory
-            })
+      });
 
-            await varients.save();
+
+      const varients = new Varients({
+        inventory: inventory
+      })
+
+      await varients.save();
 
 
 
@@ -125,8 +125,8 @@ product.volume.forEach((element, i) => {
       })
 
       await newProduct.save();
-      
-      await Varients.findOneAndUpdate({_id:newProduct.varients_id}, {product_id: newProduct._id});
+
+      await Varients.findOneAndUpdate({ _id: newProduct.varients_id }, { product_id: newProduct._id });
 
       return res.redirect("/admin/addProduct?message=Product Added Successfully")
 
@@ -180,17 +180,17 @@ const listProducts = async (req, res) => {
       .populate('brand_id')
       .exec();
 
-      const varients = await Varients.find().sort({createdAt:-1})
+    const varients = await Varients.find().sort({ createdAt: -1 })
 
-   
 
-      const varient = varients.filter((v)=> {
-      
-             return  productData.some(p=> p._id.toString() === v.product_id.toString())
-      })
 
-  
-    
+    const varient = varients.filter((v) => {
+
+      return productData.some(p => p._id.toString() === v.product_id.toString())
+    })
+
+
+
 
     const count = await Product.countDocuments(filter)
 
@@ -275,12 +275,9 @@ const deleteProduct = async (req, res) => {
     const productId = req.params.id;
     const currentPage = req.params.page
 
-
     const product = await Product.findByIdAndUpdate(productId, { isDeleted: true });
 
     return res.redirect(`/admin/products?page=${currentPage}`);
-
-
 
   } catch (error) {
     console.log("error in deleting product", error)
@@ -304,23 +301,23 @@ const addOffer = async (req, res) => {
 
     const offerPrice = parseFloat((product.sales_price * (1 - offer / 100)).toFixed(2))
 
-    const finalPrice = categoryOffer < offerPrice ? categoryOffer : offerPrice  
+    const finalPrice = categoryOffer < offerPrice ? categoryOffer : offerPrice
 
 
-     await Product.findByIdAndUpdate(productId, { offer_price: offer, final_price: finalPrice });
+    await Product.findByIdAndUpdate(productId, { offer_price: offer, final_price: finalPrice });
 
-    const varients = await Varients.findOne({product_id:productId})
+    const varients = await Varients.findOne({ product_id: productId })
 
-    const allvarients = await Varients.find({product_id: productId})
+    const allvarients = await Varients.find({ product_id: productId })
 
-    
 
-    for(let item of varients.inventory ){
+
+    for (let item of varients.inventory) {
 
       const categoryOffer = parseFloat((item.sales_price * (1 - category.category_offer / 100)).toFixed(2))
       const offerPrice = parseFloat((item.sales_price * (1 - offer / 100)).toFixed(2))
-      const finalPrice = categoryOffer <   offerPrice ? categoryOffer : offerPrice  
-          item.final_price = finalPrice;
+      const finalPrice = categoryOffer < offerPrice ? categoryOffer : offerPrice
+      item.final_price = finalPrice;
     }
 
     await varients.save()
@@ -333,8 +330,6 @@ const addOffer = async (req, res) => {
   }
 }
 
-// v1 productId = 6862b31488e61227abcacea8
-// v2 productId = 687cb71bbfcc41be03c48a9b
 
 const removeOffer = async (req, res) => {
   try {
@@ -354,22 +349,22 @@ const removeOffer = async (req, res) => {
       finalPrice = categoryOffer;
 
     }
-       await Product.findByIdAndUpdate(productId, { offer_price: 0, final_price: finalPrice });
- 
-      const varients = await Varients.findOne({product_id:productId})
+    await Product.findByIdAndUpdate(productId, { offer_price: 0, final_price: finalPrice });
 
-    for(let item of varients.inventory ){
+    const varients = await Varients.findOne({ product_id: productId })
+
+    for (let item of varients.inventory) {
 
       let finalPrice = item.sales_price;
 
-        if (category.category_offer > 0) {
+      if (category.category_offer > 0) {
 
-             const categoryOffer = parseFloat((item.sales_price * (1 - category.category_offer / 100)).toFixed(2))
-      
-          finalPrice = categoryOffer;
-        }
+        const categoryOffer = parseFloat((item.sales_price * (1 - category.category_offer / 100)).toFixed(2))
 
-          item.final_price = finalPrice;
+        finalPrice = categoryOffer;
+      }
+
+      item.final_price = finalPrice;
     }
 
     await varients.save()
@@ -389,8 +384,7 @@ const editProduct = async (req, res) => {
     const editedDetails = req.body;
     const productId = req.params.id;
     const page = parseInt(req.query.page) || 1
-  
-   console.log("req.body" , req.body)
+
 
     const imageToDelete = JSON.parse(req.body.imagesToDelete || '')
 
@@ -405,17 +399,13 @@ const editProduct = async (req, res) => {
 
 
       if (editedDetails[key] && editedDetails[key] !== JSON.stringify(existing[key])) {
-          
+
         updatedFields[key] = editedDetails[key];
 
       }
     }
 
-
-
     const indexes = req.body.changedImageIndexes.split(",")
-  
-    console.log('req.files' , req.files)
 
     if (req.files && req.files.length > 0) {
       const images = existing.image;
@@ -425,7 +415,7 @@ const editProduct = async (req, res) => {
         await sharp(req.files[i].path)
           .resize({ width: 440, height: 440 })
           .toFile(resizedImagePath);
-         
+
         images[indexes[i]] = ('/uploads/product-images/' + req.files[i].filename);
         fs.unlinkSync(req.files[i].path)
       }
@@ -433,86 +423,85 @@ const editProduct = async (req, res) => {
     }
 
 
-    if (imageToDelete && imageToDelete.length>0) {
+    if (imageToDelete && imageToDelete.length > 0) {
       const images = existing.image;
 
       const indexesToDelete = imageToDelete.map(i => parseInt(i))
 
       const filteredImages = images.filter((_, index) => !indexesToDelete.includes(index))
-     
-      const deleteImage = images.filter(( (_, index) => indexesToDelete.includes(index) ))
-   
 
-       for(let d of deleteImage){
-       
-         let imagePath  = path.join(__dirname ,'../../public', d)
-     
-         if(fs.existsSync(imagePath)){ 
-      
-            fs.unlinkSync(imagePath)
+      const deleteImage = images.filter(((_, index) => indexesToDelete.includes(index)))
 
-           }
-           
-       }
+
+      for (let d of deleteImage) {
+
+        let imagePath = path.join(__dirname, '../../public', d)
+
+        if (fs.existsSync(imagePath)) {
+
+          fs.unlinkSync(imagePath)
+
+        }
+
+      }
       updatedFields.image = filteredImages;
 
-    } 
-
-
-
-
-    if (updatedFields.stock && updatedFields.stock[0]  > 0) {
-      updatedFields.stock_status = true;
-    
     }
 
-    updatedFields.stock = editedDetails?.stock ? editedDetails?.stock[0] :  0
 
-     const varient = await Varients.findOne({product_id: productId});
-     const category = await Category.findOne({_id: editedDetails.category_id});
-     const product = await Product.findOne({_id: productId})
-    
+
+
+    if (updatedFields.stock && updatedFields.stock[0] > 0) {
+      updatedFields.stock_status = true;
+
+    }
+
+    updatedFields.stock = editedDetails?.stock ? editedDetails?.stock[0] : 0
+
+    const varient = await Varients.findOne({ product_id: productId });
+    const category = await Category.findOne({ _id: editedDetails.category_id });
+    const product = await Product.findOne({ _id: productId })
+
     let inventory = [];
 
-    if(editedDetails.volume){ 
+    if (editedDetails.volume) {
 
-     editedDetails?.volume?.forEach((item,i)=>{
+      editedDetails?.volume?.forEach((item, i) => {
 
-      let final_price = editedDetails.sales_price[i];
-        console.log("final_price" , final_price)       
-          if(category.category_offer > product.offer_price){ 
+        let final_price = editedDetails.sales_price[i];
 
-                final_price = parseFloat( editedDetails.sales_price[i] * (1- category.category_offer/100)).toFixed(2);
-                console.log("category_final" , final_price) 
+        if (category.category_offer > product.offer_price) {
 
-            } else if(product.offer_price > 0){
+          final_price = parseFloat(editedDetails.sales_price[i] * (1 - category.category_offer / 100)).toFixed(2);
 
-                 final_price = parseFloat(editedDetails.sales_price[i] * (1- product.offer_price/100)).toFixed(2)              
-              }
+        } else if (product.offer_price > 0) {
 
-         
-          
-                 inventory.push({   
-                                 volume: item , 
-                                 stock: editedDetails.stock[i] , 
-                                 regular_price: editedDetails.regular_price[i], 
-                                 sales_price :  editedDetails.sales_price[i],
-                                 final_price : final_price
-                               })
-            
-              
-                })
-            }
+          final_price = parseFloat(editedDetails.sales_price[i] * (1 - product.offer_price / 100)).toFixed(2)
+        }
 
-    
 
-          await Varients.findOneAndUpdate({product_id:productId } , { inventory })
 
-         
-        
-         updatedFields.varients_id = varient._id
-         updatedFields.regular_price = editedDetails?.regular_price[0]
-         updatedFields.sales_price = editedDetails?.sales_price[0]
+        inventory.push({
+          volume: item,
+          stock: editedDetails.stock[i],
+          regular_price: editedDetails.regular_price[i],
+          sales_price: editedDetails.sales_price[i],
+          final_price: final_price
+        })
+
+
+      })
+    }
+
+
+
+    await Varients.findOneAndUpdate({ product_id: productId }, { inventory })
+
+
+
+    updatedFields.varients_id = varient._id
+    updatedFields.regular_price = editedDetails?.regular_price[0]
+    updatedFields.sales_price = editedDetails?.sales_price[0]
 
 
     await Product.findByIdAndUpdate(productId, updatedFields, { new: true });

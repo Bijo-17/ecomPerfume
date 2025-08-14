@@ -54,7 +54,7 @@ const loadDashboard = async (req,res)=>{
     res.render("dashboard")
   }
   catch(error){
-    res.render("/pageError")
+    res.render("admin/pageError")
     console.log("error",error)
   }
    

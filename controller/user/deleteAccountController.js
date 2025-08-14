@@ -9,8 +9,6 @@ const loadDeleteAccount = async (req,res)=>{
 
         const user = await User.findOne({_id : userId})
 
-    
-
         res.render("deleteAccount" , {layout:"../layout/userAccount", active:"delete",user })
         
      } catch (error) {

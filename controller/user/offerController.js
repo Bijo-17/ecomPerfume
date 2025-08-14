@@ -5,10 +5,8 @@ const User = require('../../models/userSchema');
 
 
 const getOffer = async (req,res)=>{
- 
-      const product = await Product.find({isDeleted:false , isBlocked:false}).populate('category_id brand_id')
-  
-      let displayProducts = product.filter(p=> p.brand_id?.status === 'active' && p.category_id?.status === 'active')
+
+      try{ 
  
       let topThree = await Product.aggregate([
                                                 {$match:{isDeleted:false , isBlocked:false}},
@@ -40,8 +38,19 @@ const getOffer = async (req,res)=>{
                                                              }
                                                      } ,
 
+                                                      {$lookup : {   
+                                                                      from : 'varients',
+                                                                      localField : 'varients_id',
+                                                                      foreignField : '_id',
+                                                                      as : 'varient'
+
+                                                                  }
+                                                      },
+
+                                                        {$unwind : '$varient'},
+
                                                      {$addFields : {
-                                                          discount : {$subtract :['$sales_price' , '$final_price' ]}
+                                                          discount : {$subtract :['$regular_price' , '$final_price' ]}
                                                      }
                                                     },
 
@@ -52,12 +61,20 @@ const getOffer = async (req,res)=>{
 
                                                     {$sort: {discount: -1 }},
 
-                                                    {$limit: 3}                                         
+                                                    {$limit: 10}                                         
                                              
                                               ]);
+
+            topThree = topThree.filter(product=>{
+                                          
+                                               return  !product.varient.inventory.every(s => s.stock < 1);
+                                        })
+                                        
+                    topThree = topThree.slice(0,3)                 
+
           
-          const endOfToday = new Date();
-           endOfToday.setHours(23, 59, 59, 999);                                    
+      const endOfToday = new Date();
+      endOfToday.setHours(23, 59, 59, 999);                                    
 
       const coupon = await Coupon.find({isActive:true , coupon_type: 'common' , 
 
@@ -67,12 +84,19 @@ const getOffer = async (req,res)=>{
                                                     {expiry_date:null}
                                                 ]
                                           })
-                console.log(coupon , 'c')                              
+                                         
      
-       const user = await User.findById(req.session.user)         
+      const user = await User.findById(req.session.user)         
 
      res.render('offers' , { topThree , coupon , user });
+
+} catch(error){
+       console.log("error in loading offers page" , error);
+       res.redirect("/pageError")
 }
+
+} 
+
 
 
 

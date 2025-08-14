@@ -13,7 +13,6 @@ const getAddress = async (req,res)=>{
       const [firstName = "" ,middleName = "", lastName = "" ] = (user.name || "" ).split(' ')
  
      const address = await Address.find({user_id:user})
-
         
         res.render("address",{layout:"../layout/userAccount", active:"address" ,user:userData , addresses:address ,firstName,lastName})
     } catch (error) {
@@ -30,9 +29,6 @@ const addAddress = async (req,res)=>{
         const addressDetails = req.body;
 
          addressDetails.makeDefault = !!req.body.makeDefault;
-
-
-        console.log("adddresss",addressDetails)
 
         const address = await new Address({
              user_id:userId,
@@ -53,8 +49,6 @@ const addAddress = async (req,res)=>{
 
         await address.save();
 
-  
-
         await User.findByIdAndUpdate(userId,{address:address._id})
    
         res.redirect("/address");
@@ -72,12 +66,9 @@ const editAddress = async (req,res)=>{
 
       const editedDetails = req.body;
 
-
-
       await Address.findByIdAndUpdate(addressId, editedDetails , {new:true});
 
       res.redirect('/address')
-
 
 
   } catch (error) {
@@ -94,7 +85,6 @@ const deleteAddress = async (req,res)=> {
     
      res.redirect("/address")
 
-
   } catch (error) {
      console.log("error in deleting address",error);
      res.redirect("/pageNotFound")
@@ -106,14 +96,10 @@ const setDefault = async (req, res) => {
         const selectedAddressId = req.params.id;
          const userId = req.session.user;
 
-     try {
-
-      
+     try {   
    
         await Address.updateMany({ user_id: userId }, { $set: { isDefault: false } });
-
-   
-       await Address.findByIdAndUpdate(selectedAddressId, { $set: { isDefault: true } });
+        await Address.findByIdAndUpdate(selectedAddressId, { $set: { isDefault: true } });
 
       res.redirect('/address');
 
@@ -152,12 +138,9 @@ const editAddressCheckout = async (req,res)=>{
 
       const editedDetails = req.body;
 
-
-
       await Address.findByIdAndUpdate(addressId, editedDetails , {new:true});
 
       res.redirect('/checkout')
-
 
 
   } catch (error) {

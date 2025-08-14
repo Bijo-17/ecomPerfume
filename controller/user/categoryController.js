@@ -14,6 +14,7 @@ const getCategory = async (req,res)=>{
  
      }
      catch(error){
+      
         console.log("error in loading category Page" , error);
         res.redirect('/pageError');
      }

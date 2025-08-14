@@ -6,99 +6,100 @@ const Subcategory = require("../../models/subCategorySchema")
 const Rating = require("../../models/ratingSchema")
 
 
-const search = async (req,res)=>{
-    try {
-       
-      console.log("called")
-          const search = String(req.query.q || '').trim();
-          const page = parseInt(req.query.page) || 1
-          const {price ,sortOption }= req.query
-         
+const search = async (req, res) => {
+  try {
 
-        const filter = {isDeleted:false , isBlocked:false , stock_status :true }
-        
+    const search = String(req.query.q || '').trim();
+    const page = parseInt(req.query.page) || 1
+    const { price, sortOption } = req.query
 
-     if(search){
-           
-        const brand = await Brand.find({name:{$regex: search , $options: 'i'}})
-        const brandId = brand.map(i=> i._id)
-        const category = await Category.find({name: {$regex: search , $options : 'i'}})
-       
-         const catId = category.map(c=> c._id)
-        const subcategory = await Subcategory.find({name: {$regex: search , $options : 'i'}})
-         const subcatId = subcategory.map(c=> c._id)
-         
-        filter.$or = [
-            { product_name : { $regex : search , $options : 'i'}},
-            { brand_id :{  $in : brandId} },
-             { category_id :{  $in : catId} },
-              { subcategory_id :{  $in : subcatId} }
-        ]
+    const filter = { isDeleted: false, isBlocked: false, stock_status: true }
 
-     }
-        const categoryName = 'Search = ' + search
+    if (search) {
 
-          if (price) {
-            if (price === "2000+") {
-              filter.final_price = { $gte: 2000 };
-            } else {
-              const [min, max] = price.split("-").map(Number);
-              filter.final_price = { $gte: min, $lte: max };
-            }
-          }
-                 
-             let sortQuery = {}
-        
-            //  sortOption = 'nameAZ'
-        
-            switch (sortOption) {
-              case 'priceLow':
-                sortQuery = { final_price: 1 }; // ascending
-                break;
-              case 'priceHigh':
-                sortQuery = { final_price: -1 }; // descending
-                console.log("entered priceHigh",sortQuery)
-                break;
-              case 'nameAZ':
-                sortQuery = { product_name: 1 }; // A-Z
-                console.log("asc entered",sortQuery)
-                break;
-              case 'nameZA':
-                sortQuery = { product_name: -1 }; // Z-A
-                break;
-              default:
-                sortQuery = {createdAt: -1}; // no sorting
-            }
-             
-          const categories = await Category.find({isDeleted:false , status: 'active'});
+      const brand = await Brand.find({ name: { $regex: search, $options: 'i' } })
+      const brandId = brand.map(i => i._id)
+      const category = await Category.find({ name: { $regex: search, $options: 'i' } })
 
-         const subcategory = await Subcategory.find({isDeleted:false , status: 'active'});
+      const catId = category.map(c => c._id)
+      const subcategory = await Subcategory.find({ name: { $regex: search, $options: 'i' } })
+      const subcatId = subcategory.map(c => c._id)
 
-      categories.forEach(category=> {
-            category.subcategories = subcategory.filter(s=> s.category_id.toString() === category._id.toString())
-      })
-        
-            const limit = 9;
-            const skip = (page - 1) * limit;
+      filter.$or = [
+        { product_name: { $regex: search, $options: 'i' } },
+        { brand_id: { $in: brandId } },
+        { category_id: { $in: catId } },
+        { subcategory_id: { $in: subcatId } }
+      ]
 
-        const products = await Product.find(filter).sort(sortQuery).limit(limit).skip(skip).populate([{ path:'brand_id', select: 'name status' }, {path:'category_id', select: 'name status'}  ])
-
-      
-
-          const count = await Product.countDocuments(filter);
-
-          const ratings = await Rating.find()
-           
-           const displayProducts = products.filter(p=> p.brand_id.status === 'active' && p.category_id.status === 'active')
-
-        res.render("allProductPage",{ products: displayProducts , categoryName, search , sort:sortOption , price ,currentPage:page , totalPages: Math.ceil(count/limit) , ratings , categories })
-
-
-    } catch (error) {
-        console.log("error in seaching items" , error)
     }
+    const categoryName = 'Search = ' + search
+
+    if (price) {
+      if (price === "2000+") {
+        filter.final_price = { $gte: 2000 };
+      } else {
+        const [min, max] = price.split("-").map(Number);
+        filter.final_price = { $gte: min, $lte: max };
+      }
+    }
+
+    let sortQuery = {}
+
+    //  sortOption = 'nameAZ'
+
+    switch (sortOption) {
+      case 'priceLow':
+        sortQuery = { final_price: 1 }; // ascending
+        break;
+      case 'priceHigh':
+        sortQuery = { final_price: -1 }; // descending
+        break;
+      case 'nameAZ':
+        sortQuery = { product_name: 1 }; // A-Z
+        break;
+      case 'nameZA':
+        sortQuery = { product_name: -1 }; // Z-A
+        break;
+      default:
+        sortQuery = { createdAt: -1 }; // no sorting
+    }
+
+    const categories = await Category.find({ isDeleted: false, status: 'active' });
+
+    const subcategory = await Subcategory.find({ isDeleted: false, status: 'active' });
+
+    categories.forEach(category => {
+      category.subcategories = subcategory.filter(s => s.category_id.toString() === category._id.toString())
+    })
+
+    const limit = 9;
+    const skip = (page - 1) * limit;
+
+    const products = await Product.find(filter).sort(sortQuery).limit(limit).skip(skip).populate([{ path: 'brand_id', select: 'name status' }, { path: 'category_id', select: 'name status' }])
+
+    const count = await Product.countDocuments(filter);
+
+    const ratings = await Rating.find()
+
+    const displayProducts = products.filter(p => p.brand_id.status === 'active' && p.category_id.status === 'active')
+
+    res.render("allProductPage", {
+                                    products: displayProducts, 
+                                    categoryName, search, 
+                                    sort: sortOption, price, 
+                                    currentPage: page, 
+                                    totalPages: Math.ceil(count / limit),
+                                    ratings, categories
+                                })
+
+
+  } catch (error) {
+    console.log("error in seaching items", error)
+  }
+  
 }
 
 
 
-module.exports ={  search }
+module.exports = { search }

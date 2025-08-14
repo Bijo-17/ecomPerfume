@@ -22,17 +22,13 @@ const getAllProducts = async (req,res)=>{
            userData = await User.findOne({_id:user});
         }
 
-        console.log("cat" , categoryName , sub)
-
         let search = "";
        const filter = { isDeleted:false , isBlocked: false  };
         
-     
-   
         if(categoryName.includes("Search")){
-           console.log("entered search" ,  categoryName)
+        
               search = categoryName.split("=")[1]?.trim() || ""; 
-           console.log(search , "search")
+      
               const brand = await Brand.find({name:{$regex: search , $options: 'i'}})
         const brandId = brand.map(i=> i._id)
         const category = await Category.find({name: {$regex: search , $options : 'i'}})
@@ -48,26 +44,23 @@ const getAllProducts = async (req,res)=>{
         ]
         }
  
-       
-         
-     console.log("price" , price)
   let subcategoryProducts;
 
       if (categoryName) {
          const catDoc = await Category.findOne({ name:categoryName });
 
          if (catDoc){
+
            filter.category_id = catDoc._id; 
 
              if(sub){
-               const subdoc = await Subcategory.findOne({name:sub , category_id : catDoc._id})
-                if(subdoc) filter.subcategory_id = subdoc
-                console.log("sub" , subdoc , catDoc)
+                const subdoc = await Subcategory.findOne({name:sub , category_id : catDoc._id})
+                if(subdoc) filter.subcategory_id = subdoc;
+        
              }
           
           }
           
-           console.log("filter"  , filter)
 
             if(!catDoc){ 
 
@@ -83,8 +76,7 @@ const getAllProducts = async (req,res)=>{
                       }
 
                    }
-                 
-                 
+                               
                 
                 if(!catDoc && subDoc.length<1){
                
@@ -96,19 +88,17 @@ const getAllProducts = async (req,res)=>{
            
           } 
           
-     console.log("subcatprooducts" , subcategoryProducts?.flat())
 
     // const sub = await Subcategory.find({name:'Bath and body'})
- 
 
-        if (price) {
-    if (price === "2000+") {
-      filter.final_price = { $gte: 2000 };
-    } else {
-      const [min, max] = price.split("-").map(Number);
-      filter.final_price = { $gte: min, $lte: max };
-    }
-  }
+    if (price) {
+       if (price === "2000+") {
+         filter.final_price = { $gte: 2000 };
+       } else {
+         const [min, max] = price.split("-").map(Number);
+         filter.final_price = { $gte: min, $lte: max };
+       }
+   }
          
      let sortQuery = {}
 
@@ -203,10 +193,10 @@ const getAllProducts = async (req,res)=>{
 
        displayProducts = displayProducts.filter(product => {
             
-                                        return !product.varients_id.inventory.some(s=> s.stock < 1);
+                                        return !product.varients_id.inventory.every(s=> s.stock < 1);
                                })
          
-                  
+              
         
          const count = displayProducts.length;
          
@@ -241,9 +231,7 @@ const productDetails = async (req,res)=>{
     const productId = req.params.id;
     const user = req.session.user
      let userData = ''
-      let selectedVolume = req.query.volume || '';
-
-     console.log("selected Volume" , selectedVolume)
+     let selectedVolume = req.query.volume || '';
 
         if(user){
           userData = await User.findOne({_id:user});
@@ -253,19 +241,17 @@ const productDetails = async (req,res)=>{
 
         const varients = await Varients.findOne({product_id:productId});
 
-        console.log("vaienddts" , varients)
-
         let regular_price = product.regular_price;
         let sales_price = product.final_price;
-
 
         let stock_status = '';
 
         if(selectedVolume && varients){
-           const varientData = varients.inventory.find(d=> d.volume === parseInt(selectedVolume))
+
+            const varientData = varients.inventory.find(d=> d.volume === parseInt(selectedVolume))
          
-            regular_price = varientData.regular_price;
-            sales_price = varientData.final_price;
+             regular_price = varientData.regular_price;
+             sales_price = varientData.final_price;
 
             if(varientData.stock < 1){
                stock_status = "Out of stock"
@@ -283,14 +269,9 @@ const productDetails = async (req,res)=>{
             }
         }
         
-    console.log("volume raea" , selectedVolume)
-        
-        console.log("price"  , regular_price , sales_price)
-
 
     const ratings = await Rating.find({product_id:productId}).populate('user_id')
 
-    
     let product_status = '';
 
       if(stock_status){
@@ -303,8 +284,6 @@ const productDetails = async (req,res)=>{
         ) {
             product_status = 'Unavailable';
       } 
-
-   
 
      const relatedProducts = await Product.find({
           category_id: product.category_id._id,
@@ -332,9 +311,7 @@ const rateProduct =async (req,res)=>{
   const { rating, review } = req.body;
   const userId = req.session.user;
   const { productId } = req.params;
-
  
-   
   if(!userId){
     res.redirect(`/productDetails/${productId}`)
   } else{
@@ -359,17 +336,12 @@ const rateProduct =async (req,res)=>{
 
   const average = ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length;
 
-
-
   await Product.findByIdAndUpdate(productId, { averageRating: average , ratingCount:ratingCount  });
 
   res.redirect(`/productDetails/${productId}`);
 };
 
 }
-
-
-
 
 
 module.exports =  { getAllProducts , productDetails , rateProduct}

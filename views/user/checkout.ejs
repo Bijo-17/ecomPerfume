@@ -249,11 +249,6 @@
                                 <div class="form-group">
                                     <select id="state" name="stateForm" required>
                                         <option value="">State</option>
-                                        <option value="Andhra Pradesh">Andhra Pradesh</option>                                      
-                                        <option value="Assam">Assam</option>                                  
-                                        <option value="Goa">Goa</option>
-                                        <option value="Haryana">Haryana</option>
-                                        <option value="Himachal Pradesh">Himachal Pradesh</option>                                      
                                         <option value="Kerala">Kerala</option>
                                         <option value="Maharashtra">Maharashtra</option>                            
                                         <option value="Tamil Nadu">Tamil Nadu</option>
@@ -460,7 +455,7 @@
 
 <!-- Address Selection Modal -->
 <div class="modal-overlay" id="addressModal">
-    <div class="modal-content">
+    <div class="modal-content bg-white p-5">
         <div class="modal-header">
             <h3>Select Delivery Address</h3>
             <button class="close-modal" id="closeModal">
@@ -478,12 +473,10 @@
 
 <!-- Add/Edit Address Modal -->
 <div class="modal-overlay" id="addressFormModal" >
-    <div class="modal-content">
+    <div class="modal-content" style="background: white; padding: 30px;">
         <div class="modal-header">
             <h3 id="addressFormTitle">Add New Address</h3>
-            <button class="close-modal" id="closeAddressFormModal">
-                <i class="fas fa-times"></i>
-            </button>
+          
         </div>
         <div class="modal-body">
             <form id="addressForm" class="address-form" method="post" action="/address/add" >
@@ -681,8 +674,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('pincode').value = address.pin_code;
 
         // document.querySelector(`input[name="addressType"][value="${address.address_type}"]`).checked = true;
-        
-        console.log("entereddd editaddress")
+    
 
     const form = document.getElementById('addressForm');
          form.method = "POST"
@@ -731,14 +723,11 @@ document.getElementById('placeOrderBtn').addEventListener('click', async () => {
                          
                         };
                           
-                         
-        console.log("payload", payload)
+                        
 
     if (isTypedAddress) {
 
                   const form = document.getElementById('checkoutForm');
-
-                  console.log("form found", !form)
 
                   if (!form) {
                             return Swal.fire("Form Missing", "Checkout form not found!", "error");
@@ -754,8 +743,7 @@ document.getElementById('placeOrderBtn').addEventListener('click', async () => {
                             const pin_code = form.querySelector('[name="pin_codeForm"]')?.value?.trim();
                             const address_type = form.querySelector('input[name="address_typeForm"]:checked')?.value;
 
-                       
-                       console.log("valid", name , phone_number , address_name , locality , city , state  , pin_code , !address_type)
+
 
                       if (!name || !phone_number || !address_name || !locality || !city || !state || !pin_code || !address_type) {
                                     return Swal.fire("Missing Info", "Please fill in the full address before placing the order.", "warning");
@@ -776,11 +764,10 @@ document.getElementById('placeOrderBtn').addEventListener('click', async () => {
                   
 
            } else {       
-              console.log("entered  else satatement")
+    
                    payload.addressId = addressId;
 
                   }
-           console.log("full payload", payload)
          
               if(paymentMethod === 'online'){
                    return handleOnlinePayment(payload); // Razorpay 
@@ -814,7 +801,6 @@ document.getElementById('placeOrderBtn').addEventListener('click', async () => {
 
                     
          } catch (error) {
-                    console.log(error);
                     return Swal.fire("Server Error","Unable to submit the adddress","error");
                 }
         }
@@ -822,7 +808,7 @@ document.getElementById('placeOrderBtn').addEventListener('click', async () => {
 
     
   async function handleOnlinePayment(payload) {
-        console.log("full payload", payload , "end of payload")
+    
     try {
         const response = await fetch('/orders/razorpay', {
             method: 'POST',
@@ -838,7 +824,6 @@ document.getElementById('placeOrderBtn').addEventListener('click', async () => {
             return Swal.fire("Failed", data.message || "Unable to initiate payment", "error");
         }
  
-        console.log("amount frontend", payload.addressId)
         // Now initiate Razorpay/PayPal flow using SDK
         const options = {
             key: data.key,
@@ -848,7 +833,6 @@ document.getElementById('placeOrderBtn').addEventListener('click', async () => {
             description: "Order Payment",
             order_id: data.order.id,
             handler: function (response) {
-                console.log("in response" , payload.addressId)
                 verifyPayment(response, data.order.id , payload);
             },
             prefill: {
@@ -862,23 +846,20 @@ document.getElementById('placeOrderBtn').addEventListener('click', async () => {
         };
 
         const rzp = new Razorpay(options);
-        console.log("online payment done")
         rzp.open();
 
         rzp.on('payment.failed', function (response){
-            console.log(response.error);
            window.location.href = '/orders/failed';
        });
 
     } catch (error) {
-        console.error(error);
+       
         return Swal.fire("Payment Error", "Could not process the online payment.", "error");
     }
 }
 
 async function verifyPayment(paymentResponse, orderId, payload) {
     try {
-        console.log("paymentResponse", paymentResponse , orderId ,addressId)
         const res = await fetch('/orders/razorpay/verify', {
             method: 'POST',
             headers: {
@@ -901,7 +882,7 @@ async function verifyPayment(paymentResponse, orderId, payload) {
         } 
 
     } catch (error) {
-        console.error(error);
+      
         return Swal.fire("Error", "Could not verify payment", "error");
     }
 }
@@ -1013,7 +994,6 @@ async function verifyPayment(paymentResponse, orderId, payload) {
             // remove coupon
 
                   document.getElementById('removeCouponBtn').addEventListener('click', async () => {
-                    console.log("called")
                     const removeRes = await fetch('/removeCoupon', { method: 'POST' });
                    const removeData = await removeRes.json();
               if (removeData.success) {

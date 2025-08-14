@@ -5,7 +5,7 @@ const addSubcategory = async (req, res) => {
 
   try {
     const { id } = req.params
-    console.log("req.body" , req.body)
+
     const subcategory = req.body.name
 
     const newSubcategory = await new Subcategory({
@@ -21,7 +21,6 @@ const addSubcategory = async (req, res) => {
     res.redirect("/admin/pageError")
     console.log("error adding subcategory ", error)
   }
-
 
 }
 

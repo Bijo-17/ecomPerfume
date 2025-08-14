@@ -23,39 +23,39 @@ const pageNotFound = async (req,res)=>{
 const pageError = async (req,res)=>{
    try{
          res.render("server-error")
-   }
+      }
    catch(error){
           res.render("server-error")
    }
-}
+ }
 
 const loadLogin = async (req,res)=>{
 
   try{
     if(!req.session.user){
-     
+
       return  res.render("login", {message:"", activeTab: "login" });
+
     } else {
       res.redirect("/")
     } 
-  }
-  catch(error){
+   }
+   catch(error){
      res.redirect("/pageNotFound")
   } 
-
-           
 }
+
 
 const loadRegister = async (req,res)=>{
     try {
 
       const refId = req.query.ref;
-
       req.session.ref = refId
-        res.render("login", {message:"", activeTab: "register" });
+
+      res.render("login", {message:"", activeTab: "register" });
 
     } catch (error) {
-        conseole.log("error in loadregister",error)
+        console.log("error in loadregister",error)
         res.status(500).redirect("/pageError")
     }
 }
@@ -74,8 +74,8 @@ async function sendVerificationEmail(email,otp){
             secure:false,
             requireTLS:true,
             auth:{
-                user:process.env.NODEMAILER_EMAIL,
-                pass:process.env.NODEMAILER_PASSWORD
+                 user:process.env.NODEMAILER_EMAIL,
+                 pass:process.env.NODEMAILER_PASSWORD
             }
         })
 
@@ -98,21 +98,18 @@ async function sendVerificationEmail(email,otp){
 }
 
 
-      const registerUser = async (req,res)=>{
+  const registerUser = async (req,res)=>{
 
         const {name, email, phone, password} = req.body
-        let hashedPassword;
          
-
         try{
                
-            const existingUser = await User.findOne({email ,isDeleted:false})
+              const existingUser = await User.findOne({email ,isDeleted:false})
     
-            if(existingUser){
-              return res.render("login" ,{message:"user already exists", activeTab:"register"})
-            }
-    
-        
+             if(existingUser){
+                   return res.render("login" ,{message:"user already exists", activeTab:"register"})
+              }
+       
     
             const otp = generateOtp();      
             
@@ -133,23 +130,20 @@ async function sendVerificationEmail(email,otp){
             res.render("verifyOtp"  , { message: "OTP sent to your email. Please verify." })
 
             console.log(`Otp send ${otp}`)
+
         }
-          catch(error){
-            console.error("signup error",error)
+        catch(error){
+             console.error("signup error",error)
             res.redirect("/pageError")
           }
 
-
-        }
-
+    }
 
 
-        const verifyOtp = async (req,res)=>{
-
+    const verifyOtp = async (req,res)=>{
 
             const { otp:enteredOtp } = req.body;
            
-
             const { userOtp, otpExpiry, userData } = req.session;
 
             if (!userOtp || !userData) {
@@ -164,72 +158,55 @@ async function sendVerificationEmail(email,otp){
                 return res.status(400).json({ success: false, message: "Incorrect OTP. Try again." });
               }
 
-
-              try{
+       try{
                          
                         const {name, email, phone, password} = userData
-
                         const saltRounds = 10;
-
-                        hashedPassword= await bcrypt.hash(password, saltRounds)
-
-                              
-                       const newUser = new User({name, email, phone, password:hashedPassword})
+                        hashedPassword= await bcrypt.hash(password, saltRounds)                              
+                        const newUser = new User({name, email, phone, password:hashedPassword})
  
                         await newUser.save()
 
-               // check for refrals 
+                 // check for refrals 
 
                      const referralToken = req.session.ref;
 
-                
+                     let referrerId = null;
 
-                    let referrerId = null;
-
-                 if (referralToken) { 
+                  if (referralToken) { 
                   
                        const decoded = jwt.verify(referralToken, process.env.JWT_SECRET);
                        referrerId = decoded.referrerId;
                   
-          
-                  }
+                    }
 
-       let referredUser = await User.findById(referrerId)
-
-    
-
-       let offer_price = 40;
-
-  
-     
+            let referredUser = await User.findById(referrerId)
+            let offer_price = 40;
+   
        if(referredUser && (referredUser.referredUsers.length+1) % 5 === 0 && referredUser.referredUsers.length !==0){
          
                   offer_price = 100;
                
-
        }
 
         if (referrerId) {
             // Generate and assign a coupon to the referrer
-            const randomNum = Math.floor(100 + Math.random() * 900);
-            const coupon = new Coupon({
-              coupon_name : `Ref-user${randomNum}`, 
+             const randomNum = Math.floor(100 + Math.random() * 900);
+             const coupon = new Coupon({
+                coupon_name : `Ref-user${randomNum}`, 
                 user_id: referrerId,
                 coupon_type: 'referal',
                 code: `REF${Date.now()}`,
-                 offer_price,
-                 minimum_price : 500,
+                offer_price,
+                minimum_price : 500,
                 expiry_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
             });
-            await coupon.save();
-            
+
+            await coupon.save();            
             await User.findByIdAndUpdate(referrerId ,{ $push: {referredUsers: {user_id: newUser._id,coupon_id:coupon._id}},$inc:{referralEarnings: offer_price}})
         }
-
-                        
-
-                        req.session.userOtp = null;
-                      
+               
+                        req.session.userOtp = null;                  
                         req.session.otpExpiry = null;
                         req.session.user=newUser._id
                    
@@ -240,25 +217,25 @@ async function sendVerificationEmail(email,otp){
                         });
    
 
-              }
+     }
     
-                   catch(error){
+     catch(error){
                        console.log(error)
                        return res.status(500).json({ success: false, message: "Registration failed, Try again later" })
-                   }
-           }
+                }
+      }
 
-           const resendOtp =  async (req, res) => {
-            try {
-              const { userData } = req.session;
-            
-            
+
+     const resendOtp =  async (req, res) => {
+
+       try {
+
+              const { userData } = req.session;        
           
-              if(!userData || !userData.email) 
-                {
-              
+             if(!userData || !userData.email) 
+                {            
                     return res.render("login" ,{message:"Session expired", activeTab:"register"});
-                  }
+                }
           
               const otp = generateOtp();
               const otpExpiry = Date.now() + 60 * 1000; 
@@ -283,31 +260,25 @@ async function sendVerificationEmail(email,otp){
           };
           
 
-  const verifyUser = async (req,res)=>{
+   const verifyUser = async (req,res)=>{
    
     const {email , password}= req.body
-    
-   
+     
     try{
-          const existingUser = await User.findOne({email})
+           const existingUser = await User.findOne({email})
          
-          if(existingUser){ 
+           if(existingUser){ 
             
-         
-
             const pmatch = await bcrypt.compare(password,existingUser.password)
-           
-
+          
             if(!pmatch){   
                return res.status(400).render("login" , {message : "Invalid password " , activeTab: "login"})
             }
-
-           
+      
             req.session.email = email
-            req.session.user = existingUser._id;  
-            
+            req.session.user = existingUser._id;            
 
-            res.redirect("/")
+             res.redirect("/")
 
           }else{
             return res.status(400).render("login" , {message : "user not found", activeTab: "login"})
@@ -326,11 +297,9 @@ const loadHome = async (req,res)=>{
       
           const user = req.session.user;
           const currentDate = new Date()
-          currentDate.setHours(23,59,59,999)
-       
+          currentDate.setHours(23,59,59,999)    
 
           let product = await Product.find({isDeleted:false , isBlocked : false}).populate('category_id brand_id subcategory_id varients_id').exec()
-
  
            product = product.filter(product=>{
 
@@ -340,7 +309,6 @@ const loadHome = async (req,res)=>{
                                         return stock && brandStatus
                                          
                              })
-
 
 
           const banner = await Banner.find({ 
@@ -366,6 +334,7 @@ const loadHome = async (req,res)=>{
         
         
     } catch (error) {
+      
         console.log("failed to load homePage", error)
         return res.redirect("/pageError")
         
@@ -415,7 +384,7 @@ const logout = async (req,res)=>{
   
    req.session.email=null;
    req.session.user = null;
-  
+
   res.redirect("/")
 }
 

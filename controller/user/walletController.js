@@ -11,19 +11,14 @@ const getWallet = async (req, res) => {
         const wallet = await Wallet.findOne({ user_id: userId })
         const transaction = await Transaction.find({ user_id: user._id }).sort({ transaction_date: -1 })
 
-
         res.render("wallet", { layout: "../layout/userAccount", active: "wallet", wallet, user, transaction })
-
 
     } catch (error) {
         console.log("error in loading wallet", error);
         res.redirect("/pageError")
     }
 
-
 }
-
-
 
 
 

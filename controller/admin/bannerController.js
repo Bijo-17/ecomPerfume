@@ -63,16 +63,14 @@ const addBanner = async (req, res) => {
 
    } catch (error) {
       console.log("error in adding banner", error);
-      res.redirect("/pageError");
+      res.redirect("admin/pageError");
    }
 }
 
 const editBanner = async (req,res)=>{
     try{
 
-      const data = req.body;
-      console.log("req.body" , req.body, "\n")
-       console.log('req.file', req.file)
+      const data = req.body
      
      const banner = await Banner.findByIdAndUpdate(data.banner_id,data)
 
@@ -99,8 +97,6 @@ const deleteBanner = async (req,res)=>{
     try{
 
       const bannerId = req.params.id;
- 
-      console.log("bannerId" , bannerId)
       
       await Banner.findByIdAndUpdate(bannerId,{ isDeleted: true});
       
@@ -109,7 +105,7 @@ const deleteBanner = async (req,res)=>{
     }
     catch(error){
        console.log("error in deleting banner" , error);
-       res.redirect("/pageError")
+       res.redirect("admin/pageError")
     }
 }
 

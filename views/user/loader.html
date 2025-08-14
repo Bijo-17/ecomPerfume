@@ -1,57 +1,190 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Perfume Loader</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Perfume Loader (sync to real load)</title>
 <style>
-  body {
-    background: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+  html,body{height:100%;margin:0}
+  body{
+    background:white;
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
+    overflow:hidden; /* hide scroll during preload */
+    display:flex;
+    align-items:center;
+    justify-content:center;
   }
 
-  svg {
-    width: 259px;
-    height: 208px;
+  /* Full-screen loader container */
+  #loader {
+    position:fixed;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:white;
+    z-index:9999;
+    transition:opacity .55s ease, visibility .55s ease;
+    will-change:opacity;
+  }
+  #loader.hidden {
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
   }
 
-  .liquid {
-    fill: black;
-    animation: fillUp 3s ease-in-out infinite;
-  }
+  /* the svg size (kept same as your provided values) */
+  svg { width:259px; height:208px; display:block; }
 
-  @keyframes fillUp {
-    0%   { y: 208; height: 0; }
-    100% { y: 0; height: 208; }
-  }
+  /* liquid group translated from +208 (empty) to 0 (full) */
+  #liquidGroup { transform: translateY(208px); will-change:transform; }
+
+  /* Keep the liquid pure black */
+  .liquid-rect { fill:black; }
+  .liquid-wave { fill:black; }
+
+  /* Page content hidden until loader completes */
+  #content { display:none; padding:24px; text-align:center; }
 </style>
 </head>
 <body>
 
-<svg baseProfile="tiny" height="208px" viewBox="0 0 259 208" width="259px"
-     xmlns="http://www.w3.org/2000/svg">
+<!-- LOADER -->
+<div id="loader" aria-hidden="false">
+  <svg baseProfile="tiny" viewBox="0 0 259 208" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Loading">
+    <!-- clip path = your exact bottle polygons -->
+    <clipPath id="bottle-clip">
+      <polygon points="112,81 111,82 110,82 110,83 109,84 109,91 111,93 112,93 113,94 120,94 124,98 124,101 123,102 123,103 120,106 102,106 101,107 100,107 99,108 99,112 101,114 101,115 99,117 99,118 97,120 96,120 96,121 89,128 89,129 87,131 87,132 86,133 86,134 84,136 84,137 83,138 83,139 82,140 82,142 81,143 81,145 80,146 80,148 79,149 79,152 78,153 78,159 77,160 77,164 78,165 78,166 79,167 80,167 82,169 82,170 87,175 88,175 90,177 90,178 96,184 97,184 98,185 98,186 99,186 100,187 100,188 101,188 102,189 102,190 157,190 157,189 158,188 159,188 159,187 160,186 161,186 161,185 163,183 164,183 170,177 170,176 171,175 172,175 177,170 177,169 179,167 180,167 181,166 181,165 182,164 182,160 181,159 181,153 180,152 180,149 179,148 179,146 178,145 178,143 177,142 177,140 176,139 176,138 175,137 175,136 173,134 173,133 172,132 172,131 170,129 170,128 163,121 163,120 162,120 160,118 160,117 158,115 158,114 160,112 160,108 159,107 158,107 157,106 139,106 136,103 136,102 135,101 135,98 139,94 146,94 147,93 148,93 150,91 150,84 149,83 149,82 148,82 147,81"/>
+      <polygon points="115,40 114,41 113,41 111,43 110,43 110,44 109,45 109,46 108,47 108,49 107,50 107,51 108,52 108,55 109,56 109,57 121,69 121,70 122,71 122,77 130,77 130,74 131,73 131,72 132,71 132,70 134,68 135,68 135,67 141,61 142,61 142,60 145,57 145,55 146,54 146,48 145,47 145,46 144,45 144,44 141,41 142,40 143,40 145,42 146,42 148,44 148,45 149,46 149,47 150,48 150,55 149,56 149,57 148,58 148,59 143,64 142,64 142,65 136,71 136,73 135,74 135,76 136,77 137,77 137,71 138,70 138,69 150,57 150,56 151,55 151,52 152,51 152,50 151,49 151,47 150,46 150,45 146,41 145,41 144,40"/>
+      <polygon points="129,19 127,21 126,21 122,25 122,26 121,27 121,29 120,30 120,32 121,33 121,34 123,36 136,36 138,34 138,33 139,32 139,30 138,29 138,27 137,26 137,25 133,21 132,21 130,19"/>
+    </clipPath>
 
-  <!-- Define the bottle shape as a clipping mask -->
-  <clipPath id="bottle-clip">
-    <polygon points="112,81 111,82 110,82 110,83 109,84 109,91 111,93 112,93 113,94 120,94 124,98 124,101 123,102 123,103 120,106 102,106 101,107 100,107 99,108 99,112 101,114 101,115 99,117 99,118 97,120 96,120 96,121 89,128 89,129 87,131 87,132 86,133 86,134 84,136 84,137 83,138 83,139 82,140 82,142 81,143 81,145 80,146 80,148 79,149 79,152 78,153 78,159 77,160 77,164 78,165 78,166 79,167 80,167 82,169 82,170 87,175 88,175 90,177 90,178 96,184 97,184 98,185 98,186 99,186 100,187 100,188 101,188 102,189 102,190 157,190 157,189 158,188 159,188 159,187 160,186 161,186 161,185 163,183 164,183 170,177 170,176 171,175 172,175 177,170 177,169 179,167 180,167 181,166 181,165 182,164 182,160 181,159 181,153 180,152 180,149 179,148 179,146 178,145 178,143 177,142 177,140 176,139 176,138 175,137 175,136 173,134 173,133 172,132 172,131 170,129 170,128 163,121 163,120 162,120 160,118 160,117 158,115 158,114 160,112 160,108 159,107 158,107 157,106 139,106 136,103 136,102 135,101 135,98 139,94 146,94 147,93 148,93 150,91 150,84 149,83 149,82 148,82 147,81"/>
-    <polygon points="115,40 114,41 113,41 111,43 110,43 110,44 109,45 109,46 108,47 108,49 107,50 107,51 108,52 108,55 109,56 109,57 121,69 121,70 122,71 122,77 130,77 130,74 131,73 131,72 132,71 132,70 134,68 135,68 135,67 141,61 142,61 142,60 145,57 145,55 146,54 146,48 145,47 145,46 144,45 144,44 141,41 142,40 143,40 145,42 146,42 148,44 148,45 149,46 149,47 150,48 150,55 149,56 149,57 148,58 148,59 143,64 142,64 142,65 136,71 136,73 135,74 135,76 136,77 137,77 137,71 138,70 138,69 150,57 150,56 151,55 151,52 152,51 152,50 151,49 151,47 150,46 150,45 146,41 145,41 144,40"/>
-    <polygon points="129,19 127,21 126,21 122,25 122,26 121,27 121,29 120,30 120,32 121,33 121,34 123,36 136,36 138,34 138,33 139,32 139,30 138,29 138,27 137,26 137,25 133,21 132,21 130,19"/>
-  </clipPath>
+    <!-- LIQUID GROUP anchored to SVG coordinates. 
+         This group will move from +208 (empty) to 0 (full) -->
+    <g id="liquidGroup" clip-path="url(#bottle-clip)" transform="translate(0,208)">
+      <rect class="liquid-rect" x="0" y="0" width="259" height="208" />
+      <path class="liquid-wave" d="M0,20 Q20,0 40,20 T80,20 T120,20 T160,20 T200,20 T240,20 V208 H0 Z" transform="translate(0,0)"/>
+    </g>
 
-  <!-- Animated filling rectangle clipped to bottle -->
-  <rect class="liquid" x="0" y="208" width="259" height="208" clip-path="url(#bottle-clip)" />
+    <!-- Bottle outline (unchanged) -->
+    <polygon fill="none" stroke="black" stroke-width="2"
+             points="112,81 111,82 110,82 110,83 109,84 109,91 111,93 112,93 113,94 120,94 124,98 124,101 123,102 123,103 120,106 102,106 101,107 100,107 99,108 99,112 101,114 101,115 99,117 99,118 97,120 96,120 96,121 89,128 89,129 87,131 87,132 86,133 86,134 84,136 84,137 83,138 83,139 82,140 82,142 81,143 81,145 80,146 80,148 79,149 79,152 78,153 78,159 77,160 77,164 78,165 78,166 79,167 80,167 82,169 82,170 87,175 88,175 90,177 90,178 96,184 97,184 98,185 98,186 99,186 100,187 100,188 101,188 102,189 102,190 157,190 157,189 158,188 159,188 159,187 160,186 161,186 161,185 163,183 164,183 170,177 170,176 171,175 172,175 177,170 177,169 179,167 180,167 181,166 181,165 182,164 182,160 181,159 181,153 180,152 180,149 179,148 179,146 178,145 178,143 177,142 177,140 176,139 176,138 175,137 175,136 173,134 173,133 172,132 172,131 170,129 170,128 163,121 163,120 162,120 160,118 160,117 158,115 158,114 160,112 160,108 159,107 158,107 157,106 139,106 136,103 136,102 135,101 135,98 139,94 146,94 147,93 148,93 150,91 150,84 149,83 149,82 148,82 147,81"/>
+    <polygon fill="none" stroke="black" stroke-width="2"
+             points="115,40 114,41 113,41 111,43 110,43 110,44 109,45 109,46 108,47 108,49 107,50 107,51 108,52 108,55 109,56 109,57 121,69 121,70 122,71 122,77 130,77 130,74 131,73 131,72 132,71 132,70 134,68 135,68 135,67 141,61 142,61 142,60 145,57 145,55 146,54 146,48 145,47 145,46 144,45 144,44 141,41 142,40 143,40 145,42 146,42 148,44 148,45 149,46 149,47 150,48 150,55 149,56 149,57 148,58 148,59 143,64 142,64 142,65 136,71 136,73 135,74 135,76 136,77 137,77 137,71 138,70 138,69 150,57 150,56 151,55 151,52 152,51 152,50 151,49 151,47 150,46 150,45 146,41 145,41 144,40"/>
+    <polygon fill="none" stroke="black" stroke-width="2"
+             points="129,19 127,21 126,21 122,25 122,26 121,27 121,29 120,30 120,32 121,33 121,34 123,36 136,36 138,34 138,33 139,32 139,30 138,29 138,27 137,26 137,25 133,21 132,21 130,19"/>
+  </svg>
+</div>
 
-  <!-- Bottle Outline on top -->
-  <polygon fill="none" stroke="black" stroke-width="2"
-           points="112,81 111,82 110,82 110,83 109,84 109,91 111,93 112,93 113,94 120,94 124,98 124,101 123,102 123,103 120,106 102,106 101,107 100,107 99,108 99,112 101,114 101,115 99,117 99,118 97,120 96,120 96,121 89,128 89,129 87,131 87,132 86,133 86,134 84,136 84,137 83,138 83,139 82,140 82,142 81,143 81,145 80,146 80,148 79,149 79,152 78,153 78,159 77,160 77,164 78,165 78,166 79,167 80,167 82,169 82,170 87,175 88,175 90,177 90,178 96,184 97,184 98,185 98,186 99,186 100,187 100,188 101,188 102,189 102,190 157,190 157,189 158,188 159,188 159,187 160,186 161,186 161,185 163,183 164,183 170,177 170,176 171,175 172,175 177,170 177,169 179,167 180,167 181,166 181,165 182,164 182,160 181,159 181,153 180,152 180,149 179,148 179,146 178,145 178,143 177,142 177,140 176,139 176,138 175,137 175,136 173,134 173,133 172,132 172,131 170,129 170,128 163,121 163,120 162,120 160,118 160,117 158,115 158,114 160,112 160,108 159,107 158,107 157,106 139,106 136,103 136,102 135,101 135,98 139,94 146,94 147,93 148,93 150,91 150,84 149,83 149,82 148,82 147,81"/>
-  <polygon fill="none" stroke="black" stroke-width="2"
-           points="115,40 114,41 113,41 111,43 110,43 110,44 109,45 109,46 108,47 108,49 107,50 107,51 108,52 108,55 109,56 109,57 121,69 121,70 122,71 122,77 130,77 130,74 131,73 131,72 132,71 132,70 134,68 135,68 135,67 141,61 142,61 142,60 145,57 145,55 146,54 146,48 145,47 145,46 144,45 144,44 141,41 142,40 143,40 145,42 146,42 148,44 148,45 149,46 149,47 150,48 150,55 149,56 149,57 148,58 148,59 143,64 142,64 142,65 136,71 136,73 135,74 135,76 136,77 137,77 137,71 138,70 138,69 150,57 150,56 151,55 151,52 152,51 152,50 151,49 151,47 150,46 150,45 146,41 145,41 144,40"/>
-  <polygon fill="none" stroke="black" stroke-width="2"
-           points="129,19 127,21 126,21 122,25 122,26 121,27 121,29 120,30 120,32 121,33 121,34 123,36 136,36 138,34 138,33 139,32 139,30 138,29 138,27 137,26 137,25 133,21 132,21 130,19"/>
-</svg>
+<!-- real page content (hidden until loader completes) -->
+<div id="content">
+  <h1>Welcome — site content</h1>
+  <p>Replace this area with your real page. The bottle will fill while assets load.</p>
+</div>
+
+<script>
+(function () {
+  const loader = document.getElementById('loader');
+  const content = document.getElementById('content');
+  const liquidGroup = document.getElementById('liquidGroup');
+
+  const TOTAL_HEIGHT = 208;          // SVG height in px (exact)
+  let targetProgress = 0;            // desired progress (0..1)
+  let displayedProgress = 0;         // smoothed progress used for display (0..1)
+  const SMOOTHING = 0.14;            // how quickly displayed approaches target
+  const MIN_VISIBLE_MS = 800;        // ensure loader visible at least this long
+  let loaderShownAt = performance.now();
+
+  // Get images to track (document.images)
+  const imgs = Array.from(document.images || []);
+  // We'll treat totalResources = images + 1 (final window.load)
+  const totalResources = Math.max(1, imgs.length) + 1;
+  let loadedResources = 0;
+
+  function markLoaded() {
+    loadedResources = Math.min(loadedResources + 1, totalResources);
+    targetProgress = loadedResources / totalResources;
+  }
+
+  // Attach listeners to images
+  imgs.forEach(img => {
+    if (img.complete && img.naturalWidth !== 0) {
+      markLoaded();
+    } else {
+      img.addEventListener('load', markLoaded, { once: true });
+      img.addEventListener('error', markLoaded, { once: true });
+    }
+  });
+
+  // If DOM becomes interactive, nudge the progress slightly (visual feedback)
+  document.addEventListener('readystatechange', () => {
+    if (document.readyState === 'interactive') {
+      targetProgress = Math.max(targetProgress, 0.12);
+    }
+  });
+
+  // When window fully loads, mark final resource
+  window.addEventListener('load', () => {
+    // Count final resource as loaded
+    if (loadedResources < totalResources) {
+      loadedResources = totalResources;
+      targetProgress = 1;
+    }
+  });
+
+  // Safety: if something never fires, force completion after timeout
+  const safetyTimeout = setTimeout(() => {
+    targetProgress = 1;
+    loadedResources = totalResources;
+  }, 15000);
+
+  // If there are zero images and page already complete when script runs,
+  // still animate to ensure user sees the loader briefly:
+  if (document.readyState === 'complete' && imgs.length === 0) {
+    // mark final as pending (we don't immediately hide)
+    targetProgress = 1;
+  }
+
+  // Main loop: smooth displayedProgress toward targetProgress and update translate
+  function tick() {
+    // interpolate
+    displayedProgress += (targetProgress - displayedProgress) * SMOOTHING;
+
+    // clamp tiny float noise
+    if (Math.abs(targetProgress - displayedProgress) < 0.001) {
+      displayedProgress = targetProgress;
+    }
+
+    // compute translateY for group: progress=0 => translateY = TOTAL_HEIGHT (empty)
+    // progress=1 => translateY = 0 (full)
+    const translateY = Math.round(TOTAL_HEIGHT - (TOTAL_HEIGHT * displayedProgress));
+    liquidGroup.setAttribute('transform', `translate(0, ${translateY})`);
+
+    // Decide when to finalize: only when targetProgress==1 AND visually reached the top,
+    // and we've shown loader for at least MIN_VISIBLE_MS.
+    const elapsedShown = performance.now() - loaderShownAt;
+    if (targetProgress >= 1 && displayedProgress >= 0.995 && elapsedShown >= MIN_VISIBLE_MS) {
+      clearTimeout(safetyTimeout);
+      // keep the full bottle visible a short instant, then fade
+      setTimeout(() => {
+        loader.classList.add('hidden');
+        // restore page scroll behavior
+        document.body.style.overflow = '';
+        // show content
+        content.style.display = 'block';
+        // remove loader after fade
+        setTimeout(() => loader.remove(), 700);
+      }, 300);
+      return; // stop ticking
+    }
+
+    requestAnimationFrame(tick);
+  }
+
+  // Start loop
+  requestAnimationFrame(tick);
+})();
+</script>
 
 </body>
 </html>

@@ -11,7 +11,6 @@ const contactUs = async (req,res)=>{
 
         const details = req.body;
 
-        console.log(details)
          await new ContactMessage({
                                       name: details.name,
                                       email: details.email,

@@ -161,11 +161,13 @@ const resendOtp = async (req, res) => {
         console.log("otp send failed", error)
     }
 
-
 }
 
+
 const newPasswordPage = async (req, res) => {
+
     res.render("resetPassword", { message: "" })
+
 }
 
 
@@ -173,8 +175,6 @@ const SaveNewPassword = async (req, res) => {
     try {
         const { password, cPassword } = req.body;
         const email = req.session.email;
-
-
 
         if (!email) {
             return res.render("forgotPassword", { message: "session expired" })
@@ -195,14 +195,7 @@ const SaveNewPassword = async (req, res) => {
             return res.render("forgotPassword", { message: "Unable to reset password" });
         }
 
-
-
         return res.render("login", { message: "Password updated successfully", activeTab: "login" });
-
-
-
-
-
 
     }
     catch (error) {
@@ -210,11 +203,9 @@ const SaveNewPassword = async (req, res) => {
         return res.status(500).render("resetPassword", { message: "Server error. Please try again." });
     }
 
-
 }
 
 const loadAccount = async (req, res) => {
-
 
     try {
 
@@ -241,7 +232,6 @@ const loadAccount = async (req, res) => {
         console.log("error in loading profile", error)
 
     }
-
 
 }
 
@@ -279,13 +269,9 @@ const editAccount = async (req, res) => {
 
             }
 
-
         }
 
-
         await User.findByIdAndUpdate(user._id, updatedFields, { new: true })
-
-
 
         res.redirect('/account');
 
@@ -293,8 +279,6 @@ const editAccount = async (req, res) => {
         console.error(error);
         res.status(500).redirect("/pageError")
     }
-
-
 
 }
 
@@ -378,6 +362,7 @@ const changeEmail = async (req, res) => {
     }
 }
 
+
 const loadEmailOtp = async (req, res) => {
     try {
 
@@ -389,17 +374,12 @@ const loadEmailOtp = async (req, res) => {
 }
 
 
-
 const verifyChangeEmail = async (req, res) => {
     try {
         const enteredOtp = req.body.otp
         const email = req.session.email
         const otp = req.session.userOtp
         const otpExpiry = req.session.otpExpiry
-
-
-
-
 
         if (!otp || !email) {
 
@@ -415,10 +395,6 @@ const verifyChangeEmail = async (req, res) => {
 
             return res.status(400).json({ success: false, message: "otp donot match" })
         }
-
-
-
-
 
         return res.status(200).json({ success: true, message: "otp verification sucessfull" })
 
@@ -436,16 +412,13 @@ const saveNewEmail = async (req, res) => {
 
         if (userId && email) {
 
-
             await User.findByIdAndUpdate(userId, { email });
 
             res.redirect('/account')
 
-
         } else {
             res.status(400).json({ message: "Unable to change email" })
         }
-
 
 
     } catch (error) {
@@ -456,16 +429,14 @@ const saveNewEmail = async (req, res) => {
     }
 }
 
+
 const changePassword = async (req, res) => {
     try {
 
         const userId = req.session.user
         const user = await User.findById(userId)
 
-
-
         const { currentPassword, newPassword, confirmPassword } = req.body;
-
 
         const pmatch = await bcrypt.compare(currentPassword, user.password)
 

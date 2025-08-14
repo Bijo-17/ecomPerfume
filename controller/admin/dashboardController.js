@@ -120,7 +120,7 @@ const getSalesReport = async (req, res) => {
     });
   } catch (error) {
     console.error("Sales Report Load Error:", error);
-    res.status(500).send("Internal Server Error");
+    res.status(500).redirect("/admin/pageError");
   }
 };
 
@@ -131,8 +131,6 @@ const getChartData = async (req, res) => {
 
     const now = new Date()
     let startDate, endDate = new Date()
-
-
 
     switch (query) {
       case 'daily':
@@ -294,8 +292,6 @@ const getTopItems = async (req, res) => {
           product_name: '$product.product_name',
           price: '$product.final_price'
 
-
-
         }
       }
 
@@ -452,7 +448,6 @@ const exportSalesReport = async (req, res) => {
       endDate
     );
 
- console.log('start' , startDate , endDate , singleDate , !singleDate ,  !startDate , !endDate)
     query = {
       createdAt: { $gte: start, $lte: end },
     };

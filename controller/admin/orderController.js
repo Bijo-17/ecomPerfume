@@ -73,7 +73,6 @@ const orderDetails = async (req, res) => {
 
         const currentProduct = order.order_items.find(product => product._id == productId)
 
-
         res.render("detailedOrderPage", { order })
 
     } catch (error) {
@@ -174,7 +173,7 @@ const approveReturn = async (req, res) => {
 
         } else {
 
-            await Transaction.findOneAndUpdate({ user_id: userId }, { amount: refundAmount, status: 'credited' , order_id:order.id , transaction_date: new Date() })
+            await Transaction.findOneAndUpdate({ user_id: userId }, { amount: refundAmount, status: 'credited', order_id: order.id, transaction_date: new Date() })
 
         }
 
@@ -207,17 +206,14 @@ const updateOrderStatus = async (req, res) => {
         let order = await Order.findOne({ _id: orderId }).populate('order_items.product_id')
 
 
-
-     
         if (order.order_status === 'delivered') {
             order.delivered_date = new Date();
-               order.order_status = status
+            order.order_status = status
 
         }
         const currentItem = order.order_items.find(product => product._id.toString() === productId.toString())
 
         currentItem.order_status = status;
-
 
         await order.save()
 

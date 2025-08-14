@@ -14,176 +14,166 @@ const Transaction = require("../../models/transactionSchema")
 
 
 
-const getOrder = async (req,res)=> {
+const getOrder = async (req, res) => {
 
   try {
-      const userId = req.session.user;
+    const userId = req.session.user;
 
-      const user = await User.findOne({_id : userId});
-       
-      const fullname = user.name;
+    const user = await User.findOne({ _id: userId });
 
-       const order = await Order.find({user_id:userId}).populate('order_items.product_id address_id').sort({createdAt:-1});
-       
- 
-    
-      res.render("orders",{layout:"../layout/userAccount", active:"order" ,user, firstName: fullname , orders:order})
+    const fullname = user.name;
+
+    const order = await Order.find({ user_id: userId }).populate('order_items.product_id address_id').sort({ createdAt: -1 });
+
+    res.render("orders", { layout: "../layout/userAccount", active: "order", user, firstName: fullname, orders: order })
 
   } catch (error) {
-      console.log("error in loading order list", error)
-      res.redirect("/pageNotFound")
+    console.log("error in loading order list", error)
+    res.redirect("/pageNotFound")
   }
-      
-}
-
-
-
-
-const orderPlaced = async (req,res)=>{
-   
-    try {
-       
-        const orderId = req.session.orderId
-
-          const isoDate = new Date().toISOString().substring(0, 10);
-               const [year, month, day] = isoDate.split('-');
-               const date = `${day}/${month}/${year}`
-
-        const order = await Order.findOne({order_id:orderId}).populate('order_items.product_id');
-
-      
-            order.order_status = 'pending';
-         
-               order.estimated_delivery = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-               
-
-            for(let ord of order.order_items){
-                ord.order_status = 'pending';
-            }
-
-            if(order.payment_method.method === 'online'){                 
-                     order.isPaid = true;
-                    order.payment_method.status = 'paid';
-            }
-
-            await order.save(); 
-            req.session.coupon = null
-            
-
-
-        res.render("orderPlaced",{orderId,date, order})
-        
-    } catch (error) {
-        console.log("error in  order confirmation ",error);
-        res.redirect("/pageNotFound")
-    }
 
 }
 
 
-const orderFailed = async (req,res)=>{
-   
-    try {
-       
-        const orderId = req.session.orderId
-
-          const isoDate = new Date().toISOString().substring(0, 10);
-               const [year, month, day] = isoDate.split('-');
-               const date = `${day}/${month}/${year}`
-      
-
-        const order = await Order.findOne({order_id:orderId}).populate('order_items.product_id');
-        
-            order.order_status = 'failed';
-            order.payment_method.status ='failed'
-            order.isPaid = false;
-       
-
-            for(let ord of order.order_items){
-               ord.order_status = 'failed';
-            }
-
-            await order.save(); 
-
-        res.render("razorpayFailed",{orderId,date, order})
-        
-    } catch (error) {
-        console.log("error in  order confirmation ",error);
-        res.redrirect("/pageError")
-    }
-
-}
-
-
-
-const cancelProduct = async (req,res)=> {
+const orderPlaced = async (req, res) => {
 
   try {
-         const userId = req.session.user;
-        const productId = req.params.productId;
-         const orderId =  decodeURIComponent(req.params.orderId)
 
-         const user = await User.findById(userId)
+    const orderId = req.session.orderId
 
-          let order = await Order.findOne({order_id:orderId}).populate('order_items.product_id')
+    const isoDate = new Date().toISOString().substring(0, 10);
+    const [year, month, day] = isoDate.split('-');
+    const date = `${day}/${month}/${year}`
 
-    
-           
-          const returnedItem = order.order_items.find(product=>product.product_id._id == productId )
+    const order = await Order.findOne({ order_id: orderId }).populate('order_items.product_id');
 
-          const {product_price , delivery_charge , quantity } = returnedItem;
 
-          const refundAmount = parseFloat((quantity * product_price) + delivery_charge - (order.discount/order.order_items.length ));
-          
-        
-        
-        
+    order.order_status = 'pending';
 
-          if(order.isPaid){           
+    order.estimated_delivery = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
 
-               const wallet = await Wallet.findOneAndUpdate({user_id: userId} , { $inc :{balance:refundAmount}})
 
-               if(!wallet){
-                   const wallet =  await new Wallet({ user_id:userId , balance:refundAmount}).save()
+    for (let ord of order.order_items) {
+      ord.order_status = 'pending';
+    }
 
-                     await User.findByIdAndUpdate(userId,{wallet_id:wallet._id}) 
-               }
+    if (order.payment_method.method === 'online') {
+      order.isPaid = true;
+      order.payment_method.status = 'paid';
+    }
 
-          
+    await order.save();
+    req.session.coupon = null
 
-                const transaction = await new Transaction({
-                        amount:refundAmount,
-                        
-                        order_id : order._id,
-                        user_id : user._id,
-                        status: 'credited'
-                     }).save()
 
-                     
-               await Wallet.findOneAndUpdate({user_id: userId} ,{transaction_id : transaction })
-              }
 
-            
+    res.render("orderPlaced", { orderId, date, order })
 
-          for(let product of order.order_items){
+  } catch (error) {
+    console.log("error in  order confirmation ", error);
+    res.redirect("/pageNotFound")
+  }
 
-              if(product.product_id._id == productId){
-                        
-                  product.order_status = 'cancelled';
-                  product.cancelled_date = new Date();
-          
-                  await order.save()
+}
 
-                }
 
-            }
-         
-         
-          const product = await Product.findByIdAndUpdate(productId, {$inc : {stock:quantity},stock_status:true},{new:true})
+const orderFailed = async (req, res) => {
 
-          
-     
-         res.status(200).json()
+  try {
+
+    const orderId = req.session.orderId
+
+    const isoDate = new Date().toISOString().substring(0, 10);
+    const [year, month, day] = isoDate.split('-');
+    const date = `${day}/${month}/${year}`
+
+
+    const order = await Order.findOne({ order_id: orderId }).populate('order_items.product_id');
+
+    order.order_status = 'failed';
+    order.payment_method.status = 'failed'
+    order.isPaid = false;
+
+
+    for (let ord of order.order_items) {
+      ord.order_status = 'failed';
+    }
+
+    await order.save();
+
+    res.render("razorpayFailed", { orderId, date, order })
+
+  } catch (error) {
+    console.log("error in  order confirmation ", error);
+    res.redrirect("/pageError")
+  }
+
+}
+
+
+
+const cancelProduct = async (req, res) => {
+
+  try {
+    const userId = req.session.user;
+    const productId = req.params.productId;
+    const orderId = decodeURIComponent(req.params.orderId)
+
+    const user = await User.findById(userId)
+
+    let order = await Order.findOne({ order_id: orderId }).populate('order_items.product_id')
+
+    const returnedItem = order.order_items.find(product => product.product_id._id == productId)
+
+    const { product_price, delivery_charge, quantity } = returnedItem;
+
+    const refundAmount = parseFloat((quantity * product_price) + delivery_charge - (order.discount / order.order_items.length));
+
+    if (order.isPaid) {
+
+      const wallet = await Wallet.findOneAndUpdate({ user_id: userId }, { $inc: { balance: refundAmount } })
+
+      if (!wallet) {
+        const wallet = await new Wallet({ user_id: userId, balance: refundAmount }).save()
+
+        await User.findByIdAndUpdate(userId, { wallet_id: wallet._id })
+      }
+
+
+
+      const transaction = await new Transaction({
+        amount: refundAmount,
+
+        order_id: order._id,
+        user_id: user._id,
+        status: 'credited'
+      }).save()
+
+
+      await Wallet.findOneAndUpdate({ user_id: userId }, { transaction_id: transaction })
+    }
+
+
+
+    for (let product of order.order_items) {
+
+      if (product.product_id._id == productId) {
+
+        product.order_status = 'cancelled';
+        product.cancelled_date = new Date();
+
+        await order.save()
+
+      }
+
+    }
+
+
+    const product = await Product.findByIdAndUpdate(productId, { $inc: { stock: quantity }, stock_status: true }, { new: true })
+
+
+
+    res.status(200).json()
 
 
   } catch (error) {
@@ -194,43 +184,40 @@ const cancelProduct = async (req,res)=> {
 
 }
 
-const returnProduct = async (req,res)=>{  
-      
-     try {
-            const orderId =  decodeURIComponent(req.params.orderId)
-          const { productId }= req.params
-          const reason = req.body.reason
+const returnProduct = async (req, res) => {
 
-          const order = await Order.findOne({order_id:orderId}).populate('order_items.product_id')
+  try {
+    const orderId = decodeURIComponent(req.params.orderId)
+    const { productId } = req.params
+    const reason = req.body.reason
 
-           
-
-          for(let product of order.order_items){
-               
-               if(product.product_id._id == productId){
-                   
-                  // product.order_status = 'returned'
-                  product.return_request.status = 'requested'
-                  product.return_request.reason = reason
-                   product.return_request.requestedAt = new Date()
-                   await order.save()
-
-                }
-
-          }
+    const order = await Order.findOne({ order_id: orderId }).populate('order_items.product_id')
 
 
-          res.status(200).json()
-      
-     } catch (error) {
-        console.log("error in returning product", error)
-        res.status(500).json()
-     }
+
+    for (let product of order.order_items) {
+
+      if (product.product_id._id == productId) {
+
+        // product.order_status = 'returned'
+        product.return_request.status = 'requested'
+        product.return_request.reason = reason
+        product.return_request.requestedAt = new Date()
+        await order.save()
+
+      }
+
+    }
+
+
+    res.status(200).json()
+
+  } catch (error) {
+    console.log("error in returning product", error)
+    res.status(500).json()
+  }
 
 }
-
-
-
 
 
 const generateInvoice = async (req, res) => {
@@ -238,10 +225,10 @@ const generateInvoice = async (req, res) => {
     const orderId = decodeURIComponent(req.params.orderId);
     const productId = req.params.productId;
     const userId = req.session.user;
-   
- 
 
-    const order = await Order.findOne({ order_id: orderId})
+
+
+    const order = await Order.findOne({ order_id: orderId })
       .populate({
         path: "order_items.product_id",
         select: "product_name delivery_charge",
@@ -251,17 +238,17 @@ const generateInvoice = async (req, res) => {
 
 
     if (!order) {
-      
+
       return res.send("/orders");
     }
-            
+
     let delivery = 0;
-       order.order_items.forEach(item=> { 
-          item.delivery_charge ? delivery = item.delivery_charge : 0
+    order.order_items.forEach(item => {
+      item.delivery_charge ? delivery = item.delivery_charge : 0
 
-       })
+    })
 
-      const user = await User.findById(userId);
+    const user = await User.findById(userId);
 
     const userName = order?.address_id?.name || "Customer";
     const userEmail = user?.email || "";
@@ -301,7 +288,7 @@ const generateInvoice = async (req, res) => {
       .fillColor("#555555")
       .text(`Invoice: ${order.order_id || orderId}`, 50, 150)
       .text(`Ordered Date: ${new Date(order.createdAt).toLocaleDateString()}`, 50, 165)
-       .text(`Deliverd Date: ${new Date(order?.delivered_date).toLocaleDateString()}`, 50, 180);
+      .text(`Deliverd Date: ${new Date(order?.delivered_date).toLocaleDateString()}`, 50, 180);
 
     // Customer info
     doc
@@ -317,19 +304,17 @@ const generateInvoice = async (req, res) => {
 
     if (order.address_id) {
       doc.text(
-        `${order.address_id.address_name}${
-          order.address_id.city ? ", " + order.address_id.city : ""
+        `${order.address_id.address_name}${order.address_id.city ? ", " + order.address_id.city : ""
         }`,
         50,
         currentY
       );
       currentY += 15;
       doc.text(
-        `${order.address_id.state}${
-          order.address_id.pin_code ? " - " + order.address_id.pin_code : ""
+        `${order.address_id.state}${order.address_id.pin_code ? " - " + order.address_id.pin_code : ""
         }`,
         50,
-     
+
       );
       currentY += 15;
       doc.text(order.address_id.country, 50, currentY);
@@ -358,8 +343,8 @@ const generateInvoice = async (req, res) => {
     doc
       .fillColor("#000000")
       .fontSize(10)
-      .text("Sl.no", itemCodeX, tableTop, { width: 60 })
-      .text("Item", descriptionX, tableTop, { width: 170 })
+      .text("Sl.no", itemCodeX, tableTop, { width: 20 })
+      .text("Item", descriptionX, tableTop, { width: 184 })
       .text("Qty", quantityX, tableTop, { width: 40 })
       .text("Price", priceX, tableTop, { width: 70 })
       .text("Amount", amountX, tableTop, { width: 70 });
@@ -367,7 +352,10 @@ const generateInvoice = async (req, res) => {
     // Row data
     let y = tableTop + 20;
     order.order_items.forEach((item, i) => {
-      const productName = item.product_id?.product_name+' ('+item.volume+' ML)' || "Product";
+      const productName = item.product_id?.product_name.length>27 ? 
+                                                                     item.product_id.product_name.substring(0,25)+ '...' + ' (' + item.volume + ' ML)' || 'Product' : 
+                                                                     item.product_id.product_name + ' (' + item.volume + ' ML)' || "Product";
+
       const isEven = i % 2 === 0;
 
       if (isEven) {
@@ -383,8 +371,8 @@ const generateInvoice = async (req, res) => {
       doc
         .fillColor("#000")
         .fontSize(10)
-        .text(i+1, itemCodeX, y, { width: 60 })
-        .text(productName, descriptionX, y, { width: 170 })
+        .text(i + 1, itemCodeX, y, { width: 20 })
+        .text(productName, descriptionX, y, { width: 190 })
         .text(item.quantity.toString(), quantityX, y, { width: 40 })
         .text(`₹${item.product_price.toFixed(2)}`, priceX, y, { width: 70 })
         .text(`₹${(item.product_price * item.quantity).toFixed(2)}`, amountX, y, {
@@ -401,7 +389,7 @@ const generateInvoice = async (req, res) => {
     // Totals section - moved to the right side
     // Draw totals with fixed positioning to ensure they appear as expected
     doc
-      .rect(350, y, 200, 80 )
+      .rect(350, y, 200, 80)
       .fillColor("#f9f9f9")
       .fill()
       .strokeColor("#dddddd")
@@ -412,51 +400,51 @@ const generateInvoice = async (req, res) => {
       .fillColor("#000000")
       .fontSize(10)
       .text("Subtotal:", 370, y + 15, { width: 75 })
-      .text(`₹ ${Number(order.total_price+order.discount-delivery).toFixed(2)}`, 490, y + 15, {
+      .text(`₹ ${Number(order.total_price + order.discount - delivery).toFixed(2)}`, 490, y + 15, {
         width: 50,
         align: "right",
       });
 
-    y +=20;
+    y += 20;
 
     order.order_items.forEach((item, i) => {
 
 
-      if(item.product_id._id.toString() === productId.toString() ){ 
+      if (item.product_id._id.toString() === productId.toString()) {
 
-     doc
-      .fillColor("#000000")
-      .fontSize(10)
-      .text("delivery:", 370, y + 15, { width: 75 })
-      .text(`₹ ${item.delivery_charge.toFixed(2)}`, 490, y + 15, {
+        doc
+          .fillColor("#000000")
+          .fontSize(10)
+          .text("delivery:", 370, y + 15, { width: 75 })
+          .text(`₹ ${item.delivery_charge.toFixed(2)}`, 490, y + 15, {
+            width: 50,
+            align: "right",
+          });
+
+      }
+
+    })
+
+
+    y += 20;
+
+
+    doc
+      .text("Discount:", 370, y + 15, { width: 75 })
+      .text(`-₹ ${order.discount.toFixed(2)}`, 490, y + 15, {
         width: 50,
         align: "right",
       });
 
-    }
+    doc
+      .fontSize(11)
+      .font("Unicode")
+      .text("Total:", 370, y + 60, { width: 75 })
+      .text(`₹ ${order.total_price.toFixed(2)}`, 490, y + 60, {
+        width: 50,
+        align: "right",
+      });
 
-    })  
-
-  
-    y +=20;
-
-   
-      doc
-        .text("Discount:", 370, y + 15, { width: 75 })
-        .text(`-₹ ${order.discount.toFixed(2)}`, 490, y + 15, {
-          width: 50,
-          align: "right",
-        });
-
-      doc
-        .fontSize(11)
-        .font("Unicode")
-        .text("Total:", 370, y + 60, { width: 75 })
-        .text(`₹ ${order.total_price.toFixed(2)}`, 490, y + 60, {
-          width: 50,
-          align: "right",
-        });
- 
 
     // Move down to ensure space for payment info
     y = y + (order.discount > 0 ? 100 : 80);
@@ -505,14 +493,14 @@ const generateInvoice = async (req, res) => {
 
     doc.end();
 
-   
+
   } catch (error) {
     console.error("Error generating invoice:", error);
     if (!res.headersSent) {
-  
+
       return res.redirect("/orders");
     }
   }
 };
 
-module.exports = {orderPlaced , getOrder , generateInvoice , returnProduct , cancelProduct , orderFailed}
+module.exports = { orderPlaced, getOrder, generateInvoice, returnProduct, cancelProduct, orderFailed }

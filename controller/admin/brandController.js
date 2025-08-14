@@ -41,11 +41,9 @@ const addBrand = async (req, res) => {
       const details = req.body
 
 
-        let image = req.file ? req.file.filename : null;
+      let image = req.file ? req.file.filename : null;
 
-console.log("imsge" , image)
       const brand = await Brand.findOne({ name: { $regex: `^${details.name.trim()}$`, $options: 'i' }, isDeleted: false })
-
 
       if (details.name.length < 3) {
 
@@ -55,31 +53,31 @@ console.log("imsge" , image)
 
 
       if (brand) {
-          
-          if(image){
-             fs.unlinkSync(req.file.path)
-          }
+
+         if (image) {
+            fs.unlinkSync(req.file.path)
+         }
          return res.status(400).json("Brand already exists")
 
-      } 
+      }
 
-        if(image){
-            const brandImagePath = path.join('public', 'uploads' , 'brand-images' ,  'brand-'+req.file.filename);
-            await sharp(req.file.path).resize({width:440 , height:440}).toFile(brandImagePath);
-             fs.unlinkSync(req.file.path)
-            image ='/uploads/brand-images/brand-'+req.file.filename;
-                   
-        }
+      if (image) {
+         const brandImagePath = path.join('public', 'uploads', 'brand-images', 'brand-' + req.file.filename);
+         await sharp(req.file.path).resize({ width: 440, height: 440 }).toFile(brandImagePath);
+         fs.unlinkSync(req.file.path)
+         image = '/uploads/brand-images/brand-' + req.file.filename;
 
-         const newBrand = await new Brand({
-            name: details.name.trim(),
-            offer: details.offer || 0,
-            image:  image
-         })
+      }
 
-         await newBrand.save()
+      const newBrand = await new Brand({
+         name: details.name.trim(),
+         offer: details.offer || 0,
+         image: image
+      })
 
-         res.status(200).json({ success: true, message: "brand added sucessfully" })
+      await newBrand.save()
+
+      res.status(200).json({ success: true, message: "brand added sucessfully" })
 
 
    } catch (error) {
@@ -95,38 +93,38 @@ const editBrand = async (req, res) => {
    try {
       const id = req.params.id
       const data = req.body
-       let image = req.file ? req.file.filename : ''
-  console.log("req.file" , req.file)
-      const currentBrand = await Brand.findOne({_id: id})
+      let image = req.file ? req.file.filename : ''
+
+      const currentBrand = await Brand.findOne({ _id: id })
       const brand = await Brand.findOne({ name: { $regex: `^${data.name.trim()}$`, $options: 'i' }, isDeleted: false })
-       
+
 
       if (brand && brand.name.toLowerCase() !== currentBrand.name.toLowerCase()) {
-         return res.status(400).json({success: false , message:"Brand Already exists" });
-      } 
-   
-
-         await Brand.findByIdAndUpdate(id, { name: data.name.trim(), offer: data.offer.trim() || 0})
-       
-         if(image){
-               
-                 const brandImagePath = path.join('public', 'uploads' , 'brand-images' ,  'brand-'+req.file.filename);
-                await sharp(req.file.path).toFile(brandImagePath)
-                 fs.unlinkSync(req.file.path)
-                 fs.unlinkSync(path.join('public',currentBrand.image));
-                 await currentBrand.save();
-                image = '/uploads/brand-images/brand-'+req.file.filename;
-               await Brand.findByIdAndUpdate(id, {  image : image })
-        }
+         return res.status(400).json({ success: false, message: "Brand Already exists" });
+      }
 
 
+      await Brand.findByIdAndUpdate(id, { name: data.name.trim(), offer: data.offer.trim() || 0 })
 
-      res.status(200).json({success: true , message: "Brand edited"});
+      if (image) {
+
+         const brandImagePath = path.join('public', 'uploads', 'brand-images', 'brand-' + req.file.filename);
+         await sharp(req.file.path).toFile(brandImagePath)
+         fs.unlinkSync(req.file.path)
+         fs.unlinkSync(path.join('public', currentBrand.image));
+         await currentBrand.save();
+         image = '/uploads/brand-images/brand-' + req.file.filename;
+         await Brand.findByIdAndUpdate(id, { image: image })
+      }
+
+
+
+      res.status(200).json({ success: true, message: "Brand edited" });
 
 
    } catch (error) {
       console.log("error in editing brand ", error)
-      res.status(500).json({success:false , message: "server Error" });
+      res.status(500).json({ success: false, message: "server Error" });
 
    }
 }

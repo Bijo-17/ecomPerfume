@@ -7,8 +7,6 @@ const getReferral=async (req, res) => {
 
     const user = await User.findById(userId).populate('referredUsers.user_id referredUsers.coupon_id')
 
-    console.log(user.referredUsers)
-
     if (!user) {
         return res.status(401).redirect("/")
     }

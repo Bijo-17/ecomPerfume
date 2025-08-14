@@ -64,11 +64,6 @@ router.get('/addBrand/block/:id', brandController.blockBrand);
 router.get('/addBrand/unblock/:id', brandController.unblockBrand);
 router.get('/addBrand/delete/:id',adminAuth, brandController.deleteBrand);
 
-router.post('/test-upload', uploads.single('image'), (req, res) => {
-  console.log("FILE:", req.file);
-  res.send("Received");
-});
-
 // banner mangement
 
 router.get('/banner',adminAuth,bannerController.loadBannerPage)

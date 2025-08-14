@@ -17,11 +17,10 @@ const getWishlist = async (req, res) => {
 
     console.log("error in loading wishlist", error);
     res.redirect("/pageError")
-    
+
   }
 
 }
-
 
 
 const addToWishlist = async (req, res) => {
@@ -57,11 +56,9 @@ const addToWishlist = async (req, res) => {
 
     }
 
-
     await wishlist.save();
 
     return res.status(200).json({ success: true, message: " Item added to wishlist" });
-
 
   } catch (error) {
     console.log("unable to add item to wishlist ", error);
@@ -77,7 +74,7 @@ const removeProduct = async (req, res) => {
     const { productId } = req.params
     const userId = req.session.user;
 
-     await Wishlist.updateOne({ user_id: userId }, { $pull: { products: { product_id: productId } } });
+    await Wishlist.updateOne({ user_id: userId }, { $pull: { products: { product_id: productId } } });
 
     res.redirect('/wishlist');
 
@@ -87,7 +84,6 @@ const removeProduct = async (req, res) => {
   }
 
 };
-
 
 
 

@@ -8,19 +8,15 @@ const getCoupon = async (req, res) => {
         const coupon = await Coupon.find()
 
         const date = new Date()
-        date.setHours(0,0,0,0)
-
-        console.log("date" ,date)
+        date.setHours(0, 0, 0, 0)
 
         for (let c of coupon) {
             if (c.expiry_date && c.expiry_date < date) {
-                console.log(c.expiry_date , date , "date")
+
                 c.isActive = false
                 await c.save();
             }
         };
-
-        
 
 
         res.render("coupon", { coupon })
@@ -39,7 +35,7 @@ const createCoupon = async (req, res) => {
 
         const { couponName, startDate, endDate, offerPrice, minimumPrice, couponType, maxDiscount } = req.body.formData
 
-        const existingCoupon = await Coupon.findOne({ coupon_name: { $regex: `^${couponName}$`, '$options': 'i' }})
+        const existingCoupon = await Coupon.findOne({ coupon_name: { $regex: `^${couponName}$`, '$options': 'i' } })
 
         if (existingCoupon) {
             return res.status(400).json({ success: false, message: "Coupon already exists!" })
