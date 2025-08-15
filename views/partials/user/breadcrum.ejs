@@ -4,10 +4,11 @@
     <ol class="breadcrumb">
       <li class="breadcrumb-item"><a href="/">Home</a></li>
       <% breadcrumbs.forEach((crumb, index) => { %>
+         <% let cleanName = crumb.breadcrumbName.split('?')[0]; %>
         <% if (index === breadcrumbs.length - 1) { %>
-          <li class="breadcrumb-item active" aria-current="page"><%= crumb.breadcrumbName %></li>
+          <li class="breadcrumb-item active" aria-current="page"><%= cleanName %></li>
         <% } else { %>
-          <li class="breadcrumb-item"><a href="<%= crumb.breadcrumbUrl %>"><%= crumb.breadcrumbName %></a></li>
+          <li class="breadcrumb-item"><a href="<%= crumb.breadcrumbUrl %>"><%= cleanName %></a></li>
         <% } %>
       <% }); %>
     </ol>

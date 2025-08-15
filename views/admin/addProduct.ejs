@@ -264,7 +264,7 @@
                                    <div id="addedImagesContainer" class="thumbnails-container"></div>
                                </div>
 
-                           <!-- // new code for croppig image -->
+                           <!-- croppig image -->
 
   <div class="row">
 
@@ -584,7 +584,7 @@ function viewImage(event, index) {
             croppedImage.src = croppedCanvas.toDataURL();
 
             const timestamp = new Date().getTime();
-            const fileName = `cropped-img-${timestamp}-${index}.png`;
+            const fileName = `cropped-${timestamp}-${index}.png`;
 
             croppedCanvas.toBlob((blob) => {
                 const imgFile = new File([blob], fileName, { type: "image/png" });

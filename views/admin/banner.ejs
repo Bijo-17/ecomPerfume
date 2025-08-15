@@ -179,8 +179,10 @@
              <div id="error-edit-couponName" class="error-message"></div>
              </div>
 
-             <label for="banner_status" class="label-banner">Status:</label>
-             <input type="text" id="banner_status" name="status" class="input-banner" value="<%= banner[i].status%>" required>
+             <label for="banner_status" class="label-bannr">Status:</label>          
+                 <label class="label-banner">  
+                  <input type="radio" name="status" value="true" <%=banner[i].status === true ? 'checked' : ''%> > Active
+                 <input type="radio" class="ml-5" name="status" value="false" <%=banner[i].status === false ? 'checked' : '' %> >Inactive </label>
              <div id="error-edit-couponName" class="error-message"></div>
 
              <label class="label-banner">Banner Image:</label>
@@ -242,6 +244,7 @@
   
  let cropper;
  let originalImageSrc = null;
+
    function editImage(index){
       const bannerImg = document.getElementById('editBannerImage'+index)
       const cropContainer = document.getElementById('cropContainer' + index); 

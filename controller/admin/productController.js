@@ -16,10 +16,9 @@ const addProductPage = async (req, res) => {
   try {
 
     const category = await Category.find({ status: 'active', isDeleted: false })
-
     const subcategory = await Subcategory.find({ status: 'active', isDeleted: false }).populate('category_id')
-    const brand = await Brand.find({ status: 'active' })
-    const message = req.query.message;
+    const brand = await Brand.find({ status: 'active' , isDeleted: false })
+    const message = req.query.message || '';
 
     res.render("addProduct", {
       cat: category,
@@ -50,7 +49,7 @@ const addProducts = async (req, res) => {
       if (req.files && req.files.length > 0) {
         for (let i = 0; i < req.files.length; i++) {
           const originalImagePath = req.files[i].path;
-          const resizedImagePath = path.join('public', 'uploads', 'product-images', req.files[i].filename);
+          const resizedImagePath = path.join('public', 'uploads', 'product-images', 'product-Img'+ req.files[i].filename);
           await sharp(originalImagePath).resize({ width: 440, height: 440 }).toFile(resizedImagePath);
           fs.unlinkSync(originalImagePath)
           images.push('/uploads/product-images/product-Img' + req.files[i].filename);
@@ -411,12 +410,12 @@ const editProduct = async (req, res) => {
       const images = existing.image;
 
       for (let i = 0; i < req.files.length; i++) {
-        const resizedImagePath = path.join('public', 'uploads', 'product-images', req.files[i].filename);
+        const resizedImagePath = path.join('public', 'uploads', 'product-images','product-Img'+ req.files[i].filename);
         await sharp(req.files[i].path)
           .resize({ width: 440, height: 440 })
           .toFile(resizedImagePath);
 
-        images[indexes[i]] = ('/uploads/product-images/' + req.files[i].filename);
+        images[indexes[i]] = ('/uploads/product-images/product-Img' + req.files[i].filename);
         fs.unlinkSync(req.files[i].path)
       }
       updatedFields.image = images;

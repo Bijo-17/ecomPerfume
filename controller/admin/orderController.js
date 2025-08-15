@@ -27,11 +27,12 @@ const getOrders = async (req, res) => {
             const product = await Product.find({ product_name: { $regex: searchQuery, $options: "i" } });
             const product_id = product.map(p => p._id)
 
+
             filter.$or = [
 
-                { user_id: { $in: userId } },
-                { 'order_items.product_id': { $in: product_id } }
-
+                { 'user_id' : { $in: userId } },
+                { 'order_items.product_id': { $in: product_id } },
+                { 'order_id' : {$regex : searchQuery , $options : 'i'}}
 
             ]
 
