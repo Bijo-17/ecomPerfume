@@ -424,7 +424,7 @@ a {
 .cart-item.unavailable {
   opacity: 0.5;
   position: relative;
-}
+}   
 
 /* Disable interaction inside unavailable cart items except for remove-btn */
 .cart-item.unavailable .product-info,

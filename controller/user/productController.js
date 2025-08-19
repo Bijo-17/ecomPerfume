@@ -299,7 +299,7 @@ const productDetails = async (req,res)=>{
 
 } catch(error){
     console.log("failed to load productDetail page",error);
-    res.redirect("/pageNotFound")
+    res.redirect("/pageError");
 }
 
 }
@@ -313,7 +313,7 @@ const rateProduct =async (req,res)=>{
   const { productId } = req.params;
  
   if(!userId){
-    res.redirect(`/productDetails/${productId}`)
+    res.redirect(`/login`)
   } else{
 
   const product = await Product.findById(productId);
@@ -343,5 +343,60 @@ const rateProduct =async (req,res)=>{
 
 }
 
+const editRating = async (req,res)=>{
+   try {
+     
+         const userId = req.session.user;
+         const {updatedReview , updatedRating} = req.body;
+         const productId = req.params.productId;  
+         const existingRating = await Rating.findOne({user_id : userId , product_id : productId});
 
-module.exports =  { getAllProducts , productDetails , rateProduct}
+         if(existingRating){
+
+             existingRating.rating = updatedRating;
+             existingRating.review = updatedReview;
+             await existingRating.save();
+
+             const ratings = await Rating.find({ product_id: productId }); 
+             const average = ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length;
+             await Product.findByIdAndUpdate(productId, { averageRating: average });
+          
+           
+         }
+
+             return res.status(200).json({success:true});
+
+     
+   } catch (error) {
+      console.log("error in editing rating" , error)
+      res.status(500).redirect('/pageError');
+   }
+}
+
+const deleteRating = async (req,res)=>{
+   try {
+
+    const ratingId = req.params.reviewId;
+
+   const rating = await Rating.findByIdAndDelete(ratingId);
+
+   const ratings = await Rating.find({product_id : rating.product_id});
+     
+    const product = await Product.findOne({_id: rating.product_id });
+
+    const ratingCount = product.ratingCount-1;
+
+      const average = ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length;
+
+      await Product.findByIdAndUpdate(product._id,{ averageRating : average , ratingCount : ratingCount});
+
+       res.status(200).json({success: true});
+    
+   } catch (error) {
+      console.log("error in deleting review" , error);
+      res.status(500).redirect("/pageError");
+   }
+}
+
+
+module.exports =  { getAllProducts , productDetails , rateProduct , editRating , deleteRating}

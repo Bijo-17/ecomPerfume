@@ -81,7 +81,7 @@ const addProducts = async (req, res) => {
 
 
       product.volume.forEach((element, i) => {
-        final_price = category.category_offer > 0 ? parseFloat((product.salesPrice[i] * (1 - category.category_offer / 100)).toFixed(2)) : product.salesPrice[i]
+       let final_price = category.category_offer > 0 ? parseFloat((product.salesPrice[i] * (1 - category.category_offer / 100)).toFixed(2)) : product.salesPrice[i]
         inventory.push({
           volume: element,
           stock: product.stock[i],
@@ -448,8 +448,6 @@ const editProduct = async (req, res) => {
     }
 
 
-
-
     if (updatedFields.stock && updatedFields.stock[0] > 0) {
       updatedFields.stock_status = true;
 
@@ -482,7 +480,7 @@ const editProduct = async (req, res) => {
 
         inventory.push({
           volume: item,
-          stock: editedDetails.stock[i],
+          stock: editedDetails.stock[i] || 0,
           regular_price: editedDetails.regular_price[i],
           sales_price: editedDetails.sales_price[i],
           final_price: final_price

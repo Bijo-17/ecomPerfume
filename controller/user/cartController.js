@@ -25,11 +25,11 @@ const getCart = async (req, res) => {
 
     const cart = await Cart.findOne({ user_id: userId }).populate('items.product_id');
 
+    if(cart){ 
+
     for (let product of cart.items) {
 
-
       const varient = await Varient.findOne({ product_id: product.product_id._id })
-
 
       if (varient) {
 
@@ -46,8 +46,9 @@ const getCart = async (req, res) => {
 
       }
     }
-
     await cart.save();
+
+  }
 
     res.render('cart', { cart, user });
 
@@ -65,13 +66,12 @@ const addToCart = async (req, res) => {
     const productId = req.params.id;
     const quantity = parseInt(req.body.quantity) || 1
     const userId = req.session.user;
-    let volume = parseInt(req.body.volume)
+    let volume = Number(req.body.volume)
 
 
     if (!userId) {
       return res.status(400).json({ success: false, message: "Please log in to Add item to Cart" });
     }
-
 
     const product = await Product.findById(productId).populate('category_id');
 
@@ -119,7 +119,7 @@ const addToCart = async (req, res) => {
     //  Remove from wishlist
 
 
-    await Wishlist.updateOne({ user_id: userId }, { $pull: { products: { product_id: productId } } });
+    await Wishlist.updateOne({ user_id: userId }, { $pull: { products: { product_id: productId , volume : volume } } });
 
     cart.applied_coupon = null;
 

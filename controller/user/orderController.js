@@ -239,7 +239,7 @@ const generateInvoice = async (req, res) => {
 
     if (!order) {
 
-      return res.send("/orders");
+      return res.redirect("/orders");
     }
 
     let delivery = 0;

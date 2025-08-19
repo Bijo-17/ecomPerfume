@@ -6,7 +6,7 @@
     href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
     rel="stylesheet"
   />
-  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <style>
     .product-thumb {
       max-height: 100px;
@@ -39,8 +39,13 @@
   color: #ccc;
   font-size: 1.2rem;
 }
+
 .star.filled {
   color: gold;
+}
+
+.star.editable {
+  cursor: pointer;
 }
 
 .container {
@@ -82,6 +87,12 @@
            font-size: 14px;
            font-weight: 600;
           }
+
+
+        .edit-input {
+           width: 80%;
+           margin-top : 5px;
+        }  
 
 
 
@@ -178,14 +189,6 @@
         </select>
       </div>
 
-      <!-- Coupon -->
-      <!-- <div class="mb-3">
-        <label class="form-label fw-bold">Apply Coupon:</label>
-        <div class="input-group">
-          <input type="text" class="form-control" placeholder="Enter coupon code" />
-          <button class="btn btn-outline-secondary" type="button">Apply</button>
-        </div>
-      </div> -->
 
       <!-- Offers -->
       <div class="offer-box mb-4">
@@ -232,18 +235,7 @@
           Description
         </button>
       </li>
-      <li class="nav-item" role="presentation">
-        <button
-          class="nav-link"
-          id="details-tab"
-          data-bs-toggle="tab"
-          data-bs-target="#details"
-          type="button"
-          role="tab"
-        >
-          Product Details
-        </button>
-      </li>
+    
       <li class="nav-item" role="presentation">
         <button
           class="nav-link"
@@ -261,26 +253,35 @@
       <div class="tab-pane fade show active" id="desc" role="tabpanel">
         <p><%=product.description%></p>
       </div>
-      <div class="tab-pane fade" id="details" role="tabpanel">
-        <ul>
-          <li>Type: Eau de Parfum</li>
-          <li>Volume: 30ml / 50ml / 100ml</li>
-          <li>Fragrance Notes: Citrus, Musk, Vanilla</li>
-          <li>Long-lasting formula</li>
-        </ul>
-      </div>
+     
       <div class="tab-pane fade" id="reviews" role="tabpanel">
-        <p><strong>John:</strong> “Amazing fragrance! Worth every rupee.”</p>
-        <p><strong>Aisha:</strong> “Smells divine and lasts long.”</p>
+      
 
         <!-- Display reviews -->
+         
     <% ratings.forEach(r => { %>
-       <div class="border-bottom mt-3">
-      <strong><%= r.user_id.name %></strong>: <%= r.review %>
-       <div class="text-warning">
-       <% for (let i = 0; i < r.rating; i++) { %>★<% } %>
-      </div>
-      </div>
+       <div class="border-bottom mt-3" data-review-id="<%= r._id%>" >
+         <input type="text" id="productId" value="<%=r.product_id%>" hidden>
+      <strong><%= r.user_id.name %></strong> 
+      <div style="padding-left: 10px;"> 
+      <span class="review-text" > <%= r.review %> </span>
+
+      <% if (r.user_id._id.toString() === user?._id?.toString()) { %> 
+           <button class="btn btn-sm btn-link text-primary edit-btn" style="border:none;">
+               ✏️
+           </button>     
+           <i class='bi bi-trash btn p-0 delete-btn'></i>          
+        <%}%>
+        
+       <div class="stars text-warning" data-current-rating="<%= r.rating%>">
+       <% for (let i = 1 ; i <= 5; i++) { %>
+           <span class="review-rating star <%= r.rating >= i ? 'filled' : '' %>" data-rating="<%= i%>" > ★ </span>
+        <% } %>
+       </div>
+             <button class="btn btn-sm btn-info save-btn" style="display:none;">Save</button>
+               <span class="btn btn-sm btn-danger close-btn ml-3" style="display: none;"> X </span>   
+         </div>
+       </div>
    <% }) %>  
       </div>
     </div>
@@ -338,9 +339,7 @@
 
 <%-include("../partials/user/footer")%>
 
-<script
-  src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
@@ -361,8 +360,6 @@
    const quantity = document.getElementById('quantity').value;
    const volume = document.querySelector('input[name="volume"]:checked')?.value
 
-
-   console.log("volume" , volume)
   
    const response = await fetch(`/addToCart/<%= product._id%>`,{
          
@@ -403,12 +400,13 @@
  
   document.querySelector('.wishlist-btn').addEventListener('click' , async ()=>{
               
-
+   const volume = document.querySelector('input[name="volume"]:checked')?.value;
       
    const response = await fetch(`/addToWishlist/<%= product._id%>`,{
          
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
+        body : JSON.stringify({volume})
    })
 
     const data = await response.json();
@@ -441,6 +439,158 @@
  })
 
 
+   document.addEventListener('DOMContentLoaded', ()=>{ 
+
+       
+      document.querySelectorAll(".edit-btn").forEach(edit=>{ 
+
+       
+           edit.addEventListener('click' , function(e){  
+           e.preventDefault();
+
+           const reviewBox = edit.closest('[data-review-id]');
+
+           const reviewText = reviewBox.querySelector('.review-text');
+           const starsContainer = reviewBox.querySelector('.stars');
+
+           const saveBtn = reviewBox.querySelector('.save-btn');
+           const closeBtn = reviewBox.querySelector('.close-btn');
+
+           reviewText.contentEditable = 'true';
+           reviewText.focus();
+           
+        
+           const currentText = reviewText.innerText;
+           const currentRating = parseInt(starsContainer.dataset.currentRating);
+        
+              // reviewText.innerHTML = `<textarea class="update-text" style="width:280px"> ${currentText} </textarea> `
+               
+           let newRating;
+          
+            edit.style.display = 'none';
+            saveBtn.style.display = 'inline-block';
+            closeBtn.style.display = 'inline-block';
+   
+             starsContainer.querySelectorAll('.star').forEach(star=>{
+              star.classList.add('editable');
+                 star.addEventListener('click',()=>{ 
+                     const selected = parseInt(star.dataset.rating);
+
+                     starsContainer.querySelectorAll('.star').forEach(s=>{
+                         s.classList.toggle("filled" , parseInt(s.dataset.rating) <= selected );
+                     });
+
+                     starsContainer.dataset.currentRating = selected;
+                     newRating = selected;
+                 })
+             })
+
+
+            closeBtn.addEventListener('click',()=>{
+                
+                reviewText.innerHTML = `<span> ${currentText} </span>`
+                  
+                starsContainer.innerHTML = '';
+
+                for(let i=1 ; i <= 5 ; i++){
+
+                   const star = document.createElement('span');
+                   star.className = 'review-rating star' + (currentRating >= i ? ' filled' : '');
+                   star.dataset.rating = i;
+                   star.textContent= '★';
+                   starsContainer.appendChild(star);
+                }
+
+           
+                edit.style.display = 'inline-block';
+                saveBtn.style.display = 'none';
+                closeBtn.style.display = 'none';
+                 reviewText.contentEditable = 'false';
+
+              })
+
+         })
+       
+     })
+
+
+
+     document.querySelectorAll(".save-btn").forEach(save => {
+
+      save.addEventListener("click", async function (e) {
+
+      const reviewBox = save.closest("[data-review-id]");
+      const reviewText = reviewBox.querySelector(".review-text");
+      const starsContainer = reviewBox.querySelector(".stars");
+      const closeBtn = reviewBox.querySelector(".close-btn");
+      const productId = reviewBox.querySelector("#productId").value;
+
+      const updatedReview = reviewText.textContent;
+      const updatedRating = parseInt(starsContainer.dataset.currentRating);
+
+
+      const response = await fetch(`/editRating/${productId}`,{
+               method: 'post',
+               headers : {'content-Type' : 'application/json'},
+               body : JSON.stringify({updatedReview , updatedRating})
+
+      })
+
+        const data = await response.json();
+
+        if(data.success){
+
+        reviewText.innerHTML = `<span class=review-text> ${updatedReview} </span>`
+        starsContainer.innerHTML = '';
+           for(let i=1 ; i <= 5 ; i++){
+               const star = document.createElement('span');
+                   star.className = 'review-rating star' + (updatedRating >= i ? ' filled' : '');
+                   star.dataset.rating = i;
+                   star.textContent= '★';
+                   starsContainer.appendChild(star);
+                }
+
+         save.style.display = "none";
+         closeBtn.style.display = "none";
+          reviewText.contentEditable = 'false';
+         reviewBox.querySelector(".edit-btn").style.display = "inline-block";
+
+       }else {
+         window.location.href = `/productDetails/${productId}`;
+       }
+  });
+});
+
+
+ // delete review 
+
+ document.querySelectorAll('.delete-btn').forEach(del =>{
+          
+          del.addEventListener('click',async ()=>{
+             const reviewBox =  del.closest('[data-review-id]');
+             const reviewId = reviewBox.dataset.reviewId;
+ 
+              const response = await fetch(`/deleteRating/${reviewId}`, {
+                  method : 'get',
+                  headers : {'content-Type' : 'application/json'}
+
+              })
+
+              const data = await response.json();
+
+              if(data.success){
+                 window.location.reload();
+              }
+
+
+          })
+ })
+
+
+
+
+
+  })
  
 
 

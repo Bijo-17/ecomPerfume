@@ -86,7 +86,9 @@ router.get("/product/:category",productController.getAllProducts)
 router.get("/category/:category", productController.getAllProducts)
 router.get("/product",productController.getAllProducts)
 router.get("/productDetails/:id",productController.productDetails)
-router.post('/rateProduct/:productId',productController.rateProduct);
+router.post('/rateProduct/:productId',productController.rateProduct)
+router.post('/editRating/:productId',productController.editRating)
+router.get('/deleteRating/:reviewId',productController.deleteRating)
 
 
 // address 

@@ -7,27 +7,32 @@
     <% if (wishlist && wishlist.products.length>0) { %>
         <div class="wishlist-grid">
             <% wishlist.products.forEach(item => { %>
-                <div class="wishlist-item">
+                <div class="wishlist-item <%= item.status ? '' : 'unavailable' %>">
                     <div class="item-remove">
                       <a href="/wishlist/remove/<%=item.product_id._id%>">  <button class="btn-remove" data-id="<%= item.id %>">
                             <i class="fas fa-times"></i>
                         </button> </a>
                     </div>
+                    <a href="/productDetails/<%=item.product_id._id%>?volume=<%=item.volume%>"> 
                     <div class="item-image">
                         <img src="<%= item.product_id.image[0] %>" alt="<%= item.product_id.product_name %>">
                     </div>
-                    <div class="item-details">
-                        <h3 class="item-name"><%= item.product_id.product_name%></h3>
+                    <div class="item-details"> 
+                        <h3 class="item-name"> <%= item.product_id.product_name%> </h3> 
+                        <p class="item-volume"><%= item.volume%> ML</p>
                         <div class="item-price">
-                            <span class="current-price">₹<%= item.product_id.final_price.toFixed(2) %></span>
-                            <% if (item.product_id.regular_price > item.product_id.final_price) { %>
-                                <span class="original-price">₹<%= item.product_id.regular_price.toFixed(2) %></span>
-                                <span class="discount"><%= Math.round(parseFloat(1 - item.product_id.final_price/item.product_id.regular_price) * 100) %>% off</span>
-                            <% } %>
-                        </div>
-                    </div>
-                    <div class="item-actions">
-                        <button class="btn-add-to-cart" data-id="<%= item.product_id.id %>">ADD TO CART</button>
+                            <% item.product_id.varients_id.inventory.forEach(varient=>{ %> 
+                            <% if(item.volume === varient.volume) { %> 
+                            <span class="current-price">₹<%= varient.final_price.toFixed(2) %></span>
+                            <% if (varient.regular_price > varient.final_price) { %>
+                                <span class="original-price">₹<%= varient.regular_price.toFixed(2) %></span>
+                                <span class="discount"><%= Math.round(parseFloat(1 - varient.final_price/varient.regular_price) * 100) %>% off</span>
+                            <% } }%>
+                            <% }) %>
+                        </div> 
+                    </div> </a> 
+                    <div class="item-actions disabled">
+                        <button class="btn-add-to-cart" data-id="<%= item.product_id.id %>" data-volume="<%= item.volume %>">ADD TO CART</button>
                     </div>
                 </div>
             <% }); %>
@@ -51,12 +56,13 @@
  document.querySelectorAll('.btn-add-to-cart').forEach(button => {
     button.addEventListener('click', async function () {
       const productId = this.dataset.id;
-
+      const volume = this.dataset.volume;
    
    const response = await fetch(`/addToCart/${productId}`,{
          
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
+        body : JSON.stringify({volume})
    })
 
  const data = await response.json();
