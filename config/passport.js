@@ -18,13 +18,28 @@ async (accessToken,refreshToken,profile,done)=>{
         if(user){
             return done(null,user);
         } else {
+
+           const existingUser = await User.findOne({email : profile.emails[0].value});
+
+           if(existingUser){ 
+          
+              existingUser.googleId = profile.id;
+              await existingUser.save();
+              
+                return done(null, existingUser);
+            
+           }else { 
             user = new User({
                 name:profile.displayName,
                 email:profile.emails[0].value,
                 googleId:profile.id,
             });
-            await user.save();
-            return done(null,user)
+            
+             await user.save();
+             return done(null,user)
+          }
+
+           
         }
         
     } catch (err) {
