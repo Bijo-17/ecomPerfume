@@ -4,7 +4,7 @@
     <ol class="breadcrumb">
       <li class="breadcrumb-item"><a href="/">Home</a></li>
       <% breadcrumbs.forEach((crumb, index) => { %>
-         <% let cleanName = crumb.breadcrumbName.split('?')[0]; %>
+         <% let cleanName = decodeURIComponent( crumb.breadcrumbName.split('?')[0] ); %>
         <% if (index === breadcrumbs.length - 1) { %>
           <li class="breadcrumb-item active" aria-current="page"><%= cleanName %></li>
         <% } else { %>

@@ -11,6 +11,7 @@ const path = require("path")
 const expressLayout = require("express-ejs-layouts")
 const methodOverride = require('method-override');
 const getBreadcrumbs = require("./middlewares/breadcrum");
+const MongoStore = require('connect-mongo');
 
 const passport = require("./config/passport")
 
@@ -24,6 +25,10 @@ app.use(session({
     secret:process.env.SESSION_SECRET,
     resave:false,
     saveUninitialized:false,
+    store: MongoStore.create({
+    mongoUrl: process.env.MONGODB_URI,  
+    collectionName: 'sessions'
+  }),
     cookie:{
         maxAge: 24*60*60*1000
    }
