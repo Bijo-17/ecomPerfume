@@ -12,8 +12,8 @@ const getWishlist = async (req, res) => {
     const wishlist = await Wishlist.findOne({ user_id: userId }).populate({path:'products.product_id' , populate:{path: 'varients_id category_id brand_id' } })
     const user = await User.findById(userId)
 
-
-    for(let product of wishlist.products){  
+  if(wishlist){ 
+     for(let product of wishlist.products){  
         const varient = await Varient.findOne({product_id : product.product_id._id})
           
            const status = varient.inventory.some(v=> v.volume === product.volume && v.stock < 1);
@@ -28,7 +28,7 @@ const getWishlist = async (req, res) => {
               }  
        
       }
-
+    }
 
     res.render("wishlist", { layout: "../layout/userAccount", active: "wishlist", wishlist, user })
 
