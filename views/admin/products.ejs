@@ -191,25 +191,57 @@
 </div>
 </div>
 
-<div class="container mt-3">
+<div class="container mt-3 pb-5">
 
-    <div class="container mt-3">
-   <nav aria-label="Page navigation">
-       <ul class="pagination justify-content-center mb-20" style="margin-right: 200px;">
+    <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center mb-2">
+         
+               <% if (currentPage > 1) { %>
+                    <li class="page-item">
+                      <a class="page-link" href="?page=1<%= search ? '&search=' + search : '' %>">First</a>
+                    </li>
+                  <li class="page-item">
+                      <a class="page-link" href="?page=<%= currentPage - 1 %><%= search ? '&search=' + search : '' %>">Prev</a>
+                  </li>
+               <% } %>
 
+                   <% 
+                      let startPage = Math.max(1, currentPage - 1);  
+                      let endPage = Math.min(totalPages, startPage + 3);  
 
-           <% for (let i = 1; i <= totalPages; i++) { %>
-           <li class="page-item <%=(i === currentPage) ? 'active' : '' %>">
-               <a class="page-link" href="?page=<%= i %>"><%= i %></a>
-           </li>
-           <% } %>
+                      if (endPage - startPage < 3) {
+                         startPage = Math.max(1, endPage - 3);  
+                       }
+                    %>
 
+                   <% for (let i = startPage; i <= endPage; i++) { %>
+                      <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                        <a class="page-link" href="?page=<%= i %><%= search ? '&search=' + search : '' %>"><%= i %></a>
+                      </li>
+                   <% } %>
 
-       </ul>
-   </nav>
-</div>
+                    <% if (endPage < totalPages) { %>
+                        <li class="page-item disabled">
+                           <span class="page-link">...</span>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page=<%= totalPages %><%= search ? '&search=' + search : '' %>"><%= totalPages %></a>
+                        </li>
+                     <% } %>
+                    
+                     <% if (totalPages > currentPage) { %> 
+                            
+                              <li class="page-item">
+                                <a class="page-link" href="?page=<%= currentPage + 1 %><%= search ? '&search=' + search : '' %>">Next</a>
+                              </li>
+                            
+                      
+                     <% } %>
 
-</div>
+              </ul>
+            </nav>
+
+  </div>
 
    <% for(let i = 0; i < data.length; i++) { %>
 
@@ -329,27 +361,6 @@
             </div>
 
 
-         
-          <!-- <div class="mb-3">
-            <label for="regularPrice" class="form-label">Regular Price</label>
-            <input type="number" class="form-control" id="regularPrice" name="regular_price" value="<%=data[i].regular_price%>">
-          </div>
-
-          <div class="mb-3">
-            <label for="salesPrice" class="form-label">Sales Price</label>
-            <input type="number" class="form-control" id="salesPrice" name="sales_price" value="<%=data[i].sales_price%>">
-          </div>
-
-          <div class="mb-3">
-            <label for="volume" class="form-label">Volume (ML)</label>
-            <input type="text" class="form-control" id="volume" name="volume" value="<%=data[i].volume%>">
-          </div>
-         
-          <div class="mb-3">
-            <label for="stock" class="form-label">Stock</label>
-            <input type="number" class="form-control" id="stock" name="stock" value="<%=data[i].stock%>">
-          </div> -->
-
         
         <div class="product-container" data-product-id="<%= data[i]._id %>">
 
@@ -405,13 +416,13 @@
 
 
          <!-- Inside  loop (per product) -->
-      <div id="cropModal-<%= data[i]._id %>" class="crop-modal" style="display: none; position: fixed; top: 10%; left: 50%; transform: translateX(-50%); padding: 20px; border: 1px solid #ccc; z-index: 1000;">
+      <div id="cropModal-<%= data[i]._id %>" class="crop-modal" style="display: none; position: fixed; top: 10%; left: 50%; transform: translateX(-50%); padding: 20px; border: 1px solid #ccc; z-index: 1000; background: rgb(218, 218, 218);">
        <img id="cropperImage-<%= data[i]._id %>" style="max-width: 100%; max-height: 400px;" />
       <br>
-       <button type="button" onclick="cropImage('<%= data[i]._id %>', '<%=i%>')">Crop & Add</button>
-       <button type="button" onclick="closeCropModal('<%= data[i]._id %>')">Cancel</button>
+       <button type="button" class="btn btn-sm btn-info" onclick="cropImage('<%= data[i]._id %>', '<%=i%>')">Crop & Add</button>
+       <button type="button" class="btn btn-sm btn-warning" onclick="closeCropModal('<%= data[i]._id %>')">Cancel</button>
     </div>
- </div>
+   </div>
            
 
    </div>
@@ -619,7 +630,7 @@ function cropImage(productId , index) {
   cropper.getCroppedCanvas({ width: 440, height: 440 })
     .toBlob(blob => {
       // create a File object from the blob
-      const file = new File([blob], `cropped-${Date.now()}-${index}.jpg`, { type: 'image/jpeg' });
+      const file = new File([blob], `cropped-${Date.now()}-${index}.png`, { type: 'image/png' });
 
       // store it
       if (!croppedFiles[productId]) croppedFiles[productId] = [];
@@ -642,8 +653,7 @@ function cropImage(productId , index) {
       hiddenFileInput.files = dt.files;
 
       // write changed‐indexes into the hidden input
-      document.getElementById(`changedIndexes-${productId}`)
-        .value = Array.from(changedIndexes[productId]).join(',');
+      document.getElementById(`changedIndexes-${productId}`).value = Array.from(changedIndexes[productId]).join(',');
 
       closeCropModal(productId);
     });
@@ -855,58 +865,11 @@ function showCancelButton(container, show) {
 
   }
 
-  function addVarients(i) {
-    const container = document.getElementById(`varients-field-${i}`);
-
-    // Create a main wrapper
-    const mainCard = document.createElement("div");
-    mainCard.className = "col-md-6 mb-3";
-
-    mainCard.innerHTML = `
-        <div class="card" style="width: 28rem;">
-            <div class="card-header bg-light">
-                <label>Varients</label>
-                <button type="button" class="btn btn-sm btn-outline-danger mx-1" onclick="removeVarient(this)">x</button>
-            </div>
-            <ul class="list-group">
-                <li class="list-group-item">
-                    <div class="row">
-                        <div class="col-md-6 mb-2">
-                            <label class="form-label">Volume (ML)</label>
-                            <input name="volume" type="number" class="form-control border" placeholder="Enter volume in ML">
-                            <div class="error-message"></div>
-                        </div>
-                        <div class="col-md-6 mb-2">
-                            <label class="form-label">Stock</label>
-                            <input name="stock" type="number" class="form-control border" placeholder="Stock">
-                            <div class="error-message"></div>
-                        </div>
-                        <div class="col-md-6 mb-2">
-                            <label class="form-label">Regular Price</label>
-                            <input name="regular_price" type="text" class="form-control border" placeholder="$">
-                            <div class="error-message"></div>
-                        </div>
-                        <div class="col-md-6 mb-2">
-                            <label class="form-label">Sale Price</label>
-                            <input name="sales_price" type="text" class="form-control border" placeholder="$">
-                            <div class="error-message"></div>
-                        </div>
-                    </div>
-                </li>
-            </ul>
-        </div>
-    `;
-
-    container.appendChild(mainCard);
-}
+ 
 
   function removeVarient(button){ 
       button.closest(".col-md-6").remove();
   }
-
-
-
-
 
 
 

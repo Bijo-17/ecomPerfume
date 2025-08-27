@@ -154,7 +154,7 @@
       <span class="star">☆</span>
     <% } %>
   <% } %>
-  <span class="rating-count">(<%= ratings.length %>)</span>
+  <span class="rating-count">(<%= product.ratingCount %>)</span>
 </div> <br>
 
 
@@ -354,7 +354,7 @@
     }
   });
 
- document.getElementById('addToCart-btn').addEventListener('click',async ()=>{
+ document.getElementById('addToCart-btn')?.addEventListener('click',async ()=>{
 
   
    const quantity = document.getElementById('quantity').value;

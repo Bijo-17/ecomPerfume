@@ -126,13 +126,13 @@
                 <h6 class="card-title"><%=p.product_name%></h6>
                 <div class="mb-2">
                 <% for (let i = 0; i < 5; i++) { %>
-                  <% if (i < Math.floor(product.averageRating)) { %>
+                  <% if (i < Math.floor(p.averageRating)) { %>
                     <span class="text-warning">★</span>
                   <% } else { %>
                     <span class="text-secondary">☆</span>
                   <% } %>
                 <% } %>
-                <small class="text-muted">(<%= product.ratingCount %>)</small>
+                <small class="text-muted">(<%= p.ratingCount %>)</small>
               </div>
                 <p class="mb-1 price">₹<%=p.final_price%><span class="original-price">₹<%=p.regular_price%></span>
                       <span class="discount"><%= Math.round(parseFloat(1 - p.final_price/p.regular_price) * 100) %>% off</span>

@@ -13,6 +13,13 @@
     + Add New Category
   </button>
   </div>
+
+  <% if(message && message.length > 0 ) { %> 
+  <div  style=" background: rgb(231, 216, 9); text-align: center; margin-bottom: 4px;"> 
+         <h3 id="message" class="text-danger" style="font-weight: bolder; padding: 10px; text-shadow: 1px 1px 0 black;"><%= message %></h3>
+  </div>
+
+  <% } %>
   
   <!-- Add Category Modal -->
   <div class="modal fade" id="addCategoryModal" tabindex="-1" aria-labelledby="addCategoryModalLabel" aria-hidden="true">
@@ -121,14 +128,20 @@
         </div>
            <div class="modal-body"">
             
-            <img src="<%=category?.category_image%>" alt="img..." id="cropEditImage<%=index%>" width="200px">
+            <img src="<%=category?.category_image%>" alt="img..." id="viewEditImage<%=index%>" width="200px">
       
              <br>
              <label style="cursor: pointer;"> 
-             <h6 class="modal-title"> Edit </h6> 
+             <h6 class="btn btn-sm btn-info modal-title"> Change Image </h6> 
               <input class="form-control border d-none" name="image" type="file" id="editInputFile<%=index%>" onchange="viewEditImage(event,'<%=index%>')" />
             </label>
-            <button class="btn btn-sm btn-info" style="display:none;" type="button" id="editCropBtn<%=index%>">Crop</button>
+          
+             <div  style="max-width: 400px; display: none; position: fixed; top: 10%; left: 50%; transform: translateX(-50%); padding: 20px; border: 1px solid #ccc; z-index: 1000; background: rgba(159, 148, 148, 0.5);" > 
+              <img src="" id="editCropImage<%=index%>" >
+                <button class="btn btn-sm btn-danger mt-1" type="button" id="editCropCancelBtn<%=index%>" onclick="closeCropModal('<%=index%>')" > Cancel</button>
+             <button type="button" class="btn btn-sm btn-info mt-1" id="editCropBtn<%=index%>">Crop</button>
+            </div>
+
             </div>
 
       <div class="modal-footer">
@@ -148,7 +161,7 @@
                             <% } else { %>
                                 <a href="/admin/category/unblock?id=<%= category._id %>" class="btn btn-sm btn-success">List</a>
                             <% } %>
-                            <a href="/admin/category/delete?id=<%= category._id %>" class="btn btn-sm btn-danger">Delete</a>
+                            <a  onclick="deleteCat('<%= category._id %>')" class="btn btn-sm btn-danger">Delete</a>
 
                              <!-- add subcategories -->
 
@@ -242,17 +255,57 @@
         </table>
     <% } %>
 
+  
 
+       <nav aria-label="Page navigation">
+              <ul class="pagination justify-content-center">
+         
+               <% if (currentPage > 1) { %>
+                   <% if (currentPage > 2) { %> 
+                    <li class="page-item">
+                      <a class="page-link" href="?page=1">First</a>
+                    </li>
+                    <% } %>
+                  <li class="page-item">
+                      <a class="page-link" href="?page=<%= currentPage - 1 %>">Prev</a>
+                  </li>
+               <% } %>
 
-    <nav aria-label="Page navigation">
-        <ul class="pagination justify-content-center">
-          <% for (let i = 1; i <= totalPages; i++) { %>
-            <li class="page-item <%= i === currentPage ? 'active' : '' %>">
-              <a class="page-link" href="?page=<%= i %>"><%= i %></a>
-            </li>
-          <% } %>
-        </ul>
-      </nav>
+                   <% 
+                      let startPage = Math.max(1, currentPage - 1);  
+                      let endPage = Math.min(totalPages, startPage + 3);  
+
+                      if (endPage - startPage < 3) {
+                         startPage = Math.max(1, endPage - 3);  
+                       }
+                    %>
+
+                   <% for (let i = startPage; i <= endPage; i++) { %>
+                      <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                        <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                      </li>
+                   <% } %>
+
+                    <% if (endPage < totalPages) { %>
+                        <li class="page-item disabled">
+                           <span class="page-link">...</span>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page=<%= totalPages %>"><%= totalPages %></a>
+                        </li>
+                     <% } %>
+                    
+                     <% if (totalPages > currentPage) { %> 
+                            
+                              <li class="page-item">
+                                <a class="page-link" href="?page=<%= currentPage + 1 %>">Next</a>
+                              </li>
+                            
+                      
+                     <% } %>
+
+              </ul>
+            </nav>
       
 
 </div>
@@ -270,10 +323,15 @@ let formData;
 async function validateCategoryForm(e) {
   e.preventDefault();
 
-const categoryName = document.getElementById("categoryName").value;
-const subcategoryName = document.getElementById("subcategoryName").value;
+const categoryName = document.getElementById("categoryName").value.trim();
+const subcategoryName = document.getElementById("subcategoryName").value.trim();
 const categoryOffer = Number(document.getElementById('categoryOffer').value);
 const image = document.getElementById('categoryImage').src
+
+if( categoryOffer && (categoryOffer > 90 || categoryOffer < 1) ){
+   Swal.fire("warning","please enter a value between 1 and 90" , "warning")
+   return;
+}
 
 if(!cropper){
    Swal.fire("Failed", "please upload a category Image", 'warning')
@@ -289,16 +347,11 @@ if(!cropper){
      formData.append("subcategoryName",subcategoryName)
      formData.append("categoryOffer", categoryOffer)
   
-if(categoryOffer > 90 || categoryOffer < 1){
-   Swal.fire("warning","please enter a value between 1 and 90" , "warning")
-}
-
 
 try {
 
   const response = await fetch('/admin/category/add',{
                method:'post',
-              //  headers: {'Content-Type':'application/json'},
                body: formData
   })
 
@@ -306,7 +359,7 @@ try {
 
 
     if(!data.success){
-        Swal.fire("Failed",data.message || "Brand already exists","error")
+        Swal.fire("Failed",data.message || "category already exists","error")
     }else{
            
            Swal.fire( 'Sucess', data.message || "success", 'success')
@@ -384,12 +437,7 @@ try {
            input.value = '';
        }
 
-//       function uploadByFile(file) {
-
-// //       formData = new FormData();
-// //     formData.append("image", file);
-
-// // }
+let editCropper;
 
 function viewEditImage(event , index) {
 
@@ -398,18 +446,21 @@ function viewEditImage(event , index) {
 
            reader.onload = function () {
                let dataURL = reader.result;
-               let image = document.getElementById('cropEditImage'+index);
+               let image = document.getElementById('editCropImage'+index);
                  image.src = dataURL;
+               let cropperContaniner = image.parentNode;
+               cropperContaniner.style.display = 'block';
 
-               let cropBtn = document.getElementById('editCropBtn'+index)
-                cropBtn.style.display = 'inline-block';
+              let cropBtn = document.getElementById('editCropBtn'+index)
+              let cancelBtn = document.getElementById('editCropCancelBtn'+index);
+
 
                if(image.cropperInstance){
                   image.cropperInstance.destroy()
                }
              
 
-               let cropper = new Cropper(image, {
+                 editCropper = new Cropper(image, {
                    aspectRatio:1,
                    viewMode: 1,
                    guides: true,
@@ -418,14 +469,14 @@ function viewEditImage(event , index) {
                    zoomable: true
                });
                
-                image.cropperInstance = cropper;
+                image.cropperInstance = editCropper;
                
-               let saveButton = document.querySelector('#saveButton');
-                const viewImage = document.querySelector('#categoryImage');
+               let saveButton = document.querySelector('#v');
+                const viewImage = document.querySelector('#viewEditImage'+index);
 
                cropBtn.addEventListener('click',  function () {
                              
-                   let croppedCanvas = cropper.getCroppedCanvas();         
+                   let croppedCanvas = editCropper.getCroppedCanvas();         
                     const croppedDataURL  = croppedCanvas.toDataURL('image/jpeg', 1.0);
                    let timestamp = new Date().getTime();
                    let fileName = `cropped-img-${timestamp}-${index}.png`;
@@ -439,10 +490,10 @@ function viewEditImage(event , index) {
                        const fileList = new DataTransfer();
                        fileList.items.add(imgFile);
                        inputField.files = fileList.files
-                      cropBtn.style.display = 'none'
-                       cropper.destroy();
+                       cropperContaniner.style.display = 'none'
+                       editCropper.destroy();
                        image.cropperInstance = null;
-                        image.src = croppedDataURL;
+                        viewImage.src = croppedDataURL;
                    } , "image/png");
                    
                });
@@ -450,6 +501,58 @@ function viewEditImage(event , index) {
            reader.readAsDataURL(input.files[0]);
            input.value='';
        }
+
+       function closeCropModal(index) {
+        const container =  document.getElementById(`editCropImage${index}`).parentNode;
+        container.style.display ='none';
+        if (editCropper) {
+            editCropper.destroy();
+          delete editCropper;
+          }
+      }
+
+    async function deleteCat(catId) {
+          
+         const result = await Swal.fire({
+                  title: "Are you sure?",
+                   text: "You won't be able to revert this!",
+                   icon: "warning",
+                   showCancelButton: true,
+                   confirmButtonColor: "#d33",
+                   cancelButtonColor: "#3085d6",
+                   confirmButtonText: "Yes, delete it!",
+              })
+            
+                     if(result.isConfirmed){
+
+                        const response = await fetch( '/admin/category/delete?id='+catId , { 
+                           method : 'GET' 
+
+                        });
+
+                        if(response.ok){ 
+                          await Swal.fire("Deleted!", "Category has been deleted.", "success");
+                         window.location.reload();
+                        } else {
+                          await Swal.fire("Error!", "Failed to delete category.", "error");
+                        }
+
+                     }          
+      }
+
+      document.addEventListener('DOMContentLoaded',function (){
+           const message = document.getElementById('message');
+           const container = message.parentNode;
+
+
+           if(message && message?.textContent !== ""){
+               setTimeout(()=>{
+                message.textContent = '';
+                container.style.display = 'none';
+             },3000)
+           } 
+
+      })
 
 
 </script>

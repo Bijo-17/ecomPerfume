@@ -64,18 +64,59 @@
                   </table>
         </div>
         <div class="container mt-3">
-            <nav aria-label="Page navigation">
-                <ul class="pagination justify-content-center mb-20" style="margin-right: 200px;">
-                    <%for(let i=1;i<=totalPages;i++){%>
 
-                        <li class="page-item <%=(i===currentPage) ? 'active' : '' %>">
-                              <a class="page-link" href="?page=<%= i %>"><%= i %></a>
- 
+
+               <nav aria-label="Page navigation">
+              <ul class="pagination justify-content-center">
+         
+               <% if (currentPage > 1) { %>
+                    <li class="page-item">
+                      <a class="page-link" href="?page=1<%= search ? '&search=' + search : '' %>">First</a>
+                    </li>
+                  <li class="page-item">
+                      <a class="page-link" href="?page=<%= currentPage - 1 %><%= search ? '&search=' + search : '' %>">Prev</a>
+                  </li>
+               <% } %>
+
+                   <% 
+                      let startPage = Math.max(1, currentPage - 1);  
+                      let endPage = Math.min(totalPages, startPage + 3);  
+
+                      if (endPage - startPage < 3) {
+                         startPage = Math.max(1, endPage - 3);  
+                       }
+                    %>
+
+                   <% for (let i = startPage; i <= endPage; i++) { %>
+                      <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                        <a class="page-link" href="?page=<%= i %><%= search ? '&search=' + search : '' %>"><%= i %></a>
+                      </li>
+                   <% } %>
+
+                    <% if (endPage < totalPages) { %>
+                        <li class="page-item disabled">
+                           <span class="page-link">...</span>
                         </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page=<%= totalPages %><%= search ? '&search=' + search : '' %>"><%= totalPages %></a>
+                        </li>
+                     <% } %>
+                    
+                     <% if (totalPages > currentPage) { %> 
+                            
+                              <li class="page-item">
+                                <a class="page-link" href="?page=<%= currentPage + 1 %><%= search ? '&search=' + search : '' %>">Next</a>
+                              </li>
+                            
+                      
+                     <% } %>
 
-                    <%}%>
-                </ul>
+              </ul>
             </nav>
+
+
+
+
         </div>
         <%- include("../../views/partials/admin/footer") %>
 

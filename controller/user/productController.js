@@ -384,9 +384,11 @@ const deleteRating = async (req,res)=>{
      
     const product = await Product.findOne({_id: rating.product_id });
 
-    const ratingCount = product.ratingCount-1;
+    const ratingCount = (product.ratingCount)-1;
 
-      const average = ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length;
+      let average = ratings.reduce((sum, r) => sum + r.rating, 0);
+ 
+       average =  (average/ ratings.length) || 0 ;
 
       await Product.findByIdAndUpdate(product._id,{ averageRating : average , ratingCount : ratingCount});
 

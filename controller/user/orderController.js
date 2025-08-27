@@ -1,14 +1,9 @@
 const User = require("../../models/userSchema")
-const Address = require("../../models/addressSchema")
-const OrderItem = require("../../models/orderItemSchema");
 const Order = require("../../models/orderSchema");
 const Product = require("../../models/productSchema")
 const Wallet = require("../../models/walletSchema")
 const path = require("path");
 const PDFDocument = require("pdfkit");
-const { constrainedMemory } = require("process");
-const { Console } = require("console");
-
 const Transaction = require("../../models/transactionSchema")
 
 
@@ -143,10 +138,10 @@ const cancelProduct = async (req, res) => {
 
       const transaction = await new Transaction({
         amount: refundAmount,
-
         order_id: order._id,
         user_id: user._id,
-        status: 'credited'
+        status: 'credited',
+        transaction_date : new Date()
       }).save()
 
 

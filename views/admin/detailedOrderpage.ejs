@@ -31,12 +31,28 @@
         <h5>Shipping Address</h5>
       </div>
       <div class="card-body">
-        <p>
-          <%= order.address_id.name %><br>
-          <%= order.address_id.address_name %>, <%= order.address_id.locality%><br>
-          <%= order.address_id.city %>, <%= order.address_id.state %> - <%= order.address_id.pin_code %><br>
-          Phone: <%= order.address_id.phone_number %>
+       
+
+        <%  if( order.address_id){ %>
+        <p> 
+          <%= order?.address_id?.name %><br>
+          <%= order?.address_id?.address_name %>, <%= order?.address_id?.locality%><br>
+          <%= order?.address_id?.city %>, <%= order?.address_id?.state %> - <%= order?.address_id?.pin_code %><br>
+          Phone: <%= order?.address_id?.phone_number %> <br>
+           Address Type : <%= order?.address_id?.address_type %>
         </p>
+         <% } else { %> 
+          <p>  
+                 <%= order.temp_address.name %> <br>
+                 <%= order.temp_address.address_name %> , <%= order.temp_address.locality %> <br>
+                 <%= order.temp_address.city %> , <%= order.temp_address.state %> - <%= order.temp_address.pin_code %> <br>
+                 phone: <%= order.temp_address.phone_number %> <br>
+                  Address Type : <%= order.temp_address.address_type %>
+
+          </p>
+
+        <% } %>
+
       </div>
     </div>
 

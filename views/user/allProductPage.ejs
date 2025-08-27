@@ -170,29 +170,57 @@
     <% } %>
   </div>
 </section>
-
             
 
    </div>
         
               
-           
-          
-
 
         <!-- Pagination -->
         <div class="pagination">   
+          
+     
+               <% if (currentPage > 1) { %>
+                   <% if (currentPage > 2) { %> 
             
-          <%if(currentPage> 1) { %> 
-            <a href="?page=<%= currentPage-1%>" class="prev-page"><i class="fas fa-chevron-left"></i></a>
-            <% } %>
-            <% for (let i = 1; i <= totalPages; i++) { %>   
-            <a href="?page=<%=i%><%=price? '&price='+price : ''%><%=sort? '&sort='+sort : ''%> " class="page-number <%=(i === currentPage) ? 'active' : '' %>" ><%= i %></a>
+                      <a class="page-link" href="?page=1">First</a>
              
-             <% } %>
-             <% if(currentPage < totalPages){  %>
-            <a href="?page=<%= currentPage+1%>" class="next-page"><i class="fas fa-chevron-right"></i></a>
-            <% } %>
+                    <% } %>
+             
+                      <a href="?page=<%= currentPage-1%>" class="prev-page"><i class="fas fa-chevron-left"></i></a>
+                  
+               <% } %>
+
+                   <% 
+                      let startPage = Math.max(1, currentPage - 1);  
+                      let endPage = Math.min(totalPages, startPage + 3);  
+
+                      if (endPage - startPage < 3) {
+                         startPage = Math.max(1, endPage - 3);  
+                       }
+                    %>
+
+                   <% for (let i = startPage; i <= endPage; i++) { %>
+                  
+                          <a href="?page=<%=i%><%=price? '&price='+price : ''%><%=sort? '&sort='+sort : ''%> " class="page-number <%=(i === currentPage) ? 'active' : '' %>" ><%= i %></a>
+                   
+                   <% } %>
+
+                    <% if (endPage <  totalPages) { %>
+                  
+                           <span class="page-link ">...</span>                   
+                            <a class="page-link" href="?page=<%= totalPages %>"><%= totalPages %></a>
+                     
+                     <% } %>
+                    
+                     <% if (totalPages > currentPage) { %>                       
+                              
+                                  <a href="?page=<%= currentPage+1%>" class="next-page"><i class="fas fa-chevron-right"></i></a>
+                                                                      
+                     <% } %>
+
+
+
         </div>
     </main>
 

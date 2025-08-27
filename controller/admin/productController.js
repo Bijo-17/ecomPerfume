@@ -45,7 +45,7 @@ const addProducts = async (req, res) => {
     if (!productExists) {
       const images = [];
 
-
+ console.log("req.files" , req.files)
       if (req.files && req.files.length > 0) {
         for (let i = 0; i < req.files.length; i++) {
           const originalImagePath = req.files[i].path;
