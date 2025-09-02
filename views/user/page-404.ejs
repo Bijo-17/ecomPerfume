@@ -69,9 +69,20 @@
     <div class="error-code">404</div>
     <div class="error-message">Oops! Page Not Found</div>
     <div class="error-subtext">The page you’re looking for doesn't exist or has been moved.</div>
-    <a href="/" class="btn btn-home">Go Back Home</a>
+    <div> 
+    <button class="btn btn-home" onclick="goBack()"> <i class="fas fa-arrow-left"></i> Go Back </button>
+    <a href="/" class="btn btn-home">Go To Home</a>
+    </div>
     <div class="petal">Petal & Mist</div>
   </div>
+
+  <script> 
+       
+       function goBack(){
+           window.history.back();
+       }
+
+  </script>
 </body>
 </html>
 

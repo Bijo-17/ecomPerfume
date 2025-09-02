@@ -17,7 +17,7 @@ const getReferral=async (req, res) => {
         { expiresIn: '7d' }
     );
 
-    const referralLink = `${process.env.BASE_URL}/register?ref=${referralToken}`;
+    const referralLink = `petalandmist.shop/register?ref=${referralToken}`;
     res.render("referAndEarn", { layout:"../layout/userAccount", active:"refer",user, referralLink });
 };
 

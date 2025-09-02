@@ -83,11 +83,11 @@ const deleteAddress = async (req,res)=> {
         
      await Address.findByIdAndDelete(addressId);
     
-     res.redirect("/address")
+     res.status(200).json();
 
   } catch (error) {
      console.log("error in deleting address",error);
-     res.redirect("/pageNotFound")
+     res.status(500).json();
   }
 }
 

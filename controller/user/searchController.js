@@ -11,7 +11,9 @@ const search = async (req, res) => {
 
     const search = String(req.query.q || '').trim();
     const page = parseInt(req.query.page) || 1
+    const sub = req.query.sub || '';
     const { price, sortOption } = req.query
+    console.log("form search" , price , sortOption , "sortoption\n\n")
 
     const filter = { isDeleted: false, isBlocked: false, stock_status: true }
 
@@ -90,7 +92,7 @@ const search = async (req, res) => {
                                     sort: sortOption, price, 
                                     currentPage: page, 
                                     totalPages: Math.ceil(count / limit),
-                                    ratings, categories
+                                    ratings, categories, sub
                                 })
 
 

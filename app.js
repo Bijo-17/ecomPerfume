@@ -62,8 +62,23 @@ app.use((req, res, next) => {
 app.use("/",userRouter)
 app.use("/admin",adminRouter)
 
+app.use((req,res,next)=>{
+   if(req.originalUrl.startsWith("/admin")){
+       return res.status(404).render('pageNotfound')
+   } else { 
+      return res.status(404).render('page-404');
+   }
+})
 
+app.use((err, req, res , next)=>{
+  console.error(err)
+   if(req.originalUrl.startsWith("/admin")){ 
+       return res.status(500).render("pageError")
+   } else { 
+    return res.status(500).render('server-error')
+   }
 
+})
 
 
 

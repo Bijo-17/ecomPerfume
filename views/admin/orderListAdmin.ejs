@@ -78,7 +78,7 @@
                       <td rowspan="<%= rowSpan %>"><%= index + 1 %></td>
                       <td rowspan="<%= rowSpan %>"><%= order.order_id %></td>
                       <td rowspan="<%= rowSpan %>"><%= new Date(order.createdAt).toLocaleDateString() %></td>
-                     <td rowspan="<%= rowSpan %>"><%= order.user_id.name %> (<%= order.user_id.email %>)</td>
+                     <td rowspan="<%= rowSpan %>"><%= order?.user_id?.name %> (<%= order?.user_id?.email %>)</td>
                   <% } %>
                   <td><%= item.product_id.product_name%> x (<%= item.quantity%>) </td>
                   <td>
@@ -90,7 +90,7 @@
 
                 <% } else {  %>
 
-          <form method="POST" action="/admin/updateOrderStatus/<%= order._id %>/<%= item._id %>">
+          <form method="POST" action="/admin/updateOrderStatus/<%= order._id %>/<%= item.product_id._id %>?page=<%=currentPage%>">
             <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
               <option value="pending" <%= item.order_status === 'pending' ? 'selected' : '' %>>Pending</option>
               <option value="shipped" <%= item.order_status === 'shipped' ? 'selected' : '' %>>Shipped</option>

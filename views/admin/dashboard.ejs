@@ -125,7 +125,7 @@
     <div class="col-12 col-sm-6 col-lg-3">
       <div class="p-4 shadow rounded-4 bg-white h-100">
         <h6 class="text-muted">Total Orders</h6>
-        <h3 class="fw-bold" id="totalOrders">28</h3>
+        <h3 class="fw-bold" id="totalOrders">0</h3>
        
       </div>
     </div>
@@ -134,7 +134,7 @@
     <div class="col-12 col-sm-6 col-lg-3">
       <div class="p-4 shadow rounded-4 bg-white h-100">
         <h6 class="text-muted">Total Revenue</h6>
-        <h3 class="fw-bold" id="totalRevenue">₹717,142.94</h3>
+        <h3 class="fw-bold" id="totalRevenue">₹00.00</h3>
       
       </div>
     </div>
@@ -143,7 +143,7 @@
     <div class="col-12 col-sm-6 col-lg-3">
       <div class="p-4 shadow rounded-4 bg-white h-100">
         <h6 class="text-muted">Total Discounts</h6>
-        <h3 class="fw-bold" id="totalDiscount">₹14,467.06</h3>
+        <h3 class="fw-bold" id="totalDiscount">₹00.00</h3>
      
       </div>
     </div>
@@ -152,7 +152,7 @@
     <div class="col-12 col-sm-6 col-lg-3">
       <div class="p-4 shadow rounded-4 bg-white h-100">
         <h6 class="text-muted">Average Order Value</h6>
-        <h3 class="fw-bold" id="averageOrderValue">₹</h3>
+        <h3 class="fw-bold" id="averageOrderValue">₹00.00</h3>
         <p class="text-primary small mt-1">Based on completed orders</p>
       </div>
     </div>
@@ -308,7 +308,7 @@
         <td><% data[i].order_items.forEach(items=>{ %>
                 <%= items.order_status %> <br>   
          <% }) %></td>
-         <td class="text-end"><%=data[i].discount%></td>
+         <td class="text-end"><%=data[i].discount.toFixed(2)%></td>
         <td > <% data[i].order_items.forEach(product=>{%>
              <%= product.product_price %>
            <br>
@@ -543,7 +543,7 @@
   let productChart;
 
   async function topItems(filter){
-     console.log("filter" , filter)
+ 
        const res = await fetch(`/admin/topItems?query=${filter}`)
        const data = await res.json();
 

@@ -3,6 +3,7 @@
     <div class="refer-earn-header">
         <h2 class="section-title">Refer & Earn</h2>
         <p class="section-subtitle">Invite friends and earn rewards for every successful referral!</p>
+        <p class="section-subtitle" > You will get ₹100 and they will get ₹50</p>
      
     </div>
 
@@ -45,14 +46,7 @@
     <div class="referral-code-section">
         <h3 class="section-heading">Your Referral Code</h3>
         <div class="referral-code-card">
-            <!-- <div class="code-display">
-                <div class="code-label">Your Referral Code</div>
-                <div class="code-value" id="referralCode">BIJO2025</div>
-                <button class="copy-code-btn" id="copyCodeBtn" onclick="copyReferralCode()">
-                    <i class="fas fa-copy"></i>
-                    <span class="copy-text">Copy</span>
-                </button>
-            </div> -->
+          
             <div class="referral-link">
                 <div class="link-label">Referral Link</div>
                 <div class="link-input-container">
@@ -81,7 +75,7 @@
             <div class="referral-item">
                 <div class="referral-info">
                     <div class="referral-name"><%=user?.referredUsers[i]?.user_id?.name %></div>
-                    <div class="referral-date"><%= user?.referredUsers[i]?.user_id?.createdAt?.toLocaleString()%></div>
+                    <div class="referral-date"><%= user?.referredUsers[i]?.user_id?.createdAt?.toLocaleString('en-IN')%></div>
                     <div class="referral-status completed">
                         <i class="fas fa-check-circle"></i>
                         <span>verified</span>

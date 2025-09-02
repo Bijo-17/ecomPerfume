@@ -13,10 +13,10 @@
 
 }
 
-#returnModal {
+.returnModal {
   display: none;
 }
-#returnModal.active {
+.returnModal.active {
   display: flex;
   position: fixed;
   top: 0; left: 0;
@@ -26,19 +26,19 @@
   align-items: center;
   z-index: 10000;
 }
-#returnModal .modal-content {
+.returnModal .modal-content {
   background: white;
   padding: 20px;
   border-radius: 10px;
   width: 400px;
   max-width: 90%;
 }
-#returnModal .modal-header {
+.returnModal .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
-#returnModal textarea {
+.returnModal textarea {
   width: 100%;
   padding: 10px;
   resize: none;
@@ -46,7 +46,7 @@
   border: 1px solid #ccc;
   border-radius: 5px;
 }
-#returnModal .modal-footer {
+.returnModal .modal-footer {
   margin-top: 15px;
   display: flex;
   justify-content: flex-end;
@@ -80,7 +80,7 @@
                     <div class="product-name">-<%=product.product_id.product_name%></div>
                     <div class="product-rating">
                       
-                     <div class="stars">
+                     <div class="stars" style="align-items: center; ">
                         <% for(let s=1 ; s<=5;s++){ %> 
                             <%if(product.product_id.averageRating >= s) {  %>
                             <i class="fas fa-star filled"></i>
@@ -88,7 +88,7 @@
                             <i class="fas fa-star"></i>
                             <% } %>
                           <%}%>
-                            (<%=product.product_id.ratingCount%>)
+                           <span style="font-size: 0.9rem;"> (<%=product.product_id.ratingCount%>) </span>
                      </div>
                   </div>
                     <div class="product-price"><%=product.product_price%>  <span class="quantity-badge"> x <%= product.quantity%> </span></div>
@@ -113,40 +113,7 @@
      <% } %>
       
 
-        <!-- Order 3 - Cancelled -->
-        <!-- <div class="order-item" data-order-id="ORD003">
-            <div class="order-product">
-                <div class="product-image">
-                    <img src="/placeholder.svg?height=80&width=80" alt="BEARDO GODFATHER">
-                </div>
-                <div class="product-details">
-                    <div class="product-brand">BEARDO</div>
-                    <div class="product-name">- GODFATHER</div>
-                    <div class="product-rating">
-                        <div class="stars">
-                            <i class="fas fa-star filled"></i>
-                            <i class="fas fa-star filled"></i>
-                            <i class="fas fa-star filled"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                        </div>
-                    </div>
-                    <div class="product-price">₹1,499</div>
-                </div>
-            </div>
-            <div class="order-status-section">
-                <div class="order-status">
-                    <span class="status-label">Status :</span>
-                    <span class="status-value cancelled">Cancelled</span>
-                </div>
-                <div class="order-date">21/12/2024</div>
-            </div>
-            <div class="order-actions">
-                <button class="view-details-btn" onclick="viewOrderDetails('ORD003')">
-                    <i class="fas fa-chevron-right"></i>
-                </button>
-            </div>
-        </div> -->
+  
 
 
     </div>
@@ -172,7 +139,7 @@
 </div>
 
 <!-- Return Product Modal -->
-<div class="modal-overlay" id="returnModal">
+<div class="modal-overlay returnModal" id="returnModal">
   <div class="modal-content">
     <div class="modal-header">
       <h3>Return Product</h3>
@@ -187,6 +154,26 @@
     <div class="modal-footer">
       <button class="action-btn btn-secondary" onclick="closeReturnModal()">Cancel</button>
       <button class="action-btn btn-primary" onclick="submitReturnReason()">Submit</button>
+    </div>
+  </div>
+</div>
+
+ <!-- cancel prouct modal -->
+<div class="modal-overlay returnModal" id="cancelModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Cancel Product</h3>
+      <button class="close-modal" onclick="closeCancelModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <label for="returnReason">Why do you want to Cancel this product?  <br> (Optional) </label>
+      <textarea id="cancelReason" rows="3" placeholder=" Enter your reason here..."></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="action-btn btn-secondary" onclick="closeCancelModal()">Close</button>
+      <button class="action-btn btn-primary" id="cancelProductBtn">Submit</button>
     </div>
   </div>
 </div>

@@ -392,18 +392,25 @@ const getTopItems = async (req, res) => {
     totalSales.totalOrders = order.length;
     totalSales.totalRevenue = order.reduce((sum, product) => {
 
-      if (product.isPaid || product.order_status === 'delivered') {
+      if ( product.order_status === 'delivered') {
 
         sum = sum + product.total_price
 
       }
 
-      return sum
+      return sum;
 
     }, 0).toFixed(2)
 
 
-    totalSales.totalDiscount = order.reduce((sum, product) => sum + product.discount, 0).toFixed(2);
+    totalSales.totalDiscount = order.reduce((sum, product) =>{ 
+
+           if(product.order_status === 'delivered'){ 
+            sum += product.discount
+          } 
+          return sum;
+          }, 0).toFixed(2);
+
     if (order.length === 0) {
       totalSales.averageOrderValue = 0;
     } else {
@@ -412,6 +419,11 @@ const getTopItems = async (req, res) => {
 
     res.status(200).json({ topProducts, topCategories, topBrands, totalSales })
 
+  const data = order.filter((v)=>{
+       if(v.order_status === 'delivered' && v.discount > 0){
+           return v
+       }
+  })
 
 
   } catch (error) {

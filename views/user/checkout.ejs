@@ -412,13 +412,14 @@
                         </div>
                         <div class="total-row">
                             <span class="total-label">Shipping</span>
-                           <% if(finaltotal > 500) { %>
+                           <% if(delivery_charge === 0) { %>
                                  <span class="total-value waived">
                                  <del>₹40.00</del> <span class="free-text">Free</span>
                                  </span>
                         <% } else { %>   
-                                 <span class="total-value">₹40.00</span>
+                                 <span class="total-value">₹<%= delivery_charge.toFixed(2) %></span>
                              <% } %>
+                               
                         </div>
                         <div class="total-row discount-row"">
                             <span class="total-label">Discount</span>
@@ -904,8 +905,7 @@ async function verifyPayment(paymentResponse, orderId, payload) {
 
            if(response.ok){ 
 
-                   document.getElementById('discount-error').textContent = data.message                  
-                  
+                   document.getElementById('discount-error').textContent = data.message                                  
                    document.getElementById('finalTotal').textContent =   "₹" + data.total.toFixed(2)
 
 
@@ -993,7 +993,7 @@ async function verifyPayment(paymentResponse, orderId, payload) {
 
             // remove coupon
 
-                  document.getElementById('removeCouponBtn').addEventListener('click', async () => {
+                  document.getElementById('removeCouponBtn')?.addEventListener('click', async () => {
                     const removeRes = await fetch('/removeCoupon', { method: 'POST' });
                    const removeData = await removeRes.json();
               if (removeData.success) {

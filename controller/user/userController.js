@@ -11,6 +11,8 @@ const Coupon = require("../../models/couponSchema");
 const Cart = require("../../models/cartSchema");
 const Banner = require("../../models/bannerSchema");
 const { dash } = require("pdfkit");
+const Wallet = require("../../models/walletSchema");
+const Transaction = require("../../models/transactionSchema");
 
 const pageNotFound = async (req,res)=>{
     try {
@@ -49,10 +51,15 @@ const loadLogin = async (req,res)=>{
 const loadRegister = async (req,res)=>{
     try {
 
+      if(!req.session.user){ 
       const refId = req.query.ref;
       req.session.ref = refId
 
       res.render("login", {message:"", activeTab: "register" });
+
+      } else {
+         res.redirect("/")
+      }
 
     } catch (error) {
         console.log("error in loadregister",error)
@@ -119,7 +126,7 @@ async function sendVerificationEmail(email,otp){
             const emailSent = await sendVerificationEmail(email,otp)
            
             if(!emailSent){
-                return res.json("email.error")
+                return res.redirect("/pageError");
             }
     
             req.session.userOtp = otp;
@@ -181,11 +188,11 @@ async function sendVerificationEmail(email,otp){
                     }
 
             let referredUser = await User.findById(referrerId)
-            let offer_price = 40;
+            let offer_price = 100;
    
        if(referredUser && (referredUser.referredUsers.length+1) % 5 === 0 && referredUser.referredUsers.length !==0){
          
-                  offer_price = 100;
+                  offer_price = 200;
                
        }
 
@@ -203,7 +210,28 @@ async function sendVerificationEmail(email,otp){
             });
 
             await coupon.save();            
-            await User.findByIdAndUpdate(referrerId ,{ $push: {referredUsers: {user_id: newUser._id,coupon_id:coupon._id}},$inc:{referralEarnings: offer_price}})
+            await User.findByIdAndUpdate(referrerId ,{ $push: {referredUsers: {user_id: newUser._id,coupon_id:coupon._id}},$inc:{referralEarnings: offer_price}});
+
+            // for the new user
+            
+             const transaction = new Transaction({
+                    user_id : newUser._id,
+                    amount : 50,
+                    transaction_date : new Date(),
+                    status : 'credited'
+             }) 
+
+             await transaction.save()
+
+
+            const wallet = new Wallet({ 
+                  user_id : newUser._id,
+                  transaction_id : transaction._id,
+                  balance : 50,
+
+             })
+
+             await wallet.save()
         }
                
                         req.session.userOtp = null;                  

@@ -1,11 +1,11 @@
 const User = require("../../models/userSchema")
-const Order = require("../../models/orderSchema");
+const Order = require("../../models/orderSchema")
 const Product = require("../../models/productSchema")
 const Wallet = require("../../models/walletSchema")
-const path = require("path");
-const PDFDocument = require("pdfkit");
+const path = require("path")
+const PDFDocument = require("pdfkit")
 const Transaction = require("../../models/transactionSchema")
-
+const Varient = require("../../models/varientsSchema")
 
 
 
@@ -113,16 +113,34 @@ const cancelProduct = async (req, res) => {
     const userId = req.session.user;
     const productId = req.params.productId;
     const orderId = decodeURIComponent(req.params.orderId)
+    const reason = req.body.reason;
+
 
     const user = await User.findById(userId)
 
-    let order = await Order.findOne({ order_id: orderId }).populate('order_items.product_id')
+    const order = await Order.findOne({ order_id: orderId })
 
-    const returnedItem = order.order_items.find(product => product.product_id._id == productId)
+    const returnedItem = order.order_items.find(product => product.product_id.toString() === productId)
 
-    const { product_price, delivery_charge, quantity } = returnedItem;
+    const { product_price, quantity, volume } = returnedItem;
 
-    const refundAmount = parseFloat((quantity * product_price) + delivery_charge - (order.discount / order.order_items.length));
+    const itemSubtotal = quantity * product_price;
+
+    const totalProductPrice = order.order_items.reduce((sum, item) => sum + (item.product_price * item.quantity), 0)
+
+    let refundAmount = itemSubtotal;
+
+    if (order.discount > 0) {
+      const discountShare = (itemSubtotal / totalProductPrice) * order.discount;
+      refundAmount = itemSubtotal - discountShare;
+    }
+
+    if (order.order_items.filter(v => v.order_status !== 'cancelled').length === 1) {
+       refundAmount += order.delivery;
+        order.order_status = 'cancelled';
+    }
+
+    // const refundAmount = parseFloat((quantity * product_price) + delivery_charge - (order.discount / order.order_items.length));
 
     if (order.isPaid) {
 
@@ -141,30 +159,41 @@ const cancelProduct = async (req, res) => {
         order_id: order._id,
         user_id: user._id,
         status: 'credited',
-        transaction_date : new Date()
+        transaction_date: new Date()
       }).save()
 
 
-      await Wallet.findOneAndUpdate({ user_id: userId }, { transaction_id: transaction })
+      await Wallet.findOneAndUpdate({ user_id: userId }, { $push: { transaction_id: transaction } })
+
     }
 
 
 
     for (let product of order.order_items) {
 
-      if (product.product_id._id == productId) {
+      if (product.product_id.toString() === productId) {
 
         product.order_status = 'cancelled';
         product.cancelled_date = new Date();
-
-        await order.save()
+        product.cancel_reason = reason || null;
 
       }
 
     }
 
+    await order.save();
 
-    const product = await Product.findByIdAndUpdate(productId, { $inc: { stock: quantity }, stock_status: true }, { new: true })
+    const varient = await Varient.findOne({ product_id: productId });
+
+    for (let v of varient.inventory) {
+
+      if (v.volume === volume) {
+        v.stock += quantity;
+      }
+
+    }
+
+    await varient.save();
 
 
 
@@ -237,9 +266,9 @@ const generateInvoice = async (req, res) => {
       return res.redirect("/orders");
     }
 
-    let delivery = 0;
+    let delivery = order.delivery_charge || 0;
     order.order_items.forEach(item => {
-      item.delivery_charge ? delivery = item.delivery_charge : 0
+      delivery = item.delivery_charge ? item.delivery_charge : 0
 
     })
 
@@ -248,6 +277,23 @@ const generateInvoice = async (req, res) => {
     const userName = order?.address_id?.name || "Customer";
     const userEmail = user?.email || "";
 
+    const deliveredItems = order.order_items.filter(item=> item.order_status === 'delivered');
+
+    const totalProductPrice = order.order_items.reduce(
+      (sum, item) => sum + item.quantity * item.product_price
+      , 0 );
+
+    const deliveredSubtotal = deliveredItems.reduce(
+      (sum, item) => sum + item.quantity * item.product_price
+      , 0 );
+
+     deliveredItems.forEach(item => {
+        const itemSubtotal = item.quantity * item.product_price;
+        item.discountShare = (itemSubtotal / totalProductPrice) * order.discount; 
+      }); 
+
+      const deliveredTotal = deliveredSubtotal - deliveredItems.reduce((sum, item) => sum + item.discountShare, 0) + order.delivery_charge;
+ 
     const doc = new PDFDocument({ margin: 50, bufferPages: true, size: "A4" });
 
     const fontPath = path.join(
@@ -346,36 +392,38 @@ const generateInvoice = async (req, res) => {
 
     // Row data
     let y = tableTop + 20;
-    order.order_items.forEach((item, i) => {
-      const productName = item.product_id?.product_name.length>27 ? 
-                                                                     item.product_id.product_name.substring(0,25)+ '...' + ' (' + item.volume + ' ML)' || 'Product' : 
-                                                                     item.product_id.product_name + ' (' + item.volume + ' ML)' || "Product";
+     deliveredItems.forEach((item, i) => {
 
-      const isEven = i % 2 === 0;
+        const productName = item.product_id?.product_name.length > 27 ?
+          item.product_id.product_name.substring(0, 25) + '...' + ' (' + item.volume + ' ML)' || 'Product' :
+          item.product_id.product_name + ' (' + item.volume + ' ML)' || "Product";
 
-      if (isEven) {
+        const isEven = i % 2 === 0;
+
+        if (isEven) {
+          doc
+            .rect(50, y - 2, 500, 18)
+            .fillColor("#f9f9f9")
+            .fill()
+            .strokeColor("#cccccc")
+            .stroke();
+        }
+
+        // Define clear column widths
         doc
-          .rect(50, y - 2, 500, 18)
-          .fillColor("#f9f9f9")
-          .fill()
-          .strokeColor("#cccccc")
-          .stroke();
-      }
+          .fillColor("#000")
+          .fontSize(10)
+          .text(i + 1, itemCodeX, y, { width: 20 })
+          .text(productName, descriptionX, y, { width: 190 })
+          .text(item.quantity.toString(), quantityX, y, { width: 40 })
+          .text(`₹${item.product_price.toFixed(2)}`, priceX, y, { width: 70 })
+          .text(`₹${(item.product_price * item.quantity).toFixed(2)}`, amountX, y, {
+            width: 70,
+            align: "left",
+          });
 
-      // Define clear column widths
-      doc
-        .fillColor("#000")
-        .fontSize(10)
-        .text(i + 1, itemCodeX, y, { width: 20 })
-        .text(productName, descriptionX, y, { width: 190 })
-        .text(item.quantity.toString(), quantityX, y, { width: 40 })
-        .text(`₹${item.product_price.toFixed(2)}`, priceX, y, { width: 70 })
-        .text(`₹${(item.product_price * item.quantity).toFixed(2)}`, amountX, y, {
-          width: 70,
-          align: "left",
-        });
-
-      y += 20;
+        y += 20;
+      
     });
 
     // Add padding after the table
@@ -395,14 +443,14 @@ const generateInvoice = async (req, res) => {
       .fillColor("#000000")
       .fontSize(10)
       .text("Subtotal:", 370, y + 15, { width: 75 })
-      .text(`₹ ${Number(order.total_price + order.discount - delivery).toFixed(2)}`, 490, y + 15, {
+      .text(`₹ ${deliveredSubtotal.toFixed(2)}`, 490, y + 15, {
         width: 50,
         align: "right",
       });
 
     y += 20;
 
-    order.order_items.forEach((item, i) => {
+     deliveredItems.forEach((item, i) => {
 
 
       if (item.product_id._id.toString() === productId.toString()) {
@@ -411,7 +459,7 @@ const generateInvoice = async (req, res) => {
           .fillColor("#000000")
           .fontSize(10)
           .text("delivery:", 370, y + 15, { width: 75 })
-          .text(`₹ ${item.delivery_charge.toFixed(2)}`, 490, y + 15, {
+          .text(`₹ ${order.delivery_charge.toFixed(2)} `, 490, y + 15, {
             width: 50,
             align: "right",
           });
@@ -426,7 +474,7 @@ const generateInvoice = async (req, res) => {
 
     doc
       .text("Discount:", 370, y + 15, { width: 75 })
-      .text(`-₹ ${order.discount.toFixed(2)}`, 490, y + 15, {
+      .text(`-₹ ${deliveredItems.reduce((sum, item)=>sum + item.discountShare ,0).toFixed(2) }`, 490, y + 15, {
         width: 50,
         align: "right",
       });
@@ -435,7 +483,7 @@ const generateInvoice = async (req, res) => {
       .fontSize(11)
       .font("Unicode")
       .text("Total:", 370, y + 60, { width: 75 })
-      .text(`₹ ${order.total_price.toFixed(2)}`, 490, y + 60, {
+      .text(`₹ ${deliveredTotal.toFixed(2)}`, 490, y + 60, {
         width: 50,
         align: "right",
       });

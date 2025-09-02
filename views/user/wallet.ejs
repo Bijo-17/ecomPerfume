@@ -19,22 +19,22 @@
     <div class="wallet-transactions">
         <h2>Transaction History</h2>
         
-        <% if (transaction && transaction.length > 0) { %>
+        <% if (wallet && wallet.transaction_id.length > 0) { %>
             <div class="transaction-list">
-                <% transaction.forEach(trans => { %>
+                <%  for(let i= wallet.transaction_id.length-1; i >= 0 ; i--) { %>
                     <div class="transaction-item">
-                        <div class="transaction-icon <%= trans.status %>">
-                            <i class="fas fa-<%= trans.status === 'credited' ? 'arrow-down' : 'arrow-up' %>"></i>
+                        <div class="transaction-icon <%= wallet.transaction_id[i]?.status %>">
+                            <i class="fas fa-<%= wallet.transaction_id[i]?.status === 'credited' ? 'arrow-down' : 'arrow-up' %>"></i>
                         </div>
                         <div class="transaction-details">
                             <h3> </h3>
-                            <p class="transaction-date"><%= trans.transaction_date.toLocaleString('en-IN') %></p>
+                            <p class="transaction-date"><%= wallet.transaction_id[i]?.transaction_date?.toLocaleString('en-IN') %></p>
                         </div>
                         <div class="transaction-amount <%= transaction.type %>">
-                            <%= trans.status === 'credited' ? '+' : '-' %> ₹<%= trans.amount.toFixed(2) %>
+                            <%= wallet.transaction_id[i]?.status === 'credited' ? '+' : '-' %> ₹<%= wallet.transaction_id[i]?.amount.toFixed(2) %>
                         </div>
                     </div>
-                <% }); %>
+                <% }; %> 
             </div>
         <% } else { %>
             <div class="empty-transactions">

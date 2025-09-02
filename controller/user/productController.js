@@ -21,7 +21,8 @@ const getAllProducts = async (req,res)=>{
         if(user){
            userData = await User.findOne({_id:user});
         }
-
+        console.log("req" , req.originalUrl)
+console.log("sub" , sub , price, sortOption)  
         let search = "";
        const filter = { isDeleted:false , isBlocked: false  };
         

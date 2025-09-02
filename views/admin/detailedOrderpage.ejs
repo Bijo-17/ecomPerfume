@@ -101,6 +101,21 @@
                 </td>
               </tr>
               <% } %>
+              
+              <% if(item.order_status === 'cancelled'){  %>
+                     <td colspan="5">
+                          <div> 
+                                <Strong> Cancel Reason :  </Strong> <% if(item.cancel_reason) { %> 
+                                                                        <%= item.cancel_reason %>
+                                                                      <% } else { %>
+                                                                          Not specified
+                                                                    <% } %>
+
+                                                                 
+                                                                       
+                          </div>
+                     </td>
+              <% } %>
 
             <% }) %>
           </tbody>

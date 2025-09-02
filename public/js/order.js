@@ -119,15 +119,17 @@ document.addEventListener('DOMContentLoaded', function() {
             <div class="order-detail-section">
                 <h4>Product Details</h4>
                 <div class="modal-product-details">
+                <a href='/productDetails/${product.product_id._id}' >
                     <div class="modal-product-image">
                         <img src="${product.product_id.image[0]}" alt="${product.product_id.product_name}">
                     </div>
                     <div class="modal-product-info">
-                        <div class="modal-product-name">${product.product_id.product_name}</div>
+                        <div class="modal-product-name">${product.product_id.product_name} (${product.volume} ML)</div>
                         <div class="modal-product-price">₹${product.product_price}  × ${product.quantity }</div>
                         <div class="product-rating">
                             ${generateStars(product.product_id.averageRating)}
                         </div>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -163,7 +165,7 @@ document.addEventListener('DOMContentLoaded', function() {
             ` : ''}
 
             <div class="order-actions-modal">
-                ${generateOrderActions(order,product.product_id._id)}
+                ${generateOrderActions(order,product.product_id._id, product.volume)}
               
             </div>
         `;
@@ -185,7 +187,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Generate order actions based on status
-    function generateOrderActions(order,productId) {
+    function generateOrderActions(order,productId , volume) {
    
 
         const productItem = order.order_items.find(item => item.product_id === productId || item.product_id._id === productId);
@@ -234,7 +236,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 `;
             case 'cancelled':
                 return `
-                    <button class="action-btn btn-primary" onclick="reorderProduct('${order.order_id}')">Reorder</button>
+                    <button class="action-btn btn-primary" onclick="reorderProduct('${productId}','${volume}')">Reorder</button>
                 `;
                 case 'failed':
                 return `
@@ -260,57 +262,81 @@ document.addEventListener('DOMContentLoaded', function() {
     window.trackOrder = function(orderId) {
         showNotification('Redirecting to order tracking...', 'success');
         setTimeout(() => {
-            window.location.href = `/track-order/${orderId}`;
+            window.location.reload();
         }, 1000);
     };
 
     window.cancelOrder = function(orderId,productId) {
-        if (confirm('Are you sure you want to cancel this order?')) {
+           
+           document.getElementById("cancelModal").classList.add("active");
+           document.body.style.overflow = "hidden";
         
-
             
-              const reason = prompt("Please enter the reason for cancellation (optional):");
-
-              fetch(`/CancelOrder/${encodeURIComponent(orderId)}/${productId}`, {
+          document.getElementById('cancelProductBtn').addEventListener('click', ()=> {
+          
+              const reason = document.getElementById('cancelReason').value;
+                  fetch(`/CancelOrder/${encodeURIComponent(orderId)}/${productId}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({ reason })
-        }).then(response => {
-            if (response.ok) {
+          }).then(response => {
+             if (response.ok) {
                 showNotification("Product cancelled", "success");
                 window.location.reload();
-            } else {
-                showNotification("Failed to cancell product", "error");
-            }
+               } else {
+                  showNotification("Failed to cancell product", "error");
+               }
         });
-        
-    } else {
-        showNotification('Failed to send cancellation request.', 'error');
-    }
 
-
-            closeOrderDetailsModal();
-             
+      })
+           
         
     };
+
+    window.closeCancelModal = function() {
+    document.getElementById("cancelModal").classList.remove("active");
+    document.body.style.overflow = "auto";
+    document.getElementById("cancelReason").value = ""; // reset textarea
+}
+
+  window.sumbitCancelReason = function () {
+     
+
+
+  }
 
   
 
-    window.reorderProduct = function(orderId) {
+     window.reorderProduct = async function(productId, volume) {
 
-        const orders = JSON.parse(document.getElementById('order-data').textContent);
+    
+       try{ 
 
-        const order = orders.find(o=> o.order_id === orderId)
-      
-        if (order) {
-            showNotification('Adding product to cart...', 'success');
-            setTimeout(() => {
+              showNotification('Adding product to cart...', 'success');
+
+              const response = await fetch(`/addToCart/${productId}`, {
+                method : 'POST',
+                headers: {'Content-Type' : 'application/json'},
+                body : JSON.stringify({volume})
+              })
+
+                const data = await response.json();
+
+            if(data.success){
                 window.location.href = '/cart';
-            }, 1000);
-        }
-    };
+            } else {
+                showNotification("Failed to add product to cart,Please Check the product and try again" , "error");
+            }
+      
+    
+          } catch (error) {
+              showNotification("Something went wrong", "error");
+           }
+         };
+
+
 
     window.retryPayment = function(orderId) {
 
@@ -440,7 +466,7 @@ window.submitReturnReason = function() {
         return;
     }
 
-    // Simulated response or API call
+
     showNotification("Return request submitted", "success");
 
   
@@ -450,8 +476,13 @@ window.submitReturnReason = function() {
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({ reason })
     }).then(res => {
-        if(res.ok) showNotification("Return successful", "success");
-        else showNotification("Failed to return", "error");
+        if(res.ok){ 
+             showNotification("Return successful", "success");
+             window.location.reload();
+        }
+        else { 
+               showNotification("Failed to return", "error");
+        }  
     });
     
 
@@ -462,9 +493,9 @@ window.submitReturnReason = function() {
 
 
     window.downloadInvoice = function(orderId,productId) {
-        // showNotification('Downloading invoice...', 'success');
-       
 
+        showNotification('Downloading invoice...', 'success');
+       
          if (orderId) {
 
            fetch(`/orders/downloadInvoice/${encodeURIComponent(orderId)}/${productId}`, {
@@ -474,10 +505,7 @@ window.submitReturnReason = function() {
             },
         
         }).then(response => {
-            if (response.ok) {
-                showNotification("Downloading Invoice...", "success");
-                
-            } else {
+            if (!response.ok) {
                 showNotification("Failed to download Invoice", "error");
             }
         });

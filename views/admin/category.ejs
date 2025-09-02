@@ -33,7 +33,7 @@
           <div class="modal-body">
             <div class="mb-3">
               <label for="categoryName" class="form-label">Category Name</label>
-              <input type="text" class="form-control" name="categoryName" id="categoryName" required>
+              <input type="text" class="form-control" name="categoryName" id="categoryName"  >
             </div>
             <div class="mb-3">
               <label for="subcategoryName" class="form-label">Subcategory (Optional)</label>
@@ -112,7 +112,7 @@
       </div>
 
       <div class="modal-body">
-        <input type="text" name="name" value="<%= category.name %>" class="form-control" required />
+        <input type="text" name="name" value="<%= category.name %>" class="form-control"   />
       </div>
     
        <div class="modal-header">
@@ -178,7 +178,7 @@
       </div>
 
       <div class="modal-body">
-        <input type="text" name="name"  class="form-control" required />
+        <input type="text" name="name"  class="form-control" required  />
       </div>
 
       <div class="modal-footer">
@@ -191,7 +191,7 @@
                             
                             
                             
-                            <!-- <a href="/admin/subcategory/add?category_id=<%= category._id %>" class="btn btn-sm btn-primary ms-2">+ Add Subcategory</a> -->
+                    
            </td>
                    </tr>
 
@@ -217,7 +217,7 @@
       </div>
 
       <div class="modal-body">
-        <input type="text" name="name" value="<%= sub.name %>" class="form-control" required />
+        <input type="text" name="name" value="<%= sub.name %>" class="form-control"   />
       </div>
 
       <div class="modal-footer">
@@ -327,6 +327,11 @@ const categoryName = document.getElementById("categoryName").value.trim();
 const subcategoryName = document.getElementById("subcategoryName").value.trim();
 const categoryOffer = Number(document.getElementById('categoryOffer').value);
 const image = document.getElementById('categoryImage').src
+
+if(!categoryName){
+    Swal.fire("warning","Please enter the category name" , "warning");
+    return;
+}
 
 if( categoryOffer && (categoryOffer > 90 || categoryOffer < 1) ){
    Swal.fire("warning","please enter a value between 1 and 90" , "warning")
@@ -542,7 +547,7 @@ function viewEditImage(event , index) {
 
       document.addEventListener('DOMContentLoaded',function (){
            const message = document.getElementById('message');
-           const container = message.parentNode;
+           const container = message?.parentNode;
 
 
            if(message && message?.textContent !== ""){

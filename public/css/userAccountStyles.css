@@ -1701,3 +1701,8 @@ textarea:disabled {
 .stat-card.updated {
     animation: pulse 0.6s ease-in-out;
 }
+
+.error-message { 
+     color:red;
+     font-size: 0.8rem;
+}

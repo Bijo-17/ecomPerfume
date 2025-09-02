@@ -3,7 +3,7 @@ const User = require("../../models/userSchema")
 const Product = require("../../models/productSchema")
 const Wallet = require("../../models/walletSchema")
 const Transaction = require("../../models/transactionSchema")
-
+const Varient = require("../../models/varientsSchema")
 
 
 const getOrders = async (req, res) => {
@@ -131,9 +131,23 @@ const approveReturn = async (req, res) => {
         const returnedItem = order.order_items.find(product => product.product_id._id == productId)
 
 
-        const { product_price, delivery_charge, quantity } = returnedItem;
+        const { product_price, quantity , volume } = returnedItem;
 
-        const refundAmount = parseFloat((quantity * product_price) + delivery_charge - (order.discount / order.order_items.length));
+        const itemSubtotal = quantity * product_price;
+
+        const totalProductPrice = order.order_items.reduce((sum, item)=> sum + (item.product_price * item.quantity), 0)
+
+        let refundAmount = itemSubtotal.toFixed(2);
+
+    if(order.discount > 0){
+         const discountShare = (itemSubtotal / totalProductPrice) * order.discount;
+         refundAmount = (itemSubtotal - discountShare).toFixed(2);
+    }
+
+    if( order.order_items.filter(v=> v.order_status !== ('cancelled' || 'returned') ).length === 1){
+        order.delivery_charge > 0  ? refundAmount += order.delivery_charge : '';
+         order.order_status = 'returned'
+    }
 
 
         returnedItem.return_request.status = 'approved';
@@ -141,42 +155,44 @@ const approveReturn = async (req, res) => {
 
         await order.save()
 
-
         const product = await Product.findByIdAndUpdate(productId, { $inc: { stock: quantity }, stock_status: true }, { new: true })
 
-        const wallet = await Wallet.findOneAndUpdate({ user_id: userId }, { $inc: { balance: refundAmount } })
-        const user = await User.findById(userId)
+          const varient = await Varient.findOne({product_id : productId});
+        
+           for(let v of varient.inventory){
+                 if(v.volume === volume){
+                     v.stock += quantity ;
+                 }
+                
+           }
+        
+            await varient.save();
+
+        let wallet = await Wallet.findOneAndUpdate({ user_id: userId }, { $inc: { balance: refundAmount } })
+
 
         if (!wallet) {
 
-            const walt = await new Wallet({
+              wallet = await new Wallet({
                 user_id: userId,
                 balance: refundAmount
             }).save()
 
 
-            await User.findByIdAndUpdate(userId, { wallet: walt._id })
+            await User.findByIdAndUpdate(userId, { wallet: wallet._id })
         }
 
 
-        const transaction = await Transaction.findOne({ user_id: userId })
-
-        if (!transaction) {
-            const trans = await new Transaction({
+         const transaction = await new Transaction({
                 amount: refundAmount,
-                transction_date: new Date(),
+                transaction_date: new Date(),
                 order_id: order._id,
-                user_id: user._id,
+                user_id: userId,
                 status: 'credited'
             }).save()
 
-            await Wallet.findByIdAndUpdate(wallet._id, { transaction_id: trans._id })
+            await Wallet.findByIdAndUpdate(wallet._id,{$push: { transaction_id: transaction._id }})
 
-        } else {
-
-            await Transaction.findOneAndUpdate({ user_id: userId }, { amount: refundAmount, status: 'credited', order_id: order.id, transaction_date: new Date() })
-
-        }
 
         res.status(200).json({ success: true })
 
@@ -202,28 +218,34 @@ const updateOrderStatus = async (req, res) => {
         const productId = req.params.productId;
         const orderId = req.params.orderId;
         const status = req.body.status;
+        const page = req.query.page || 1;
 
+        const order = await Order.findOne({ _id: orderId })
 
-        let order = await Order.findOne({ _id: orderId }).populate('order_items.product_id')
-
+        if(order.order_items.filter(v=> v.order_status !== status).length === 1 ){
+             order.order_status = status;
+        }
+        
 
         if (order.order_status === 'delivered') {
             order.delivered_date = new Date();
-            order.order_status = status
 
         }
-        const currentItem = order.order_items.find(product => product._id.toString() === productId.toString())
+
+        const currentItem = order.order_items.find(product => product.product_id.toString() === productId.toString() )
 
         currentItem.order_status = status;
 
         await order.save()
+           
+        res.redirect("/admin/orderList"+"?page="+page)
+     
 
-        res.redirect("/admin/orderList")
 
     } catch (error) {
 
         console.log("error in updating order status", error)
-        res.status(400).json({ success: false })
+        res.redirect("/admin/pageError")
 
     }
 

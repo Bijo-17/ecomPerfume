@@ -203,14 +203,13 @@ function passwordValidate(){
   const cPasswordval = cPasswordid.value;
   const alpha = /[a-zA-z]/;
   const digit = /\d/;
-console.log(passwordval)
   if(passwordval.length < 8){
     errorPassword.style.display="block"
     errorPassword.innerHTML="Password must be atleast 8 characters"
     
   }else if(!alpha.test(passwordval) || !digit.test(passwordval)){
 
-    console.log(passwordval)
+
      errorPassword.style.display="block"
      errorPassword.innerHTML="Password should contain atleast number and characters"
   }  else {

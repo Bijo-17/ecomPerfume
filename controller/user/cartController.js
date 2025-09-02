@@ -279,7 +279,7 @@ const checkout = async (req, res) => {
 
     let delivery_charge = 0;
 
-    if (finalPrice < 500) {
+    if ( finalPrice < 500) {
       finalPrice = finalPrice + 40
       delivery_charge = 40
     }
@@ -310,7 +310,7 @@ const checkout = async (req, res) => {
 
 
     res.render("checkout", {
-      user: req.session.user,
+      user,
       cart: validatedItems,
       subtotal: cartTotal,
       finaltotal: finalPrice,
@@ -320,7 +320,7 @@ const checkout = async (req, res) => {
       appliedCoupon,
       discount,
       couponDiscount,
-      user
+      delivery_charge
     });
 
     req.session.couponApplied = false;

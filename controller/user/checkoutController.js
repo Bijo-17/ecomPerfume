@@ -153,8 +153,6 @@ const placeOrder = async (req, res) => {
 
     const order_items = req.session.validatedCart;
 
-
-
     const isTypedAddress = req.body.isTypedAddress;
 
     const saveAddress = req.body.saveForFuture;
@@ -168,7 +166,6 @@ const placeOrder = async (req, res) => {
     let order = {};
 
     const saveAddressDb = await saveNewAddress(addressId, isTypedAddress, saveAddress, fullDetails, order, userId)
-
 
 
 
@@ -205,6 +202,7 @@ const placeOrder = async (req, res) => {
       if (walletBalance < total) {
         return res.status(400).json({ success: false, message: "Insufficient balance" })
       }
+
 
       wallet.balance -= total;
 
@@ -272,21 +270,25 @@ const placeOrder = async (req, res) => {
       payment_method,
       isPaid,
       estimated_delivery: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-
+      delivery_charge : delivery
     });
 
     await newOrder.save();
 
     if (paymentMethod === 'wallet') {
 
-      await new Transaction({
+     const transaction =  new Transaction({
         user_id: userId,
         status: 'debited',
         amount: total,
-        order_id: newOrder._id
+        order_id: newOrder._id,
+        transaction_date : new Date()
 
-      }).save()
+      })
 
+      await transaction.save();
+
+      await Wallet.findOneAndUpdate({user_id : userId}, {$push : {transaction_id : transaction._id }})
 
     }
 
@@ -317,6 +319,7 @@ const razorpayPayment = async (req, res) => {
 
     const delivery = req.session.delivery;
     let orderedProducts = []
+    let outOfStock = false;
 
     for (let product of order_items.items) {
 
@@ -329,11 +332,14 @@ const razorpayPayment = async (req, res) => {
         varient.inventory.forEach(item => {
 
           if (product.volume === item.volume && item.stock < product.quantity) {
+            outOfStock = true;
             return res.status(400).json({ success: false, message: `Not enough stock available for ${product.product_id.product_name}` })
           }
         })
 
-
+       if(outOfStock){ 
+          return;
+       }
 
         orderedProducts.push({
           product_id: product.product_id._id,
@@ -750,7 +756,7 @@ const applayCoupon = async (req, res) => {
             total = parseFloat(total - c.offer_price);
             discount = parseFloat(c.offer_price);
           }
-
+          
           await Cart.findOneAndUpdate({ user_id: userId }, { $set: { applied_coupon: { code: c._id, discountAmount: discount } } })
           req.session.coupon = c._id;
           req.session.discount = discount;

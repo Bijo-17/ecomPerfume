@@ -51,6 +51,10 @@ const orderSchema = new mongoose.Schema({
                               type: Number,
                               default:0,
                       }, 
+             delivery_charge: {
+                                 type : Number,
+                                 default:0
+                         },       
 
           order_items: [{
                          product_id: { 
@@ -68,6 +72,9 @@ const orderSchema = new mongoose.Schema({
                         cancelled_date: {
                                             type : Date,
                                         }, 
+                          cancel_reason : {
+                                             type: String,
+                                       },           
 
                         return_request: {
                                              status: {

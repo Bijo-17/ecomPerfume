@@ -95,8 +95,10 @@
 
             
 
-          <form method="GET" action="/product/<%=categoryName%>?q=<%=search%>" id="filterForm">
+          <!-- <form  action="/product/<%=categoryName%><%= sub? '?sub='+sub : ''%><%=search ? (sub ? '&' : '?' ) + 'q='+ search : '' %> " id="filterForm"> -->
 
+              <form  action="/product/<%=categoryName%>?sub=<%=sub%>" id="filterForm">
+     <% console.log("form fornt" , sub) %>
                  
   <!-- Price Range Filter -->
   <label>Price:</label>
@@ -116,6 +118,7 @@
     <option value="priceHigh" <%= locals.sort === 'priceHigh' ? 'selected' : '' %>>Price: High to Low</option>
     <option value="nameAZ" <%= locals.sort === 'nameAZ' ? 'selected' : '' %>>Name: A-Z</option>
     <option value="nameZA" <%= locals.sort === 'nameZA' ? 'selected' : '' %>>Name: Z-A</option>
+    <option >  NI thaneee</option>
   </select>
 </form>
 
@@ -183,11 +186,11 @@
                <% if (currentPage > 1) { %>
                    <% if (currentPage > 2) { %> 
             
-                      <a class="page-link" href="?page=1">First</a>
+                      <a class="page-link" href="?page=1<%=price? '&price='+price : ''%><%=sort? '&sort='+sort : ''%>">First</a>
              
                     <% } %>
              
-                      <a href="?page=<%= currentPage-1%>" class="prev-page"><i class="fas fa-chevron-left"></i></a>
+                      <a href="?page=<%= currentPage-1%><%=price? '&price='+price : ''%><%=sort? '&sort='+sort : ''%>" class="prev-page"><i class="fas fa-chevron-left"></i></a>
                   
                <% } %>
 
@@ -209,13 +212,13 @@
                     <% if (endPage <  totalPages) { %>
                   
                            <span class="page-link ">...</span>                   
-                            <a class="page-link" href="?page=<%= totalPages %>"><%= totalPages %></a>
+                            <a class="page-link" href="?page=<%= totalPages %><%=price? '&price='+price : ''%><%=sort? '&sort='+sort : ''%>"><%= totalPages %></a>
                      
                      <% } %>
                     
                      <% if (totalPages > currentPage) { %>                       
                               
-                                  <a href="?page=<%= currentPage+1%>" class="next-page"><i class="fas fa-chevron-right"></i></a>
+                                  <a href="?page=<%= currentPage+1%><%=price? '&price='+price : ''%><%=sort? '&sort='+sort : ''%>" class="next-page"><i class="fas fa-chevron-right"></i></a>
                                                                       
                      <% } %>
 

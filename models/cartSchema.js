@@ -26,7 +26,8 @@ const cartSchema = new mongoose.Schema({
 
          applied_coupon: {
                             code:String,
-                            discountAmount : Number
+                            discountAmount : {type: Number , default: null },
+                          
                            
           }
       
