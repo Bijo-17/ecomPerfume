@@ -124,6 +124,8 @@ const cancelProduct = async (req, res) => {
 
     const { product_price, quantity, volume } = returnedItem;
 
+    // stoc < 5 offer rate > 4
+
     const itemSubtotal = quantity * product_price;
 
     const totalProductPrice = order.order_items.reduce((sum, item) => sum + (item.product_price * item.quantity), 0)
@@ -181,7 +183,29 @@ const cancelProduct = async (req, res) => {
 
     }
 
+  
+
     await order.save();
+
+
+    const currentProduct = await Product.findById(productId);
+
+    const currentVarient = await Varient.findOne({product_id : productId})
+ let currentStock;
+    for(let s of currentVarient.inventory ){
+        if(s.volume === volume){
+            currentStock = s.stock;
+        }
+    }
+    if(currentProduct.offer > 0 && currentProduct.ratingCount > 4 && currentStock < 5 ){
+
+        let disPrice = (product_price *(1-  20 )/100)
+
+           await Wallet.findOneAndUpdate({user_id: userId} , {$inc:{ balance: disPrice}})
+
+    }
+
+
 
     const varient = await Varient.findOne({ product_id: productId });
 
