@@ -97,9 +97,9 @@
 
           <!-- <form  action="/product/<%=categoryName%><%= sub? '?sub='+sub : ''%><%=search ? (sub ? '&' : '?' ) + 'q='+ search : '' %> " id="filterForm"> -->
 
-              <form  action="/product/<%=categoryName%>?sub=<%=sub%>" id="filterForm">
-     <% console.log("form fornt" , sub) %>
-                 
+              <form  action="/product/<%=categoryName%>" id="filterForm">
+ 
+            <input type="hidden" value="<%=sub%>" name="sub">     
   <!-- Price Range Filter -->
   <label>Price:</label>
   <select name="price" onchange="document.getElementById('filterForm').submit()">
@@ -186,11 +186,11 @@
                <% if (currentPage > 1) { %>
                    <% if (currentPage > 2) { %> 
             
-                      <a class="page-link" href="?page=1<%=price? '&price='+price : ''%><%=sort? '&sort='+sort : ''%>">First</a>
+                      <a class="page-link" href="?page=1<%=sub? '&sub='+sub : ''%><%=price? '&price='+price : ''%><%=sort? '&sort='+sort : ''%>">First</a>
              
                     <% } %>
              
-                      <a href="?page=<%= currentPage-1%><%=price? '&price='+price : ''%><%=sort? '&sort='+sort : ''%>" class="prev-page"><i class="fas fa-chevron-left"></i></a>
+                      <a href="?page=<%= currentPage-1%><%=sub? '&sub='+sub : ''%><%=price? '&price='+price : ''%><%=sort? '&sort='+sort : ''%>" class="prev-page"><i class="fas fa-chevron-left"></i></a>
                   
                <% } %>
 
@@ -205,20 +205,20 @@
 
                    <% for (let i = startPage; i <= endPage; i++) { %>
                   
-                          <a href="?page=<%=i%><%=price? '&price='+price : ''%><%=sort? '&sort='+sort : ''%> " class="page-number <%=(i === currentPage) ? 'active' : '' %>" ><%= i %></a>
+                          <a href="?page=<%=i%><%=sub? '&sub='+sub : ''%><%=price? '&price='+price : ''%><%=sort? '&sort='+sort : ''%> " class="page-number <%=(i === currentPage) ? 'active' : '' %>" ><%= i %></a>
                    
                    <% } %>
 
                     <% if (endPage <  totalPages) { %>
                   
                            <span class="page-link ">...</span>                   
-                            <a class="page-link" href="?page=<%= totalPages %><%=price? '&price='+price : ''%><%=sort? '&sort='+sort : ''%>"><%= totalPages %></a>
+                            <a class="page-link" href="?page=<%= totalPages %><%=sub? '&sub='+sub : ''%><%=price? '&price='+price : ''%><%=sort? '&sort='+sort : ''%>"><%= totalPages %></a>
                      
                      <% } %>
                     
                      <% if (totalPages > currentPage) { %>                       
                               
-                                  <a href="?page=<%= currentPage+1%><%=price? '&price='+price : ''%><%=sort? '&sort='+sort : ''%>" class="next-page"><i class="fas fa-chevron-right"></i></a>
+                                  <a href="?page=<%= currentPage+1%><%=sub? '&sub='+sub : ''%><%=price? '&price='+price : ''%><%=sort? '&sort='+sort : ''%>" class="next-page"><i class="fas fa-chevron-right"></i></a>
                                                                       
                      <% } %>
 
