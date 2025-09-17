@@ -32,35 +32,35 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (!e.target.closest('.view-details-btn')) {
                     const orderId = this.getAttribute('data-order-id');
                     const productId = this.getAttribute('data-product-id')
-                    viewOrderDetails(orderId, productId);
+                    const volume = this.getAttribute('data-volume')
+                    const productOrderId = this.getAttribute('data-productOrderId')
+                    viewOrderDetails(orderId, productId , volume , productOrderId);
                 }
             });
         });
     }
 
     // View order details (global function)
-    window.viewOrderDetails = function(orderId , productId) {
+    window.viewOrderDetails = function(orderId , productId , volume , productOrderId) {
         const orders = JSON.parse(document.getElementById('order-data').textContent);
-
+ 
         const order = orders.find(o=> o.order_id === orderId)
      
-
         
         if (!order) {
             showNotification('Order not found', 'error');
             return;
         }
 
-      const product = order.order_items.find(item => item.product_id._id === productId);
+      const product = order.order_items.find(item => item.product_id._id === productId && item.volume === Number(volume) );
 
          if (!product) {
           showNotification('Product not found', 'error');
               return;
         }
 
-  
         
-        populateOrderDetailsModal(order, product);
+        populateOrderDetailsModal(order, product , productOrderId);
 
         const modal = document.getElementById('orderDetailsModal');
         if (modal) {
@@ -70,15 +70,12 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     // Populate order details modal
-    function populateOrderDetailsModal(order,product) {
+    function populateOrderDetailsModal(order,product,productOrderId) {
         const modalBody = document.getElementById('orderModalBody');
+
         if (!modalBody) return;
-
    
-       
-      const productItem = order.order_items.find(item => item.product_id === product.product_id || item.product_id._id === product.product_id._id);
-
-  
+      const productItem = order.order_items.find(item => item._id.toString() === productOrderId);
 
         const statusClass = productItem.order_status.toLowerCase();
 
@@ -88,7 +85,7 @@ document.addEventListener('DOMContentLoaded', function() {
          if(productItem.order_status === 'cancelled'){
             displayDate =  productItem.cancelled_date 
          }
-        
+    
         modalBody.innerHTML = `
             <div class="order-detail-section">
                 <h4>Order Information</h4>
@@ -150,10 +147,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="payment-details">
                     <strong>Payment Method:</strong> ${order.payment_method.method}<br>
                      <strong>Delivery:</strong> ${product.delivery_charge}<br>
-                      <strong>Discount:</strong> ${order?.discount}<br>
+                      <strong>Discount:</strong> ${order?.discount.toFixed(2)}<br>
                        ${''? `<strong>Card:</strong> ${''}<br>` : ''}
                         ${'' ? `<strong>UPI ID:</strong> ${''}<br>` : ''}
-                     <strong>Amount :</strong> ₹${((product.product_price*product.quantity)+product.delivery_charge).toFixed(2)}
+                     <strong>Product Price :</strong> ₹${((product.product_price*product.quantity)+product.delivery_charge).toFixed(2)} <br>
+                     <strong>Total Order Price : </strong> ₹${order.total_price.toFixed(2)}
                 </div>
             </div>
 
@@ -165,9 +163,18 @@ document.addEventListener('DOMContentLoaded', function() {
             ` : ''}
 
             <div class="order-actions-modal">
-                ${generateOrderActions(order,product.product_id._id, product.volume)}
+                ${generateOrderActions(order,product.product_id._id, product.volume , productOrderId)}
               
             </div>
+        ${ (order.order_items.length > 1) ?
+            `<div class="order-detail-section mt-4"> 
+               <h4>Other products in this order </h4>
+               <div class='modal-product-details'>
+                  ${generateOtherProducts(order, product.product_id._id, product.volume)}
+               </div>
+            </div>`
+           : '' }
+
         `;
 
     
@@ -186,11 +193,39 @@ document.addEventListener('DOMContentLoaded', function() {
         return `<div class="stars">${stars}</div>`;
     }
 
+    function generateOtherProducts(order, productId , volume){
+
+          const otherProducts = order.order_items.filter(p=> p.product_id._id.toString() !== productId || p.volume !== volume)
+      
+        return otherProducts.map(element => {
+        
+              return  ` <div style="cursor:pointer" class="other-product" data-order-id=${order.order_id} data-product-id=${element.product_id._id} data-volume=${element.volume} data-productOrderId=${element._id}>  
+                         <img src="${element.product_id.image[0]}" alt="${element.product_id.product_name}" style="width:50px;height:50px;">
+                         <span>${element.product_id.product_name} (${element.volume} ML)</span>
+                   <div> <hr style='margin-top: 6px'>
+                 `;
+          }).join('');
+
+       
+    }
+
+    document.addEventListener("click", function (e) {
+         const el = e.target.closest(".other-product");
+     if (el) {
+        
+               const orderId = el.getAttribute("data-order-id");
+               const productId = el.getAttribute("data-product-id");
+               const volume = el.getAttribute('data-volume')
+               const productOrderId = el.getAttribute('data-productOrderId')
+               viewOrderDetails(orderId, productId , volume , productOrderId);
+             }
+    });
+
     // Generate order actions based on status
-    function generateOrderActions(order,productId , volume) {
+    function generateOrderActions(order,productId , volume , productOrderId) {
    
 
-        const productItem = order.order_items.find(item => item.product_id === productId || item.product_id._id === productId);
+        const productItem = order.order_items.find(item => item._id.toString() === productOrderId );
 
         if (!productItem) return '';
 
@@ -203,7 +238,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     }else if(status === 'delivered' && productItem.return_request.status === 'approved'){
         
-       return  `<button class="action-btn btn-warning" > Return requested accepted </button>` 
+       return  `<button class="action-btn btn-warning" > Return request accepted </button>` 
 
     }else if(status === 'delivered' && productItem.return_request.status === 'rejected'){
         
@@ -215,17 +250,20 @@ document.addEventListener('DOMContentLoaded', function() {
             case 'pending':
                 return `
                      <button class="action-btn btn-primary" onclick="trackOrder('${order.order_id}')">Track Order</button>
-                    <button class="action-btn btn-danger" onclick="cancelOrder('${order.order_id}','${productId}')">Cancel Order</button>
+                    <button class="action-btn btn-warning" onclick="cancelProduct('${order.order_id}','${productId}','${productOrderId}')">Cancel Product</button>
+                    <button class="action-btn btn-danger" onclick="cancelFullOrder('${order.order_id}')">Cancel Full Order</button>
                 `;
             case 'shipped':
                 return `
                      <button class="action-btn btn-primary" onclick="trackOrder('${order.order_id}')">Track Order</button>
-                    <button class="action-btn btn-danger" onclick="cancelOrder('${order.order_id}','${productId}')">Cancel Order</button>
+                    <button class="action-btn btn-danger" onclick="cancelProduct('${order.order_id}','${productId}','${productOrderId}')">Cancel Order</button>
+                    <button class="action-btn btn-danger" onclick="cancelFullOrder('${order.order_id}')">Cancel Full Order</button>
                 `;
             case 'out_for_delivery':
                 return `
                      <button class="action-btn btn-primary" onclick="trackOrder('${order.order_id}')">Track Order</button>
-                    <button class="action-btn btn-danger" onclick="cancelOrder('${order.order_id}','${productId}')">Cancel Order</button>
+                    <button class="action-btn btn-danger" onclick="cancelProduct('${order.order_id}','${productId}','${productOrderId}')">Cancel Order</button>
+                    <button class="action-btn btn-danger" onclick="cancelFullOrder('${order.order_id}')">Cancel Full Order</button>
                 `;                
 
             case 'delivered':
@@ -266,7 +304,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 1000);
     };
 
-    window.cancelOrder = function(orderId,productId) {
+    window.cancelProduct = function(orderId,productId,productOrderId) {
            
            document.getElementById("cancelModal").classList.add("active");
            document.body.style.overflow = "hidden";
@@ -275,7 +313,36 @@ document.addEventListener('DOMContentLoaded', function() {
           document.getElementById('cancelProductBtn').addEventListener('click', ()=> {
           
               const reason = document.getElementById('cancelReason').value;
-                  fetch(`/CancelOrder/${encodeURIComponent(orderId)}/${productId}`, {
+                  fetch(`/CancelOrder/${encodeURIComponent(orderId)}/${productId}/${productOrderId}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ reason })
+          }).then(response => {
+             if (response.ok) {
+                showNotification("Product cancelled", "success");
+                window.location.reload();
+               } else {
+                  showNotification("Failed to cancell product", "error");
+               }
+        });
+
+      })
+           
+        
+    };
+
+
+     window.cancelFullOrder = function(orderId) {
+           
+           document.getElementById("cancelFullOrderModal").classList.add("active");
+           document.body.style.overflow = "hidden";
+            
+          document.getElementById('cancelFullOrderBtn').addEventListener('click', ()=> {
+          
+              const reason = document.getElementById('cancelFullOrderReason').value;
+                  fetch(`/CancelFullOrder/${encodeURIComponent(orderId)}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -299,6 +366,12 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById("cancelModal").classList.remove("active");
     document.body.style.overflow = "auto";
     document.getElementById("cancelReason").value = ""; // reset textarea
+}
+
+ window.closeCancelFullOrderModal = function() {
+    document.getElementById("cancelFullOrderModal").classList.remove("active");
+    document.body.style.overflow = "auto";
+    document.getElementById("cancelFullOrderReason").value = ""; // reset textarea
 }
 
   window.sumbitCancelReason = function () {

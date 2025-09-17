@@ -5,7 +5,13 @@ const getCoupon = async (req, res) => {
 
     try {
 
-        const coupon = await Coupon.find()
+
+        const page = parseInt(req.query.page || 1);
+
+        const count = await Coupon.countDocuments();
+        const skip = (page - 1) * 5;
+
+        const coupon = await Coupon.find().skip(skip).limit(5);
 
         const date = new Date()
         date.setHours(0, 0, 0, 0)
@@ -18,8 +24,7 @@ const getCoupon = async (req, res) => {
             }
         };
 
-
-        res.render("coupon", { coupon })
+        res.render("coupon", { coupon, currentPage:page, totalPages: Math.ceil(count / 5) })
 
     } catch (error) {
 

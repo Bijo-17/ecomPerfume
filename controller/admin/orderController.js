@@ -72,16 +72,14 @@ const orderDetails = async (req, res) => {
 
         const order = await Order.findById(orderId).populate('order_items.product_id address_id user_id');
 
-        const currentProduct = order.order_items.find(product => product._id == productId)
+        const currentProduct = order.order_items.find(product => product._id.toString() === productId)
 
-        res.render("detailedOrderPage", { order })
+        res.render("detailedOrderpage", { order })
 
     } catch (error) {
         console.log("error in loading detailed order page", error)
         res.redirect("/admin/pageError")
     }
-
-
 
 }
 

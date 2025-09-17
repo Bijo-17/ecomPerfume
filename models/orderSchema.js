@@ -74,7 +74,10 @@ const orderSchema = new mongoose.Schema({
                                         }, 
                           cancel_reason : {
                                              type: String,
-                                       },           
+                                       },
+                           refund_amount : {
+                                              type: Number
+                                         },                      
 
                         return_request: {
                                              status: {

@@ -299,7 +299,7 @@
         <td><%= data[i].order_id %></td>
         <td><b><%= data[i].address_id?.name || data[i].temp_address.name %></b></td>
         <td><b><% data[i].order_items.forEach(product=>{%>
-             <%= product.product_id._id %>  (<%= product.product_id.product_name %> x <%= product.quantity %> (<%=product?.volume %> ML)) <br>
+             <%= product?.product_id?._id %>  (<%= product?.product_id?.product_name %> x <%= product?.quantity %> (<%=product?.volume %> ML)) <br>
       <% }) %>
         
         </b></td>
@@ -407,13 +407,13 @@
       let endDate = '';
     
       if(dateRange){ 
-     console.log("singel date" , singleDate , dateRange)
+   
         const parts = dateRange.split(" to ");
         if(parts.length === 2){ 
          [ startDate , endDate ]  = parts ;
          
         }
-         console.log("startDate", startDate , "end", endDate)
+     
       } 
 
 
@@ -454,7 +454,6 @@
       document.body.removeChild(a);
 
     } catch (err) {
-      console.error("Export error:", err);
       alert("Failed to export sales report.");
     }
   }
@@ -486,7 +485,7 @@
   let pieChart;
 
   async function chartData(filter){
-     console.log("filter" , filter)
+    
        const res = await fetch(`/admin/chart?query=${filter}`)
        const data = await res.json();
 
@@ -613,7 +612,7 @@
   let categoryChart;
   
   async function topCategories(filter){
-     console.log("filter" , filter)
+
        const res = await fetch(`/admin/topItems?query=${filter}`)
        const data = await res.json();
 

@@ -6,7 +6,12 @@ const sharp = require('sharp');
 const loadBannerPage = async (req, res) => {
    try {
 
-       const banner = await Banner.find({isDeleted : false} )
+      const page = parseInt(req.query.page || 1);
+
+      const count = await Banner.countDocuments({isDeleted: false})
+      const skip = (page-1) * 5
+
+       const banner = await Banner.find({isDeleted : false} ).skip(skip).limit(5)
 
        for(let b of banner){
 
@@ -23,7 +28,7 @@ const loadBannerPage = async (req, res) => {
        } 
 
   
-      res.render('banner' ,{banner})
+      res.render('banner' ,{banner , currentPage : page , totalPages : Math.ceil(count/5)})
    }
    catch (error) {
       console.log("error in loading the banner page" , error)

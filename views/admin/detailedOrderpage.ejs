@@ -78,7 +78,7 @@
             <% order.order_items.forEach((item, index) => { %>
               <tr>
                 <td><%= index + 1 %></td>
-                <td><%= item.product_id.product_name %></td>
+                <td><%= item?.product_id?.product_name %></td>
                 <td><%= item.volume %> ml</td>
                 <td><%= item.quantity %></td>
                 <td>₹ <%= item?.product_price?.toFixed(2) %></td>

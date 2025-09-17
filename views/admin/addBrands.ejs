@@ -36,9 +36,9 @@
   }
 
   .pagination .active .page-link {
-    background-color: #007bff;
+    background-color: #088178;
     color: white;
-    border-color: #007bff;
+    border-color:  #088170;
   }
 
   .pagination a:hover {
@@ -361,7 +361,6 @@ async function validate(e){
       
     } catch (error) {
 
-       console.log('error adding brand',error)
        Swal.fire("Failed",'Internal server error','error')
     }
 
@@ -377,7 +376,6 @@ async function validate(e){
     const offer= document.getElementById('editOffer'+index).value;
     const image = document.getElementById('editInputFile'+index).files[0]
 
-    console.log("edit image" , image)
 
     const formData = new FormData();
     formData.append('name', name);
@@ -410,7 +408,6 @@ async function validate(e){
 
  function deleteBrand(id){
 
-  console.log("Brand id",id)
      Swal.fire({
       title:"Are you sure?",
       text:"Do you want to delete this brand?",

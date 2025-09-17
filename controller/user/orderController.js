@@ -113,14 +113,13 @@ const cancelProduct = async (req, res) => {
     const userId = req.session.user;
     const productId = req.params.productId;
     const orderId = decodeURIComponent(req.params.orderId)
+    const productOrderId = req.params.productOrderId;
     const reason = req.body.reason;
 
 
-    const user = await User.findById(userId)
-
     const order = await Order.findOne({ order_id: orderId })
 
-    const returnedItem = order.order_items.find(product => product.product_id.toString() === productId)
+    const returnedItem = order.order_items.find(product => product._id.toString() === productOrderId)
 
     const { product_price, quantity, volume } = returnedItem;
 
@@ -136,11 +135,10 @@ const cancelProduct = async (req, res) => {
     }
 
     if (order.order_items.filter(v => v.order_status !== 'cancelled').length === 1) {
-       refundAmount += order.delivery;
-        order.order_status = 'cancelled';
+      refundAmount += order.delivery;
+      order.order_status = 'cancelled';
     }
 
-    // const refundAmount = parseFloat((quantity * product_price) + delivery_charge - (order.discount / order.order_items.length));
 
     if (order.isPaid) {
 
@@ -157,13 +155,13 @@ const cancelProduct = async (req, res) => {
       const transaction = await new Transaction({
         amount: refundAmount,
         order_id: order._id,
-        user_id: user._id,
+        user_id: userId,
         status: 'credited',
         transaction_date: new Date()
       }).save()
 
 
-      await Wallet.findOneAndUpdate({ user_id: userId }, { $push: { transaction_id: transaction } })
+      await Wallet.findOneAndUpdate({ user_id: userId }, { $push: { transaction_id: transaction._id } })
 
     }
 
@@ -171,11 +169,15 @@ const cancelProduct = async (req, res) => {
 
     for (let product of order.order_items) {
 
-      if (product.product_id.toString() === productId) {
+      if (product.product_id.toString() === productId && product.volume === volume) {
 
         product.order_status = 'cancelled';
         product.cancelled_date = new Date();
         product.cancel_reason = reason || null;
+
+        if (order.isPaid) {
+          product.refund_amount = refundAmount;
+        }
 
       }
 
@@ -196,6 +198,112 @@ const cancelProduct = async (req, res) => {
     await varient.save();
 
 
+    res.status(200).json()
+
+
+  } catch (error) {
+    console.log("error in cancelling product ", error)
+    res.status(400).json();
+  }
+
+
+}
+
+
+const cancelFullOrder = async (req, res) => {
+
+  try {
+
+    const userId = req.session.user;
+    const orderId = decodeURIComponent(req.params.orderId)
+    const reason = req.body.reason;
+
+    const order = await Order.findOne({ order_id: orderId })
+
+    const activeItems = order.order_items.filter(item => item.order_status !== 'cancelled');
+    const totalActivePrice = activeItems.reduce((sum, i) => sum + i.product_price * i.quantity, 0);
+
+
+    let totalRefundAmount = 0;
+
+    order.order_items.forEach(item => {
+      if (item.order_status !== 'cancelled') {
+        const itemSubtotal = Number(item.quantity * item.product_price);
+
+
+        let refundAmount = itemSubtotal;
+
+        if (order.discount > 0 && totalActivePrice > 0) {
+          const discountShare = (itemSubtotal / totalActivePrice) * order.discount;
+          refundAmount = itemSubtotal - discountShare;
+        }
+
+     
+        totalRefundAmount += refundAmount;
+
+
+        item.order_status = 'cancelled';
+        item.cancelled_date = new Date();
+        item.cancel_reason = reason || null;
+
+      }
+    });
+
+
+
+    totalRefundAmount += Number(order.delivery_charge);
+    order.order_status = 'cancelled';
+
+
+    if (order.isPaid) {
+
+      const wallet = await Wallet.findOneAndUpdate({ user_id: userId }, { $inc: { balance: totalRefundAmount.toFixed(2) } })
+
+      if (!wallet) {
+        const wallet = await new Wallet({ user_id: userId, balance: totalRefundAmount }).save()
+
+        await User.findByIdAndUpdate(userId, { wallet_id: wallet._id })
+      }
+
+
+
+      const transaction = await new Transaction({
+        amount: totalRefundAmount,
+        order_id: order._id,
+        user_id: userId,
+        status: 'credited',
+        transaction_date: new Date()
+      }).save()
+
+
+      await Wallet.findOneAndUpdate({ user_id: userId }, { $push: { transaction_id: transaction } })
+
+    }
+
+
+    await order.save();
+
+    let varient = await Varient.find();
+
+    varient = varient.filter(p => {
+      return order.order_items.some(i => i.product_id.toString() === p.product_id.toString())
+    })
+
+    for (let vari of varient) {
+
+      for (let v of vari.inventory)
+
+        order.order_items.forEach(i => {
+
+          if (i.volume === v.volume && i.order_status !== 'cancelled' && i.product_id.toString() === vari.product_id.toString()) {
+            v.stock += i.quantity;
+          }
+
+        })
+
+      await vari.save()
+    }
+
 
     res.status(200).json()
 
@@ -207,6 +315,9 @@ const cancelProduct = async (req, res) => {
 
 
 }
+
+
+
 
 const returnProduct = async (req, res) => {
 
@@ -277,23 +388,23 @@ const generateInvoice = async (req, res) => {
     const userName = order?.address_id?.name || "Customer";
     const userEmail = user?.email || "";
 
-    const deliveredItems = order.order_items.filter(item=> item.order_status === 'delivered');
+    const deliveredItems = order.order_items.filter(item => item.order_status === 'delivered');
 
     const totalProductPrice = order.order_items.reduce(
       (sum, item) => sum + item.quantity * item.product_price
-      , 0 );
+      , 0);
 
     const deliveredSubtotal = deliveredItems.reduce(
       (sum, item) => sum + item.quantity * item.product_price
-      , 0 );
+      , 0);
 
-     deliveredItems.forEach(item => {
-        const itemSubtotal = item.quantity * item.product_price;
-        item.discountShare = (itemSubtotal / totalProductPrice) * order.discount; 
-      }); 
+    deliveredItems.forEach(item => {
+      const itemSubtotal = item.quantity * item.product_price;
+      item.discountShare = (itemSubtotal / totalProductPrice) * order.discount;
+    });
 
-      const deliveredTotal = deliveredSubtotal - deliveredItems.reduce((sum, item) => sum + item.discountShare, 0) + order.delivery_charge;
- 
+    const deliveredTotal = deliveredSubtotal - deliveredItems.reduce((sum, item) => sum + item.discountShare, 0) + order.delivery_charge;
+
     const doc = new PDFDocument({ margin: 50, bufferPages: true, size: "A4" });
 
     const fontPath = path.join(
@@ -392,38 +503,38 @@ const generateInvoice = async (req, res) => {
 
     // Row data
     let y = tableTop + 20;
-     deliveredItems.forEach((item, i) => {
+    deliveredItems.forEach((item, i) => {
 
-        const productName = item.product_id?.product_name.length > 27 ?
-          item.product_id.product_name.substring(0, 25) + '...' + ' (' + item.volume + ' ML)' || 'Product' :
-          item.product_id.product_name + ' (' + item.volume + ' ML)' || "Product";
+      const productName = item.product_id?.product_name.length > 27 ?
+        item.product_id.product_name.substring(0, 25) + '...' + ' (' + item.volume + ' ML)' || 'Product' :
+        item.product_id.product_name + ' (' + item.volume + ' ML)' || "Product";
 
-        const isEven = i % 2 === 0;
+      const isEven = i % 2 === 0;
 
-        if (isEven) {
-          doc
-            .rect(50, y - 2, 500, 18)
-            .fillColor("#f9f9f9")
-            .fill()
-            .strokeColor("#cccccc")
-            .stroke();
-        }
-
-        // Define clear column widths
+      if (isEven) {
         doc
-          .fillColor("#000")
-          .fontSize(10)
-          .text(i + 1, itemCodeX, y, { width: 20 })
-          .text(productName, descriptionX, y, { width: 190 })
-          .text(item.quantity.toString(), quantityX, y, { width: 40 })
-          .text(`₹${item.product_price.toFixed(2)}`, priceX, y, { width: 70 })
-          .text(`₹${(item.product_price * item.quantity).toFixed(2)}`, amountX, y, {
-            width: 70,
-            align: "left",
-          });
+          .rect(50, y - 2, 500, 18)
+          .fillColor("#f9f9f9")
+          .fill()
+          .strokeColor("#cccccc")
+          .stroke();
+      }
 
-        y += 20;
-      
+      // Define clear column widths
+      doc
+        .fillColor("#000")
+        .fontSize(10)
+        .text(i + 1, itemCodeX, y, { width: 20 })
+        .text(productName, descriptionX, y, { width: 190 })
+        .text(item.quantity.toString(), quantityX, y, { width: 40 })
+        .text(`₹${item.product_price.toFixed(2)}`, priceX, y, { width: 70 })
+        .text(`₹${(item.product_price * item.quantity).toFixed(2)}`, amountX, y, {
+          width: 70,
+          align: "left",
+        });
+
+      y += 20;
+
     });
 
     // Add padding after the table
@@ -450,7 +561,7 @@ const generateInvoice = async (req, res) => {
 
     y += 20;
 
-     deliveredItems.forEach((item, i) => {
+    deliveredItems.forEach((item, i) => {
 
 
       if (item.product_id._id.toString() === productId.toString()) {
@@ -474,7 +585,7 @@ const generateInvoice = async (req, res) => {
 
     doc
       .text("Discount:", 370, y + 15, { width: 75 })
-      .text(`-₹ ${deliveredItems.reduce((sum, item)=>sum + item.discountShare ,0).toFixed(2) }`, 490, y + 15, {
+      .text(`-₹ ${deliveredItems.reduce((sum, item) => sum + item.discountShare, 0).toFixed(2)}`, 490, y + 15, {
         width: 50,
         align: "right",
       });
@@ -546,4 +657,4 @@ const generateInvoice = async (req, res) => {
   }
 };
 
-module.exports = { orderPlaced, getOrder, generateInvoice, returnProduct, cancelProduct, orderFailed }
+module.exports = { orderPlaced, getOrder, generateInvoice, returnProduct, cancelProduct, orderFailed, cancelFullOrder }

@@ -53,8 +53,22 @@
   gap: 10px;
 }
 
-               
-                    
+.other-product {
+  display: flex;          /* make a flex container */
+  flex-direction: column; /* stack children vertically */
+           /* space between each child */
+}
+
+.other-product > div {
+  margin-bottom: 1rem; /* space below each block */
+}
+
+.other-product > div:last-child {
+  margin-bottom: 0; /* no space after the last one */
+}
+
+
+
                     
    </style>
  </head>
@@ -65,12 +79,14 @@
     </div>
 
     <div class="orders-list" id="ordersList">
-        <!-- Order 1 - Processing -->
+        <!-- Order  -->
          <% for(let i =0 ; i< orders.length ; i++) { %> 
                
             <% orders[i].order_items.forEach(product=> { %>
            
-        <div class="order-item" data-order-id="<%=orders[i].order_id%>" data-product-id="<%= product.product_id._id %>" >
+        <div class="order-item" data-order-id="<%=orders[i].order_id%>" data-product-id="<%= product.product_id._id %>" 
+           data-volume="<%= product.volume%>" data-productOrderId="<%= product._id %>">
+
             <div class="order-product">
                 <div class="product-image">
                     <img src="<%=product.product_id.image[0]%>" alt="product img">
@@ -174,6 +190,26 @@
     <div class="modal-footer">
       <button class="action-btn btn-secondary" onclick="closeCancelModal()">Close</button>
       <button class="action-btn btn-primary" id="cancelProductBtn">Submit</button>
+    </div>
+  </div>
+</div>
+
+<!-- cancel full order modal  -->
+<div class="modal-overlay returnModal" id="cancelFullOrderModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Cancel Order</h3>
+      <button class="close-modal" onclick="closeCancelFullOrderModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <label for="returnReason">Why do you want to Cancel this Order?  <br> (Optional) </label>
+      <textarea id="cancelFullOrderReason" rows="3" placeholder=" Enter your reason here..."></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="action-btn btn-secondary" onclick="closeCancelFullOrderModal()">Close</button>
+      <button class="action-btn btn-primary" id="cancelFullOrderBtn">Submit</button>
     </div>
   </div>
 </div>

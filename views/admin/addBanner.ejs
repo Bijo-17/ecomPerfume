@@ -150,7 +150,7 @@ body {
 
                            <div class="mb-4">
                                <label for="expiringDate" class="form-label">End Date</label>
-                               <input type="date" name="endDate" class="form-control" id="expiringDate" required />
+                               <input type="date" name="endDate" class="form-control" id="expiringDate"  />
                                <div id="error-end-date" class="error-message"></div>
                            </div>
 
@@ -298,7 +298,7 @@ body {
            let  File=imageFile.files[0]
 
 if (File===undefined) {
-    console.log('Invalid file type. Please upload a JPEG, PNG, or GIF file.');
+   
     displayErrorMessage("image-error", "Invalid file type. Please upload a JPEG, PNG, or GIF file.");
                isValid = false;
 

@@ -199,6 +199,46 @@
       }
     }
 
+    .pagination-container {
+    text-align: center;
+    width: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
+    padding: 10px 0;
+  }
+
+  .pagination {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: center;
+    gap: 4px;
+  }
+
+  .pagination li {
+    display: inline-block;
+  }
+
+  .pagination a,
+  .pagination .page-link {
+    display: inline-block;
+    padding: 5px 12px;
+    margin: 0;
+    border: 1px solid #ddd;
+    text-decoration: none;
+    color: #333;
+  }
+
+  .pagination .active .page-link {
+    background-color: #088178;
+    color: white;
+    border-color:  #088170;
+  }
+
+  .pagination a:hover {
+    background-color: #f5f5f5;
+  }
+
+
 
  </style>
 
@@ -348,6 +388,64 @@
                  </tbody>
              </table>
          </div>
+        
+         <!-- paginagtion -->
+
+          <div class="pagination-container"> 
+               
+           <nav aria-label="Page navigation">
+              <ul class="pagination justify-content-center">
+         
+               <% if (currentPage > 1) { %>
+                   <% if (currentPage > 2) { %> 
+                    <li class="page-item">
+                      <a class="page-link" href="?page=1">First</a>
+                    </li>
+                    <% } %>
+                  <li class="page-item">
+                      <a class="page-link" href="?page=<%= currentPage - 1 %>">Prev</a>
+                  </li>
+               <% } %>
+
+                   <% 
+                      let startPage = Math.max(1, currentPage - 1);  
+                      let endPage = Math.min(totalPages, startPage + 3);  
+
+                      if (endPage - startPage < 3) {
+                         startPage = Math.max(1, endPage - 3);  
+                       }
+                    %>
+
+                   <% for (let i = startPage; i <= endPage; i++) { %>
+                
+                      <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                        <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                      </li>
+                   <% } %>
+
+                    <% if (endPage < totalPages) { %>
+                        <li class="page-item disabled">
+                           <span class="page-link">...</span>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page=<%= totalPages %>"><%= totalPages %></a>
+                        </li>
+                     <% } %>
+                    
+                     <% if (totalPages > currentPage) { %> 
+                            
+                              <li class="page-item">
+                                <a class="page-link" href="?page=<%= currentPage + 1 %>">Next</a>
+                              </li>
+                            
+                      
+                     <% } %>
+
+              </ul>
+            </nav>
+           
+       </div>
+
      </div>
      </div>
    </div>
@@ -620,8 +718,6 @@ let currentCouponName = '';
    
     currentCouponName = button.dataset.coupon_name;
 
-    console.log("name " , currentCouponName)
-
     document.getElementById('couponId').value = button.dataset.id;
     document.getElementById('couponCode').value = button.dataset.coupon_name
     document.getElementById('discount').value = button.dataset.offer_price;
@@ -690,8 +786,6 @@ function validateEditForm(e){
    const name = document.getElementById("couponCode").value
 
   const editedCouponName = coupons.find(c=> c.coupon_name.toLowerCase() === name.toLowerCase());
-
-  console.log("edited"  , editedCouponName.coupon_name , currentCouponName.toLowerCase())
 
 
    if(editedCouponName && editedCouponName.coupon_name.toLowerCase() !== currentCouponName.toLowerCase()){

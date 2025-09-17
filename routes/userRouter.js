@@ -25,7 +25,7 @@ router.get("/pageNotFound",userController.pageNotFound)
 router.get("/pageError",userController.pageError)
 
 router.get("/",userController.loadHome)
-router.get("/home",userAuth,userController.userHome)
+router.get("/home",userAuth, userController.userHome)
 
 router.get("/login/",userController.loadLogin)
 router.get("/register",userController.loadRegister)
@@ -126,12 +126,13 @@ router.get("/orders/failed",userAuth,orderController.orderFailed)
 router.post("/orders/downloadInvoice/:orderId/:productId",orderController.generateInvoice)
 router.get("/downloadInvoice/:orderId/:productId",orderController.generateInvoice)          
 router.post("/returnOrder/:orderId/:productId",orderController.returnProduct)
-router.post("/cancelOrder/:orderId/:productId",orderController.cancelProduct)
+router.post("/cancelOrder/:orderId/:productId/:productOrderId",orderController.cancelProduct)
 router.post("/orders/cod",userAuth,checkoutController.placeOrder)
 router.post("/orders/razorpay",userAuth,checkoutController.razorpayPayment)
 router.post("/orders/razorpay/verify",userAuth,checkoutController.verifyRazorpayPayment)
 router.post("/applayCoupon",userAuth,checkoutController.applayCoupon)
 router.post("/removeCoupon",checkoutController.removeCoupon)
+router.post("/cancelFullOrder/:orderId",orderController.cancelFullOrder)
 
 // retry payment  
 

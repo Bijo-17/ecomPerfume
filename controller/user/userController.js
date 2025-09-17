@@ -304,9 +304,9 @@ async function sendVerificationEmail(email,otp){
             }
       
             req.session.email = email
-            req.session.user = existingUser._id;            
+            req.session.user = existingUser._id.toString();            
 
-             res.redirect("/")
+            return res.redirect("/home")
 
           }else{
             return res.status(400).render("login" , {message : "user not found", activeTab: "login"})
@@ -324,8 +324,12 @@ const loadHome = async (req,res)=>{
        try {
       
           const user = req.session.user;
-          const currentDate = new Date()
-          currentDate.setHours(23,59,59,999)    
+ 
+         if(user){
+
+            return res.redirect("/home");
+
+         } else { 
 
           let product = await Product.find({isDeleted:false , isBlocked : false}).populate('category_id brand_id subcategory_id varients_id').exec()
  
@@ -351,13 +355,10 @@ const loadHome = async (req,res)=>{
                                            }).sort({createdAt:-1})
 
                         
-           const category = await Category.find({isDeleted:false , status: 'active'})
+          const category = await Category.find({isDeleted:false , status: 'active'}) 
 
-           if(user){
+          return res.render("landingPage",{product , banner , category })
 
-            return res.redirect("/home")
-      }else {
-        return res.render("landingPage",{product , banner , category })
       }
         
         
@@ -372,7 +373,14 @@ const loadHome = async (req,res)=>{
 const userHome = async (req,res)=>{
      try {
       
-          const user = req.session.user;
+          const user= req.session.user;
+
+          if(!user){
+           
+              return res.redirect("/")
+
+           } else { 
+
           const product = await Product.find({isDeleted:false}).sort({createdAt:-1}).populate('category_id').exec()
           const banner = await Banner.find({ 
                                                 isDeleted:false , 
@@ -385,16 +393,11 @@ const userHome = async (req,res)=>{
                                                  ]
                                            }).sort({createdAt:-1})
 
-          const category = await Category.find({isDeleted:false})
-           if(user){ 
-
+        const category = await Category.find({isDeleted:false})
         const userData = await User.findOne({_id:user});
         const cart = await Cart.findOne({user_id:user})
-        
-         res.render("landingPage",{user:userData ,product , cart , banner ,category})
-      }else {
-        return  res.redirect("/")
-        //  res.render("landingPage" , {banner , category , category})
+        return res.render("landingPage",{user:userData ,product , cart , banner ,category})
+
       }
 
 
@@ -413,7 +416,7 @@ const logout = async (req,res)=>{
    req.session.email=null;
    req.session.user = null;
 
-  res.redirect("/")
+ return res.redirect("/")
 }
 
 

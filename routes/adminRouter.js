@@ -68,7 +68,7 @@ router.get('/addBrand/delete/:id',adminAuth, brandController.deleteBrand);
 
 router.get('/banner',adminAuth,bannerController.loadBannerPage)
 router.get('/addBanner',adminAuth,bannerController.addBannerPage)
-router.post('/addBanner', adminAuth,uploads.single('images'),bannerController.addBanner)
+router.post('/addBanner', adminAuth,uploads.single('image'),bannerController.addBanner)
 router.get('/deleteBanner/:id',adminAuth,bannerController.deleteBanner)
 router.post('/editBanner',adminAuth,uploads.single('image'),bannerController.editBanner)
 
