@@ -1,3 +1,4 @@
+const { name } = require("ejs")
 const Category = require("../../models/categorySchema")
 const Subcategory = require("../../models/subCategorySchema")
 
@@ -7,14 +8,19 @@ const addSubcategory = async (req, res) => {
     const { id } = req.params
 
     const subcategory = req.body.name
-
+    
+     const existingSubcategory = await Subcategory.findOne({name: {$regex: `^${subcategory}$` ,  $options : 'i' }, category_id : id , isDeleted:false})
+    
+     if(existingSubcategory){
+        return res.status(400).json({success: false , message : "Subcategory already exists"});
+     }
     const newSubcategory = await new Subcategory({
       name: subcategory,
       category_id: id
     })
 
     await newSubcategory.save()
-    res.redirect("/admin/category")
+    res.status(200).json({success: true })
 
   }
   catch (error) {
@@ -27,11 +33,19 @@ const addSubcategory = async (req, res) => {
 
 const editSubcategory = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { catId ,  subId } = req.params;
     const { name } = req.body;
+  
+    const currentSubcat = await Subcategory.findById(subId)
 
-    await Subcategory.findByIdAndUpdate(id, { name: name.trim() });
-    res.redirect('/admin/category');
+    const existingSubcategory = await Subcategory.findOne({name: {$regex: `^${name}$` ,  $options : 'i' }, category_id : catId , isDeleted:false})
+ 
+    if(existingSubcategory && currentSubcat._id.toString() !== existingSubcategory._id.toString()){
+        return res.status(400).json({success:false , message : 'Subcategory already exists'})
+    }
+
+    await Subcategory.findByIdAndUpdate(subId, { name: name.trim() });
+    res.status(200).json({success: true});
   } catch (error) {
     console.error("Error editing category:", error);
     res.redirect('/admin/pageError');

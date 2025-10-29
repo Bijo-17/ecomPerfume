@@ -47,7 +47,7 @@ const getAllProducts = async (req,res)=>{
   let subcategoryProducts;
 
       if (categoryName) {
-         const catDoc = await Category.findOne({ name:categoryName });
+         const catDoc = await Category.findOne({ name:categoryName , isDeleted:false });
 
          if (catDoc){
 
@@ -64,7 +64,7 @@ const getAllProducts = async (req,res)=>{
 
             if(!catDoc){ 
 
-                const subDoc = await Subcategory.find({name:categoryName})
+                const subDoc = await Subcategory.find({name:categoryName , status:'active' , isDeleted: false})
               
                 if(subDoc && subDoc.length>0){
               
@@ -80,7 +80,7 @@ const getAllProducts = async (req,res)=>{
                 
                 if(!catDoc && subDoc.length<1){
                
-                    const brandDoc = await Brand.findOne({name:{$regex : categoryName , $options : 'i' }});
+                    const brandDoc = await Brand.findOne({name:{$regex : categoryName , $options : 'i' }, status: 'active'});
                     if(brandDoc) filter.brand_id = brandDoc._id
                   }
 
@@ -144,7 +144,7 @@ const getAllProducts = async (req,res)=>{
          .exec();
     
          displayProducts = products.filter(p=> p.brand_id?.status === 'active' && p.category_id?.status === 'active')
-
+    
     }
          
          if(subcategoryProducts){

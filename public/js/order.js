@@ -1,6 +1,213 @@
 // Orders functionality
-document.addEventListener('DOMContentLoaded', function() {
+   document.addEventListener('DOMContentLoaded', function(){ 
+    // load more orders
+
+    let page = 2;
+    let loading = false;
+    let hasMore = JSON.parse(document.getElementById('hasmore').textContent);
+    const mainContainer = document.querySelector('.orders-content');
+    const container = document.getElementById('ordersList');
+    const resultdiv = document.getElementById("resultdiv");
+
+    async function loadOrders(){
+    
+       if(!hasMore || loading) return;
+        loading = true;
+        const loader = document.getElementById('loader');
+        loader.style.display = "block";
+      
+
+       try {
+         
+          const res = await fetch("/orders/loadmore?page="+page);
+          const data = await res.json();
+          const container = document.getElementById('ordersList')
+          const orders = data.orders;
+          
+
+           renderOrders(orders);
+
+          page++;
+          hasMore = data.hasMore;
+          loading=false;
+          loader.style.display = "none";
+          const orderdata = document.getElementById('order-data');
+          let existingOrders = [];
+          existingOrders = JSON.parse(orderdata.textContent);
+         
+          const mergedOrders = [...existingOrders , ...orders];
+          orderdata.textContent = JSON.stringify(mergedOrders);
+
+          initializeOrders();
+                
+
+          if(!hasMore){
+             loader.style.display = "none";
+             document.getElementById("end-message").style.display = "block";
+          }
+
+       } catch (error) {
+          const loader = document.getElementById("loader").style.display = "block";
+           loader.textContent = 'something Went wrong try again';
+       } 
+    }
+
+
+
+     function renderOrders(orders){
+
+        try{ 
+          
+         for(let i =0 ; i< orders.length ; i++) {
+               
+           orders[i].order_items.forEach((product, index)=> {
+         
+          const orderItemsdiv = document.createElement('div');
+         
+            orderItemsdiv.classList.add('order-item');
+            orderItemsdiv.dataset.orderId = orders[i].order_id;
+            orderItemsdiv.dataset.productId = product.product_id._id;
+            orderItemsdiv.dataset.volume = product.volume;
+            orderItemsdiv.dataset.productorderid = product._id;
    
+            const orderProductdiv = document.createElement('div');
+             orderProductdiv.classList.add('order-product');
+
+              const productImgdiv = document.createElement('div');
+               productImgdiv.classList.add('product-image');
+               const img = document.createElement('img');
+               img.src = product.product_id.image[0];
+               img.alt = 'product img';
+               productImgdiv.appendChild(img);
+           
+               const productDetailsdiv = document.createElement('div');
+                productDetailsdiv.classList.add('product-details');
+
+                     const productBranddiv = document.createElement('div');
+                      productBranddiv.classList.add('product-brand');
+                      productBranddiv.textContent = product.brand_name;
+
+                      const productNamediv = document.createElement('div');
+                       productNamediv.classList.add('product-name');
+                       productNamediv.textContent = '-'+product.product_id.product_name;
+                
+                      const ratingdiv = document.createElement('div');
+                       ratingdiv.classList.add('product-rating');
+                    
+                        const starsdiv = document.createElement('div');
+                        starsdiv.classList.add('stars');
+                        starsdiv.style.alignItems = 'center';
+       
+                         for(let s=1; s<=5; s++){
+                        
+                                if(product.product_id.averageRating >= s){
+                                    const star = document.createElement('i');
+                                     star.classList.add('fas');
+                                     star.classList.add('fa-star');
+                                     star.classList.add('filled')
+                                     starsdiv.appendChild(star);
+                                  } else {
+                                     const star = document.createElement('i');
+                                     star.classList.add('fas');
+                                     star.classList.add('fa-star');
+                                     starsdiv.appendChild(star);
+                                   
+                                  }
+                             }
+              
+                            const ratingCountdiv = document.createElement('span');
+                            ratingCountdiv.style.fontSize = "0.9rem";
+                            ratingCountdiv.textContent = '('+product.product_id.ratingCount+')';
+                            starsdiv.appendChild(ratingCountdiv)
+                       ratingdiv.appendChild(starsdiv);
+                     
+                         const productPricediv = document.createElement('div');
+                         productPricediv.classList.add('product-price');
+                         productPricediv.textContent = product.product_price;
+
+                           const quantityspan = document.createElement('span');
+                            quantityspan.classList.add('quantity-badge');
+                            quantityspan.textContent = 'x '+ product.quantity;
+
+                          productPricediv.appendChild(quantityspan);
+
+                 productDetailsdiv.appendChild(productBranddiv);
+                 productDetailsdiv.appendChild(productNamediv);
+                 productDetailsdiv.appendChild(ratingdiv);
+                 productDetailsdiv.appendChild(productPricediv);
+
+               orderProductdiv.appendChild(productImgdiv);
+               orderProductdiv.appendChild(productDetailsdiv);  
+         
+                 const orderStatusSectiondiv = document.createElement('div');
+                  orderStatusSectiondiv.classList.add('order-status-section');
+
+                    const orderStatusdiv = document.createElement('div');
+                     orderStatusdiv.classList.add('order-status');
+                      
+                        const statusspan = document.createElement('span');
+                         statusspan.classList.add('status-label');
+                         statusspan.textContent = 'Status :'
+                        const orderStatusspan = document.createElement('span');
+                         orderStatusspan.classList.add('status-value');
+                         orderStatusspan.classList.add(product.order_status);
+                         orderStatusspan.textContent = product.order_status;
+
+                       orderStatusdiv.appendChild(statusspan);
+                       orderStatusdiv.appendChild(orderStatusspan);
+
+                      const orderDatediv = document.createElement('div');
+                       orderDatediv.classList.add('order-date');
+                         const orderDate = new Date ( orders[i].order_date);
+                        orderDatediv.textContent = orderDate.toISOString().substring(0,10);
+
+                     orderStatusSectiondiv.appendChild(orderStatusdiv);
+                     orderStatusSectiondiv.appendChild(orderDatediv);
+
+                     const orderActiondiv = document.createElement('div');
+                      orderActiondiv.classList.add('order-actions');
+                        
+                         const actionbar = document.createElement('i');
+                          actionbar.classList.add('fas','fa-chevron-right');
+
+                       orderActiondiv.appendChild(actionbar);
+                     
+              
+               
+
+              orderItemsdiv.appendChild(orderProductdiv);
+              orderItemsdiv.appendChild(orderStatusSectiondiv);
+              orderItemsdiv.appendChild(orderActiondiv);
+
+            container.appendChild(orderItemsdiv);
+
+    
+           })
+         }
+
+         
+
+        } catch (error){
+            document.getElementById("loader").textContent = 'Something went worng , try again'
+        }
+
+
+     }
+
+
+     const observer = new IntersectionObserver((entries)=>{
+        
+         if(entries[0].isIntersecting && !loading && hasMore){
+         
+              loadOrders();
+            
+          }
+      
+      }, { threshold : 1});
+ 
+       observer.observe(resultdiv);
+
+
     
     // Initialize orders functionality
     function initializeOrders() {
@@ -33,8 +240,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     const orderId = this.getAttribute('data-order-id');
                     const productId = this.getAttribute('data-product-id')
                     const volume = this.getAttribute('data-volume')
-                    const productOrderId = this.getAttribute('data-productOrderId')
+                    const productOrderId = this.getAttribute('data-productorderid')
+    
                     viewOrderDetails(orderId, productId , volume , productOrderId);
+                  
                 }
             });
         });
@@ -43,12 +252,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // View order details (global function)
     window.viewOrderDetails = function(orderId , productId , volume , productOrderId) {
         const orders = JSON.parse(document.getElementById('order-data').textContent);
- 
         const order = orders.find(o=> o.order_id === orderId)
      
-        
         if (!order) {
-            showNotification('Order not found', 'error');
+            showNotification('Order not foundzz', 'error');
             return;
         }
 
@@ -76,7 +283,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!modalBody) return;
    
       const productItem = order.order_items.find(item => item._id.toString() === productOrderId);
-
         const statusClass = productItem.order_status.toLowerCase();
 
         const address = order?.address_id || order?.temp_address
@@ -637,6 +843,7 @@ window.submitReturnReason = function() {
 
     // Initialize orders when this section is loaded
     if (document.querySelector('.orders-content')) {
-        initializeOrders();
+
+         initializeOrders();
     }
 });

@@ -3,6 +3,7 @@ const Brand = require("../../models/brandSchema")
 const path = require('path')
 const fs = require('fs')
 const sharp = require('sharp')
+const Product = require('../../models/productSchema')
 
 const addBrandPage = async (req, res) => {
 
@@ -20,7 +21,6 @@ const addBrandPage = async (req, res) => {
       const count = await Brand.countDocuments({ isDeleted: false })
 
 
-
       res.render("addBrands", {
          data: bandData,
          currentPage: page,
@@ -28,7 +28,10 @@ const addBrandPage = async (req, res) => {
 
 
       })
+
+
    } catch (error) {
+      console.log("error in loading brand page" , error)
       return res.redirect("/admin/pageErorr")
    }
 

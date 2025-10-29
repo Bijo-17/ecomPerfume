@@ -335,7 +335,7 @@ const loadHome = async (req,res)=>{
  
            product = product.filter(product=>{
 
-                                             const stock = !product.varients_id.inventory.some(s=> s.stock < 1) 
+                                             const stock = !product.varients_id.inventory.every(s=> s.stock < 1) 
                                              const brandStatus = product.brand_id.status === 'active' && product.brand_id.isDeleted === false;
                                                                     
                                         return stock && brandStatus
@@ -381,7 +381,17 @@ const userHome = async (req,res)=>{
 
            } else { 
 
-          const product = await Product.find({isDeleted:false}).sort({createdAt:-1}).populate('category_id').exec()
+          let product = await Product.find({isDeleted:false}).sort({createdAt:-1}).populate('category_id brand_id subcategory_id varients_id').exec()
+
+          product = product.filter(product=>{
+
+                                             const stock = !product.varients_id.inventory.every(s=> s.stock < 1) 
+                                             const brandStatus = product.brand_id.status === 'active' && product.brand_id.isDeleted === false;
+                                                                    
+                                        return stock && brandStatus
+                                         
+                             })
+
           const banner = await Banner.find({ 
                                                 isDeleted:false , 
                                                 status:true,
@@ -393,7 +403,7 @@ const userHome = async (req,res)=>{
                                                  ]
                                            }).sort({createdAt:-1})
 
-        const category = await Category.find({isDeleted:false})
+        const category = await Category.find({isDeleted:false , status: 'active'})
         const userData = await User.findOne({_id:user});
         const cart = await Cart.findOne({user_id:user})
         return res.render("landingPage",{user:userData ,product , cart , banner ,category})

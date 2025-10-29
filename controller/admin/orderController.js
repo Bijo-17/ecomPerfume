@@ -118,16 +118,15 @@ const approveReturn = async (req, res) => {
 
     try {
 
-
         const productId = req.params.productId;
         const orderId = req.params.orderId
-
+        const currentOrderId = req.body.currentOrderId;
+ 
         let order = await Order.findOne({ _id: orderId }).populate('order_items.product_id')
 
         const userId = order.user_id;
 
-        const returnedItem = order.order_items.find(product => product.product_id._id == productId)
-
+        const returnedItem = order.order_items.find(item => item._id.toString() === currentOrderId );
 
         const { product_price, quantity , volume } = returnedItem;
 
@@ -153,7 +152,6 @@ const approveReturn = async (req, res) => {
 
         await order.save()
 
-        const product = await Product.findByIdAndUpdate(productId, { $inc: { stock: quantity }, stock_status: true }, { new: true })
 
           const varient = await Varient.findOne({product_id : productId});
         
@@ -217,7 +215,8 @@ const updateOrderStatus = async (req, res) => {
         const orderId = req.params.orderId;
         const status = req.body.status;
         const page = req.query.page || 1;
-
+        const currentOrderId = req.body.currentOrderId;
+console.log("current order id" , currentOrderId);
         const order = await Order.findOne({ _id: orderId })
 
         if(order.order_items.filter(v=> v.order_status !== status).length === 1 ){
@@ -230,7 +229,7 @@ const updateOrderStatus = async (req, res) => {
 
         }
 
-        const currentItem = order.order_items.find(product => product.product_id.toString() === productId.toString() )
+        const currentItem = order.order_items.find(item => item._id.toString() === currentOrderId )
 
         currentItem.order_status = status;
 

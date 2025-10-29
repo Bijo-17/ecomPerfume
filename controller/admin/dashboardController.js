@@ -14,7 +14,6 @@ const getSalesReport = async (req, res) => {
     const day = req.query.day || ''
     const ITEMS_PER_PAGE = 10;
     const skip = (page - 1) * ITEMS_PER_PAGE;
-    const status = req.query.status
     const selectedDate = req.query.date || '';
     let { start, end } = req.query || '';
     const date = req.query.date || '';
@@ -26,9 +25,9 @@ const getSalesReport = async (req, res) => {
 
       singleDate = dd + '-' + mm + '-' + yyyy;
     }
-    if (status && status !== 'all') {
-      query = { order_items: { $elemMatch: { order_status: status } } }
-    }
+   
+      query = { order_items: { $elemMatch: { order_status: 'delivered' } } }
+  
 
     if (selectedDate) {
 
@@ -64,25 +63,31 @@ const getSalesReport = async (req, res) => {
 
 
     // Filter based on day
+
+     if(day){ 
     const now = new Date();
     if (day === "salesToday") {
-      const start = new Date(now.setHours(0, 0, 0, 0));
-      const end = new Date(now.setHours(23, 59, 59, 999));
+      const start = new Date(now);
+      start.setHours(0,0,0,0);
+      const end = new Date(now);
+       end.setHours(23,59,59,999);
       query.createdAt = { $gte: start, $lte: end };
+    
     } else if (day === "salesWeekly") {
       const start = new Date();
       start.setDate(now.getDate() - 7);
       query.createdAt = { $gte: start };
     } else if (day === "salesMonthly") {
       const start = new Date();
-      start.setMonth(now.getMonth() - 1);
+      start.setMonth(now.getMonth() , 1);
       query.createdAt = { $gte: start };
     } else if (day === "salesYearly") {
       const start = new Date();
-      start.setFullYear(now.getFullYear() - 1);
+      start.setFullYear(now.getFullYear() , 0 ,1 );
+      start.setHours(0,0,0,0);
       query.createdAt = { $gte: start };
     }
-
+   }
 
     const sortOrder = (start && end) ? { createdAt: 1 } : { createdAt: -1 };
 
@@ -95,10 +100,21 @@ const getSalesReport = async (req, res) => {
       .limit(ITEMS_PER_PAGE);
 
 
-
     let totalOrders = await Order.countDocuments(query)
 
+    let deliveredOrders = orders.filter(o=> o.order_items.every(i=> i.order_status === 'delivered') )
+    
+     let totalSubtotal = deliveredOrders.reduce(
+      (sum, order) => sum + order.total_price,
+      0
+    );
+    const totalDiscounts = deliveredOrders.reduce(
+      (sum, order) => sum + order.discount,
+      0
+    );
 
+    const totalRevenue = totalSubtotal - totalDiscounts
+   
 
     const totalPages = Math.ceil(totalOrders / ITEMS_PER_PAGE);
 
@@ -110,13 +126,13 @@ const getSalesReport = async (req, res) => {
       salesMonthly: day === "salesMonthly",
       salesYearly: day === "salesYearly",
       totalPages,
-      selectedStatus: status,
       currentPage: Number(page),
       date: selectedDate,
       day,
       singleDate,
       start, end,
-      dateRange
+      dateRange,
+      totalRevenue
     });
   } catch (error) {
     console.error("Sales Report Load Error:", error);
@@ -139,7 +155,6 @@ const getChartData = async (req, res) => {
 
         endDate = new Date(now);
         endDate.setHours(23, 59, 59, 999);
-
 
         break;
 
@@ -256,7 +271,7 @@ const getTopItems = async (req, res) => {
         break;
 
       default:
-        startDate = new Date(2000, 0, 1);
+        startDate = new Date(2020, 0, 1);
         endDate = new Date();
         endDate.setHours(23, 59, 59, 999);
     }
@@ -392,22 +407,23 @@ const getTopItems = async (req, res) => {
     totalSales.totalOrders = order.length;
     totalSales.totalRevenue = order.reduce((sum, product) => {
 
-      if ( product.order_status === 'delivered') {
+       const deliveredRevenue = product.order_items
+                  .filter(item =>  item.order_status === 'delivered')
+                  .reduce((itemSum , item) => itemSum + (item.quantity * item.product_price), 0);
 
-        sum = sum + product.total_price
+         return sum + deliveredRevenue;
 
-      }
-
-      return sum;
-
-    }, 0).toFixed(2)
+      }, 0).toFixed(2)
 
 
     totalSales.totalDiscount = order.reduce((sum, product) =>{ 
 
-           if(product.order_status === 'delivered'){ 
-            sum += product.discount
-          } 
+           const delivered = product.order_items.some(item=> item.order_status === 'delivered')
+
+            if(delivered){ 
+            sum += product.discount;
+            }   
+          
           return sum;
           }, 0).toFixed(2);
 
@@ -442,14 +458,11 @@ const exportSalesReport = async (req, res) => {
       singleDate,
       startDate,
       endDate,
-      paymentMethod,
-      orderStatus,
       format,
     } = req.body;
 
 
-
-    let query = {}
+    let query = {order_items: {$elemMatch :{order_status:'delivered' }}}
     // Get date range based on report type
 
 
@@ -465,20 +478,16 @@ const exportSalesReport = async (req, res) => {
     };
 
 
-    // Add payment method filter if specified
-    if (paymentMethod !== "all") {
-      query.paymentMethod = paymentMethod;
-    }
-
-    // Add order status filter if specified
-    if (orderStatus !== "all") {
-      query.order_status = orderStatus;
-    }
-
+   
+    
     // Fetch orders based on filters
-    const orders = await Order.find(query)
+    let orders = await Order.find(query)
       .populate("user_id address_id")
       .sort({ createdAt: -1 });
+
+      orders = orders.filter(item=>{
+       return item.order_items.every(o=> o.order_status === 'delivered');
+     })
 
 
     if (orders.length === 0) {
@@ -487,6 +496,7 @@ const exportSalesReport = async (req, res) => {
       });
     }
 
+    
 
     // Calculate totals
     const totalOrders = orders.length;
@@ -624,7 +634,7 @@ function getDateRange(reportType, singleDate, startDate, endDate) {
     end.setHours(23, 59, 59, 999);
 
   }
-
+  
   return { start, end };
 }
 
@@ -690,12 +700,11 @@ async function exportToPdf(res, orders, summary) {
       "Date",
       "Customer",
       "Payment Method",
-      "Status",
       "Discount",
       "Total",
     ];
     // Adjusted column widths to fit payment method and discount while maintaining portrait layout
-    const columnWidths = [70, 70, 65 , 90, 65, 65, 65];
+    const columnWidths = [135, 65 , 65 , 85, 60, 60];
     let currentLeft = 50; // starting from left margin
 
     // Draw table header
@@ -773,7 +782,7 @@ async function exportToPdf(res, orders, summary) {
       // Draw row - 
       currentLeft = 50;
       [
-        order._id.toString().substring(0, 6) + "...",
+        order.order_id.toString(),
         order.order_date.toLocaleDateString('en-IN'),
         order.address_id
           ? order.address_id.name.length > 10
@@ -785,7 +794,7 @@ async function exportToPdf(res, orders, summary) {
               : order.temp_address.name
             : 'Guest',
         order.payment_method.method,
-        order.order_status,
+      
         `₹${order?.discount?.toFixed(2)}`,
         `₹${order.total_price.toFixed(2)}`,
       ].forEach((text, i) => {

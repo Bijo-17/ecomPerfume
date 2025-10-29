@@ -80,6 +80,9 @@
 
     <div class="orders-list" id="ordersList">
         <!-- Order  -->
+         <% if(orders && orders.length < 1 ){ %>
+            <h3> Looks like you haven't ordered anythig...</h3>
+        <% } else {  %>
          <% for(let i =0 ; i< orders.length ; i++) { %> 
                
             <% orders[i].order_items.forEach(product=> { %>
@@ -126,17 +129,25 @@
         </div>
 
          <% }) %>
-     <% } %>
+     <% } } %>
       
 
-  
-
-
     </div>
 
-    <div class="no-more-orders">
+   
+    <div id="resultdiv"> </div>
+   
+     <div id="loader" class="loader no-more-orders" style="display: none;">
+        <p class="m-0">Loading more orders...<p>
+        <div class="spinner-border spinner-border-sm" role="status">   
+           <span class="sr-only">Loading...</span>
+        </div>
+     </div>
+
+    <div id="end-message" class="end-message no-more-orders" style="display:none">
         <p>No more orders</p>
     </div>
+
 </div>
 
 <!-- Order Details Modal -->
@@ -216,8 +227,13 @@
 
    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
- <script id="order-data" type="application/json">
+   <script id="hasmore" type="application/json">   
+        <%- JSON.stringify(hasMore) %>     
+   </script>
+
+   <script id="order-data" type="application/json">
             <%- JSON.stringify(orders) %>
+
     </script>
 
 <script src="/js/order.js"> </script>

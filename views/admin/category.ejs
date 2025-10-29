@@ -36,11 +36,11 @@
               <input type="text" class="form-control" name="categoryName" id="categoryName"  >
             </div>
             <div class="mb-3">
-              <label for="subcategoryName" class="form-label">Subcategory (Optional)</label>
+              <label for="subcategoryName" class="form-label">Subcategory</label>
               <input type="text" class="form-control" name="subcategoryName" id="subcategoryName">
             </div>
               <div class="mb-3">
-              <label for="subcategorOffer" class="form-label">Add Offer (%)</label>
+              <label for="subcategorOffer" class="form-label">Add Offer (%) - optional</label>
               <input type="number" class="form-control" name="categoryOffer" id="categoryOffer">
             </div>
 
@@ -163,7 +163,7 @@
                             <% } %>
                             <a  onclick="deleteCat('<%= category._id %>')" class="btn btn-sm btn-danger">Delete</a>
 
-                             <!-- add subcategories -->
+          <!-- add subcategories -->
 
                                                         
 <button class="btn btn-sm btn-primary ms-2" data-bs-toggle="modal" data-bs-target="#addsubcategoryModal<%= category._id %>">+ Add Subcategory</button>
@@ -171,18 +171,18 @@
 <!-- Modal -->
 <div class="modal fade" id="addsubcategoryModal<%= category._id %>" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog">
-    <form action="/admin/subcategory/add/<%= category._id %>" method="POST" class="modal-content">
+    <form action="" class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">Add Subcategory</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
 
       <div class="modal-body">
-        <input type="text" name="name"  class="form-control" required  />
+        <input type="text" name="name" id="subcat<%=category._id%>"  class="form-control"  />
       </div>
 
       <div class="modal-footer">
-        <button type="submit" class="btn btn-primary">Save</button>
+        <button type="button" class="btn btn-primary" onclick="addSubcategory('<%=category._id %>')">Save</button>
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
       </div>
     </form>
@@ -204,24 +204,25 @@
                                 <td><%= sub.status %></td>
                                 <td></td>
                                 <td>
-                                               <!-- edit subcategory Button -->
+
+     <!-- edit subcategory Button -->
 <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editSubcategoryModal<%= sub._id %>">Edit</button>
 
-<!-- Modal -->
+<!--edit subcategory Modal -->
 <div class="modal fade" id="editSubcategoryModal<%= sub._id %>" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog">
-    <form action="/admin/subcategory/edit/<%= sub._id %>" method="POST" class="modal-content" >
+    <form  class="modal-content" >
       <div class="modal-header">
         <h5 class="modal-title">Edit Subcategory</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
 
       <div class="modal-body">
-        <input type="text" name="name" value="<%= sub.name %>" class="form-control"   />
+        <input type="text" name="name" value="<%= sub.name %>" id="editsubcat<%=sub._id%>" class="form-control"   />
       </div>
 
       <div class="modal-footer">
-        <button type="submit" class="btn btn-primary">Save</button>
+        <button type="button" class="btn btn-primary" onclick="editSubcategory('<%=category._id%>','<%=sub._id%>')" >Save</button>
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
       </div>
     </form>
@@ -331,6 +332,17 @@ const image = document.getElementById('categoryImage').src
 if(!categoryName){
     Swal.fire("warning","Please enter the category name" , "warning");
     return;
+} else if(categoryName.length < 3) {
+     Swal.fire("waring", "Category name should contain atleast three charaters", "warning")
+     return;
+}
+
+if(!subcategoryName){
+   Swal.fire("warning", "Please enter the subcategory name", "warning");
+   return;
+} else if(categoryName.length < 3) {
+     Swal.fire("waring", "Subcategory name should contain atleast three charaters", "warning")
+     return;
 }
 
 if( categoryOffer && (categoryOffer > 90 || categoryOffer < 1) ){
@@ -558,6 +570,59 @@ function viewEditImage(event , index) {
            } 
 
       })
+
+
+     async function addSubcategory(categoryId){
+         const subcat =  document.getElementById('subcat'+categoryId).value.trim()
+
+         if(!subcat){
+           Swal.fire("Warning","Enter a category name","warning")
+         } else if( subcat.length < 3){
+           Swal.fire("Warning", "Enter atleast three characters","warning")
+         }
+
+         const response = await fetch(`/admin/subcategory/add/${categoryId}`,{
+               method : 'POST',
+               headers : {'Content-Type': 'application/json'},
+               body : JSON.stringify({name:subcat})
+         })
+
+         const data = await response.json();
+
+         if(!data.success){
+            Swal.fire("warning",data.message || "unable to add category" , "warning");
+         }else {
+            window.location.reload();
+         }
+
+      }
+
+       async function editSubcategory(categoryId, subcatId){
+         const subcat =  document.getElementById('editsubcat'+subcatId).value.trim()
+
+         if(!subcat){
+           Swal.fire("Warning","Enter a category name","warning")
+         } else if( subcat.length < 3){
+           Swal.fire("Warning", "Enter atleast three characters","warning")
+         }
+
+         const response = await fetch(`/admin/subcategory/edit/${categoryId}/${subcatId}`,{
+               method : 'POST',
+               headers : {'Content-Type': 'application/json'},
+               body : JSON.stringify({name:subcat})
+         })
+
+         const data = await response.json();
+
+         if(!data.success){
+            Swal.fire("warning",data.message || "unable to add category" , "warning");
+         }else {
+            Swal.fire("Success","Subcategory edited ","success").then(()=>{
+            window.location.reload();
+            });
+         }
+
+      }
 
 
 </script>

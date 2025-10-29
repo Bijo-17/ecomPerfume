@@ -47,10 +47,7 @@ router.get('/category/delete', categoryController.deleteCategory); // soft delet
 
 
 router.post('/subcategory/add/:id', subcategoryController.addSubcategory);
-
-
-router.post('/subcategory/edit/:id', subcategoryController.editSubcategory);
-
+router.post('/subcategory/edit/:catId/:subId', subcategoryController.editSubcategory);
 router.get('/subcategory/block/:id', subcategoryController.blockSubcategory);
 router.get('/subcategory/unblock/:id', subcategoryController.unblockSubcategory);
 router.get('/subcategory/delete/:id', subcategoryController.deleteSubcategory);

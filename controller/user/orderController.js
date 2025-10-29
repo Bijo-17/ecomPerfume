@@ -15,12 +15,18 @@ const getOrder = async (req, res) => {
     const userId = req.session.user;
 
     const user = await User.findOne({ _id: userId });
-
     const fullname = user.name;
+    const page = 1;
+    const limit = 5;
+    const skip = (page - 1) * limit;
 
-    const order = await Order.find({ user_id: userId }).populate('order_items.product_id address_id').sort({ createdAt: -1 });
+    const order = await Order.find({ user_id: userId }).sort({ createdAt: -1 }).skip(skip).limit(limit).populate('order_items.product_id address_id');
 
-    res.render("orders", { layout: "../layout/userAccount", active: "order", user, firstName: fullname, orders: order })
+    const totalOrders = await Order.countDocuments({ user_id: userId });
+
+    const hasMore = page * limit < totalOrders; 
+
+    res.render("orders", { layout: "../layout/userAccount", active: "order", user, firstName: fullname, orders: order, hasMore })
 
   } catch (error) {
     console.log("error in loading order list", error)
@@ -29,6 +35,30 @@ const getOrder = async (req, res) => {
 
 }
 
+const loadMoreOrders = async (req, res) => {
+  try {
+
+    const userId = req.session.user;
+    const page = parseInt(req.query.page) || 2;
+    const limit = 10;
+    const skip = (page - 1) * limit;
+
+    const orders = await Order.find({ user_id: userId })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate('order_items.product_id address_id');
+
+    const totalOrders = await Order.countDocuments({ user_id: userId });
+    const hasMore = page * limit < totalOrders;
+console.log("more order lenght" , orders.length , page , skip);
+    res.json({ orders, hasMore });
+
+  } catch (error) {
+    res.json({message:'Something went wrong try again'});
+    console.log('error in loading products', error);
+  }
+}
 
 const orderPlaced = async (req, res) => {
 
@@ -238,7 +268,7 @@ const cancelFullOrder = async (req, res) => {
           refundAmount = itemSubtotal - discountShare;
         }
 
-     
+
         totalRefundAmount += refundAmount;
 
 
@@ -657,4 +687,4 @@ const generateInvoice = async (req, res) => {
   }
 };
 
-module.exports = { orderPlaced, getOrder, generateInvoice, returnProduct, cancelProduct, orderFailed, cancelFullOrder }
+module.exports = { orderPlaced, getOrder, generateInvoice, returnProduct, cancelProduct, orderFailed, cancelFullOrder , loadMoreOrders }

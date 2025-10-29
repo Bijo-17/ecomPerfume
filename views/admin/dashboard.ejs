@@ -172,7 +172,7 @@
         <div class="col-lg-2 col-md-3 col-6">
           <label class="form-label">Report Type</label>
           <select class="form-select" id="reportType"
-            onchange="location.href='/admin?day=' + this.value + '&status=<%= selectedStatus %>'">
+            onchange="location.href='/admin?day=' + this.value">
             <% if (salesToday) { %>
               <option value="salesToday" selected>Sales Today</option>
               <option value="">All</option>
@@ -209,16 +209,7 @@
 
         <!-- Order Status -->
         <div class="col-lg-2 col-md-3 col-6">
-          <label class="form-label">Order Status</label>
-          <select class="form-select" id="orderStatus" onchange="onStatusChange(this.value)">
-            <option disabled selected value="">Select Status</option>
-            <option value="all">All</option>
-            <option value="delivered" <%= selectedStatus === 'delivered' ? 'selected' : '' %>>Delivered</option>
-            <option value="pending" <%= selectedStatus === 'pending' ? 'selected' : '' %>>Pending</option>
-            <option value="cancelled" <%= selectedStatus === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
-            <option value="returned" <%= selectedStatus === 'returned' ? 'selected' : '' %>>Returned</option>
-            <option value="failed" <%= selectedStatus === 'failed' ? 'selected' : '' %>>Failed</option>
-          </select>
+         
         </div>
 
         <!-- Export Buttons -->
@@ -284,44 +275,54 @@
         <th>order ID</th>
         <th scope="col">Name</th>
         <th scope="col">Product</th>
+        <th scope="col">Volume(ML)</th>
         <th scope="col">Date</th>
         <th scope="col">Payment</th>
         <th scope="col">Status</th>
-        <th scope="col">Discount</th>
+        <th scope="col">Quantity</th>
         <th scope="col">Price</th>
         <th scope="col" >Total Price</th>
       </tr>
     </thead>
     <tbody>
-      <% let grandTotal = 0; %> <% for (let i = 0; i < data.length; i++) { %>
+        <% let count = 1 %>
+         <% for (let i = 0; i < data.length; i++) { %>
+      
+        <%  const deliveredItems = data[i].order_items.filter(v=> v.order_status === 'delivered'); %> 
+            <% if(deliveredItems.length  === 0) continue;  %>
+           
+            <% deliveredItems.forEach((item,index)=> { %> 
       <tr>
-        <td><%= i + 1 %></td>
+        <td><%= count++ %></td>
         <td><%= data[i].order_id %></td>
         <td><b><%= data[i].address_id?.name || data[i].temp_address.name %></b></td>
-        <td><b><% data[i].order_items.forEach(product=>{%>
-             <%= product?.product_id?._id %>  (<%= product?.product_id?.product_name %> x <%= product?.quantity %> (<%=product?.volume %> ML)) <br>
-      <% }) %>
-        
-        </b></td>
+        <td><b>        
+            <%= item?.product_id?.product_name %> 
+        </b>
+        <td ><%= item.volume %></td>
         <td><%= data[i].createdAt.toLocaleString('en-IN') %></td>
         <td><%= data[i].payment_method.method %></td>
-        <td><% data[i].order_items.forEach(items=>{ %>
-                <%= items.order_status %> <br>   
-         <% }) %></td>
-         <td class="text-end"><%=data[i].discount.toFixed(2)%></td>
-        <td > <% data[i].order_items.forEach(product=>{%>
-             <%= product.product_price %>
-           <br>
-           <% })%>
+        <td>
+                <%= item.order_status %> 
+       </td>
+        <td class="text-center"><%= item.quantity %></td>
+        <td >
+             <%=  item.product_price %>        
         </td>
-        <td class="text-end"> <%= data[i].total_price %></td>
+
+        <td class="text-center"> <%=  Number(item.product_price * item.quantity)?.toFixed(2) %></td>
       </tr>
-      <% grandTotal += data[i].total_price; %> <% } %>
+      
+
+       <% }) %>
+       <% } %>
+      
+
     </tbody>
     <tfoot>
       <tr>
         <td colspan="9" class="text-end"><b>Grand Total:</b></td>
-        <td class="text-end"><b><%= grandTotal.toFixed(2) %></b></td>
+        <td class="text-end"><b><%= totalRevenue?.toFixed(2) %></b></td>
       </tr>
     </tfoot>
   </table>
@@ -334,10 +335,10 @@
          
                <% if (currentPage > 1) { %>
                     <li class="page-item">
-                      <a class="page-link" href="?page=1&status=<%=selectedStatus %>&date=<%=date%>&day=<%=day%>&start=<%=start%>&end=<%=end%>">First</a>
+                      <a class="page-link" href="?page=1&date=<%=date%>&day=<%=day%>&start=<%=start%>&end=<%=end%>">First</a>
                     </li>
                   <li class="page-item">
-                      <a class="page-link" href="?page=<%= currentPage - 1 %>&status=<%=selectedStatus %>&date=<%=date%>&day=<%=day%>&start=<%=start%>&end=<%=end%>">Prev</a>
+                      <a class="page-link" href="?page=<%= currentPage - 1 %>&date=<%=date%>&day=<%=day%>&start=<%=start%>&end=<%=end%>">Prev</a>
                   </li>
                <% } %>
 
@@ -352,7 +353,7 @@
 
                    <% for (let i = startPage; i <= endPage; i++) { %>
                       <li class="page-item <%= i === currentPage ? 'active' : '' %>">
-                        <a class="page-link" href="?page=<%= i %>&status=<%=selectedStatus %>&date=<%=date%>&day=<%=day%>&start=<%=start%>&end=<%=end%>"><%= i %></a>
+                        <a class="page-link" href="?page=<%= i %>&date=<%=date%>&day=<%=day%>&start=<%=start%>&end=<%=end%>"><%= i %></a>
                       </li>
                    <% } %>
 
@@ -363,14 +364,14 @@
 
 
                         <li class="page-item">
-                            <a class="page-link" href="?page=<%= totalPages %>&status=<%=selectedStatus %>&date=<%=date%>&day=<%=day%>&start=<%=start%>&end=<%=end%>"><%= totalPages %></a>
+                            <a class="page-link" href="?page=<%= totalPages %>&date=<%=date%>&day=<%=day%>&start=<%=start%>&end=<%=end%>"><%= totalPages %></a>
                         </li>
                      <% } %>
                     
                      <% if (totalPages > currentPage) { %> 
                             
                               <li class="page-item">
-                                <a class="page-link" href="?page=<%= currentPage+1 %>&status=<%=selectedStatus %>&date=<%=date%>&day=<%=day%>&start=<%=start%>&end=<%=end%>" >Next</a>
+                                <a class="page-link" href="?page=<%= currentPage+1 %>&date=<%=date%>&day=<%=day%>&start=<%=start%>&end=<%=end%>" >Next</a>
                               </li>
                                          
                      <% } %>
@@ -460,25 +461,6 @@
      
 
 
-
-   
-  function onStatusChange(value) {
-    const urlParams = new URLSearchParams(window.location.search);
-    urlParams.set("status", value);
-
-    // Retain other filters like day
-    const currentDay = urlParams.get("day") || "";
-    const start = urlParams.get("start") || "";
-    const end = urlParams.get("end") || "";
-    const dateWiseFilter =  urlParams.get("date") || "";
-    if(start && end){
-        window.location.href = `/admin?start=${start}&end=${end}&status=${value}`;
-    } else if(currentDay){ 
-    window.location.href = `/admin?day=${currentDay}&status=${value}`;
-    }else {
-        window.location.href = `/admin?date=${dateWiseFilter}&status=${value}`;
-    }
-  }
 
   //for chart 
 
@@ -819,15 +801,14 @@
   function applyDateFilter() {
     const mode = document.getElementById("dateMode").value;
     const urlParams = new URLSearchParams(window.location.search);
-    const status = urlParams.get("status") || 'all'
 
     if (mode === "single") {
       if (!selectedDate) return alert("Please pick a date.");
-      window.location.href = `/admin?date=${selectedDate}&status=${status}`;
+      window.location.href = `/admin?date=${selectedDate}`;
     } else {
       if (!selectedRange || !selectedRange.includes("to")) return alert("Please pick a valid date range.");
       const [start, end] = selectedRange.split(" to ");
-      window.location.href = `/admin?start=${start}&end=${end}&status=${status}`;
+      window.location.href = `/admin?start=${start}&end=${end}`;
     }
   }
 

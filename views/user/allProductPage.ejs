@@ -93,7 +93,6 @@
     <option value="priceHigh" <%= locals.sort === 'priceHigh' ? 'selected' : '' %>>Price: High to Low</option>
     <option value="nameAZ" <%= locals.sort === 'nameAZ' ? 'selected' : '' %>>Name: A-Z</option>
     <option value="nameZA" <%= locals.sort === 'nameZA' ? 'selected' : '' %>>Name: Z-A</option>
-    <option >  NI thaneee</option>
   </select>
 </form>
 
@@ -158,12 +157,7 @@
         <div class="pagination">   
           
      
-               <% if (currentPage > 1) { %>
-                   <% if (currentPage > 2) { %> 
-            
-                      <a class="page-link" href="?page=1<%=sub? '&sub='+sub : ''%><%=price? '&price='+price : ''%><%=sort? '&sort='+sort : ''%>">First</a>
-             
-                    <% } %>
+               <% if (currentPage > 1) { %>          
              
                       <a href="?page=<%= currentPage-1%><%=sub? '&sub='+sub : ''%><%=price? '&price='+price : ''%><%=sort? '&sort='+sort : ''%>" class="prev-page"><i class="fas fa-chevron-left"></i></a>
                   

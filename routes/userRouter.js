@@ -121,6 +121,7 @@ router.post("/updateCart",userAuth,cartController.updateCart)
 // order 
 
 router.get("/orders",userAuth,orderController.getOrder)
+router.get("/orders/loadmore",userAuth,orderController.loadMoreOrders)
 router.get("/orders/success",userAuth,orderController.orderPlaced)
 router.get("/orders/failed",userAuth,orderController.orderFailed)
 router.post("/orders/downloadInvoice/:orderId/:productId",orderController.generateInvoice)

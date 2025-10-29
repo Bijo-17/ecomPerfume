@@ -121,7 +121,7 @@
                   <% } %>
                   <td><%= item?.product_id?.product_name%> x (<%= item?.quantity%>) </td>
                   <td>
-               <% if(item.order_status === 'returned' || item.order_status === 'failed' ){ %> 
+               <% if(item.order_status === 'returned' || item.order_status === 'failed' || item.order_status === 'delivered' || item.order_status === 'cancelled' ){ %> 
 
                   <span class="badge badge-sealed" title="No further actions allowed">
                       <i class="fas fa-lock"></i> <%= item.order_status.toUpperCase() %>
@@ -137,6 +137,7 @@
               <option value="delivered" <%= item.order_status === 'delivered' ? 'selected' : '' %>>Delivered</option>
               <option value="cancelled" <%= item.order_status === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
             </select>
+             <input type="hidden" name="currentOrderId" value="<%=item._id%>">
           </form>
           <% } %>
         </td>
