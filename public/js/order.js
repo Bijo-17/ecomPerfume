@@ -474,7 +474,7 @@
 
             case 'delivered':
                 return `
-                    <button class="action-btn btn-primary" onclick="returnProduct('${order.order_id}','${productId}')">Return</button>
+                    <button class="action-btn btn-primary" onclick="returnProduct('${order.order_id}','${productOrderId}')">Return</button>
                   
                     <a href="/downloadInvoice/${encodeURIComponent(order.order_id)}/${productId}" class="action-btn btn-secondary">Download Invoice</a>
                 `;

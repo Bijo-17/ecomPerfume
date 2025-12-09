@@ -51,7 +51,7 @@ const loadMoreOrders = async (req, res) => {
 
     const totalOrders = await Order.countDocuments({ user_id: userId });
     const hasMore = page * limit < totalOrders;
-console.log("more order lenght" , orders.length , page , skip);
+
     res.json({ orders, hasMore });
 
   } catch (error) {
@@ -359,10 +359,9 @@ const returnProduct = async (req, res) => {
     const order = await Order.findOne({ order_id: orderId }).populate('order_items.product_id')
 
 
-
     for (let product of order.order_items) {
 
-      if (product.product_id._id == productId) {
+      if (product._id == productId) {
 
         // product.order_status = 'returned'
         product.return_request.status = 'requested'

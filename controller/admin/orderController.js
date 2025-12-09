@@ -216,7 +216,7 @@ const updateOrderStatus = async (req, res) => {
         const status = req.body.status;
         const page = req.query.page || 1;
         const currentOrderId = req.body.currentOrderId;
-console.log("current order id" , currentOrderId);
+
         const order = await Order.findOne({ _id: orderId })
 
         if(order.order_items.filter(v=> v.order_status !== status).length === 1 ){

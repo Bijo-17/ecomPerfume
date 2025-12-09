@@ -19,7 +19,6 @@ const passport = require("./config/passport")
 db();
 
 
-
 app.use(nocache())
 app.use(session({
     secret:process.env.SESSION_SECRET,
@@ -47,7 +46,6 @@ app.set("view engine", "ejs")
 app.set("views",[path.join(__dirname,"views/user"),path.join(__dirname,"views/admin")])
 
 
-
 app.set("layout", false);
 //  app.set('layout', '../layout/userAccount');
 app.use(expressLayout)
@@ -59,8 +57,8 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use("/",userRouter)
 app.use("/admin",adminRouter)
+app.use("/",userRouter)
 
 app.use((req,res,next)=>{
    if(req.originalUrl.startsWith("/admin")){

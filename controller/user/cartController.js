@@ -17,9 +17,6 @@ const getCart = async (req, res) => {
 
     const userId = req.session.user;
 
-    if (!userId) {
-      return res.redirect("/login")
-    }
 
     const user = await User.findById(userId)
 

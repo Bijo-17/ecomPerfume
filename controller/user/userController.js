@@ -120,7 +120,7 @@ async function sendVerificationEmail(email,otp){
     
             const otp = generateOtp();      
             
-            const otpExpiry = Date.now() + 60 * 1000; // 2 minute expiry
+            const otpExpiry = Date.now() + 60 * 2000; // 2 minute expiry
 
     
             const emailSent = await sendVerificationEmail(email,otp)
@@ -304,9 +304,11 @@ async function sendVerificationEmail(email,otp){
             }
       
             req.session.email = email
-            req.session.user = existingUser._id.toString();            
-
-            return res.redirect("/home")
+            req.session.user = existingUser._id.toString(); 
+            const redirectUrl = req.session.redirectUrl  || '/home';
+            delete req.session.redirectUrl;
+       
+            return res.redirect(redirectUrl);
 
           }else{
             return res.status(400).render("login" , {message : "user not found", activeTab: "login"})
@@ -330,6 +332,7 @@ const loadHome = async (req,res)=>{
             return res.redirect("/home");
 
          } else { 
+          
 
           let product = await Product.find({isDeleted:false , isBlocked : false}).populate('category_id brand_id subcategory_id varients_id').exec()
  
