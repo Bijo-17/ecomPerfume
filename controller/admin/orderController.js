@@ -184,7 +184,8 @@ const approveReturn = async (req, res) => {
                 transaction_date: new Date(),
                 order_id: order._id,
                 user_id: userId,
-                status: 'credited'
+                status: 'credited',
+                transaction_type: 'refund'
             }).save()
 
             await Wallet.findByIdAndUpdate(wallet._id,{$push: { transaction_id: transaction._id }})

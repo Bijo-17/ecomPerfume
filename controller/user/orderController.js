@@ -187,7 +187,8 @@ const cancelProduct = async (req, res) => {
         order_id: order._id,
         user_id: userId,
         status: 'credited',
-        transaction_date: new Date()
+        transaction_date: new Date(),
+        transaction_type : 'refund'
       }).save()
 
 
@@ -302,7 +303,8 @@ const cancelFullOrder = async (req, res) => {
         order_id: order._id,
         user_id: userId,
         status: 'credited',
-        transaction_date: new Date()
+        transaction_date: new Date(),
+        transaction_type : 'refund'
       }).save()
 
 

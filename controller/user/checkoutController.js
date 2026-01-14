@@ -282,7 +282,8 @@ const placeOrder = async (req, res) => {
         status: 'debited',
         amount: total,
         order_id: newOrder._id,
-        transaction_date : new Date()
+        transaction_date : new Date(),
+        transaction_type : 'order'
 
       })
 

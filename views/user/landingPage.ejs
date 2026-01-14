@@ -324,7 +324,7 @@ document.addEventListener('DOMContentLoaded',function(){
             const viewAlldiv = document.createElement('div');
               viewAlldiv.className = 'text-center mt-4';
               const elementA = document.createElement('a');
-               elementA.href = `/product/${category[catlength-1].name}`
+               elementA.href = `/product/${category[catlength-displayedCategory].name}`
                const viewAllbtn = document.createElement('button');
                  viewAllbtn.className = 'btn btn-outline-dark px-5 py-2';
                  viewAllbtn.style.borderRadius = 0;
@@ -354,82 +354,6 @@ document.addEventListener('DOMContentLoaded',function(){
             observer.disconnect();
          }
 
-
-         // to add tocart and wishlist buttons
-
-         document.querySelectorAll('.addToCart-btn').forEach(button => {
-    button.addEventListener('click', async function () {
-      const productId = this.dataset.id;
-
-   
-   const response = await fetch(`/addToCart/${productId}`,{
-         
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-   })
-
- const data = await response.json();
-
-
-      if (data.success) {
-        Swal.fire({        
-         icon: "success",
-          title: "Item added to Cart ",
-          showConfirmButton: false,
-            timer: 1200,
-
-        })
-    
-      }else {
-        Swal.fire({
-           icon: "error",
-            title: data.message || "something went wrong",
-            showConfirmButton:false, 
-            timer:1200, 
-            
-        })
-      }
-
- })
- });
-
-  const wishlistButtons = document.querySelectorAll('.wishlist-btn');
-
-  wishlistButtons.forEach(button => {
-    button.addEventListener('click', async function () {
-      const productId = this.getAttribute('data-id');
-     
-      
-   const response = await fetch(`/addToWishlist/${productId}`,{
-         
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-   })
-
-    const data = await response.json();
-
-
-      if (data.success) {
-        Swal.fire({        
-         icon: "success",
-          title: "Item added to wishlist ",
-          showConfirmButton: false,
-            timer: 1200,
-
-        })
-    
-      }else {
-        Swal.fire({
-           icon: "error",
-            title: data.message || "something went wrong",
-            showConfirmButton:false, 
-            timer:1200, 
-            
-        })
-      }
-
- })
- });
             
        
          
@@ -439,6 +363,68 @@ document.addEventListener('DOMContentLoaded',function(){
     }
     
   }
+
+
+  document.addEventListener("click", async (e) => {
+
+  // ADD TO CART
+  if (e.target.classList.contains("addToCart-btn")) {
+    const productId = e.target.dataset.id;
+
+    const response = await fetch(`/addToCart/${productId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" }
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      Swal.fire({
+        icon: "success",
+        title: "Item added to Cart",
+        showConfirmButton: false,
+        timer: 1200
+      });
+    } else {
+      Swal.fire({
+        icon: "error",
+        title: data.message || "Something went wrong",
+        showConfirmButton: false,
+        timer: 1200
+      });
+    }
+  }
+
+  // WISHLIST
+  if (e.target.classList.contains("wishlist-btn")) {
+    const productId = e.target.dataset.id;
+
+    const response = await fetch(`/addToWishlist/${productId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" }
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      Swal.fire({
+        icon: "success",
+        title: "Item added to wishlist",
+        showConfirmButton: false,
+        timer: 1200
+      });
+    } else {
+      Swal.fire({
+        icon: "error",
+        title: data.message || "Something went wrong",
+        showConfirmButton: false,
+        timer: 1200
+      });
+    }
+  }
+
+});
+
 
   
 

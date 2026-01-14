@@ -742,9 +742,25 @@ textarea:disabled {
     flex: 1;
 }
 
-.transaction-details h3 {
-    font-size: 16px;
-    margin-bottom: 5px;
+.transaction_type {
+    display: inline-block;
+  
+    font-size: 0.8rem;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-weight: 600;
+    width: fit-content;
+    flex: 1;
+}   
+
+.transaction-type.credited {
+    background: rgba(0, 180, 90, 0.12);
+    color: #0b8f50;
+}
+
+.transaction-type.debited {
+    background: rgba(220, 53, 69, 0.12);
+    color: #c82333;
 }
 
 .transaction-date {

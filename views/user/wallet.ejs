@@ -69,13 +69,24 @@
                             <i class="fas fa-<%= transactionHistory[i]?.status === 'credited' ? 'arrow-down' : 'arrow-up' %>"></i>
                         </div>
                         <div class="transaction-details">
-                            <h3> </h3>
-                            <p class="transaction-date"><%= transactionHistory[i]?.transaction_date?.toLocaleString('en-IN') %></p>
+                           
+                            <p class="transaction-date"><%= transactionHistory[i]?.transaction_date?.toLocaleString('en-IN' , { timeZone: 'Asia/Kolkata' }) %></p>
+                               
                         </div>
+                        <div class="transaction_type <%= transactionHistory[i]?.status %>"> 
+                            <% if(transactionHistory[i].transaction_type && transactionHistory[i]?.transaction_type === 'order'){ %>
+                                 <%=    'product purchased' %>
+                             <%   } else if(transactionHistory[i]?.transaction_type === 'refund') { %>
+                               <%=      'product refund' %>
+                              <%  } %>
+                             
+                        </div>
+
                         <div class="transaction-amount <%= transactionHistory[i].type %>">
                             <%= transactionHistory[i]?.status === 'credited' ? '+' : '-' %> ₹<%= transactionHistory[i]?.amount.toFixed(2) %>
                         </div>
-                    </div>
+                    </div> 
+                   
                 <% }; %> 
             </div>
 
