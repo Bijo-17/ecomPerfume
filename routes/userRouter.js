@@ -26,6 +26,7 @@ router.get("/pageError",userController.pageError)
 
 router.get("/",userController.loadHome)
 router.get("/home",userAuth, userController.userHome)
+router.get("/loadhomepageProduct",userController.loadProduct)
 
 router.get("/login/",userController.loadLogin)
 router.get("/register",userController.loadRegister)

@@ -27,7 +27,9 @@
         <!-- Hero Banner -->
         <section class="hero-banne">
             <img src="/images/unisex-banner.jpg" alt=""> <br>
-            <div class="hero-text"><%=categoryName?  categoryName: 'All Products'%></div>
+            <div class="hero-text"><%=categoryName?  categoryName: 'All Products'%>  </div> 
+             <span><%= products.length%> results found</span>
+            
         </section>
 
         <%-include("../partials/user/breadcrum")%>

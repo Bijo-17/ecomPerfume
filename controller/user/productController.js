@@ -25,24 +25,26 @@ const getAllProducts = async (req,res)=>{
         let search = "";
        const filter = { isDeleted:false , isBlocked: false  };
         
-        if(categoryName.includes("Search")){
+        // if(categoryName.includes("Search")){
         
-              search = categoryName.split("=")[1]?.trim() || ""; 
+        //       search = categoryName.split("=")[1]?.trim() || ""; 
       
-              const brand = await Brand.find({name:{$regex: search , $options: 'i'}})
-        const brandId = brand.map(i=> i._id)
-        const category = await Category.find({name: {$regex: search , $options : 'i'}})
-         const catId = category.map(c=> c._id)
-        const subcategory = await Subcategory.find({name: {$regex: search , $options : 'i'}})
-         const subcatId = category.map(c=> c._id)
+        //       const brand = await Brand.find({name:{$regex: search , $options: 'i'}})
+        // const brandId = brand.map(i=> i._id)
+        // const category = await Category.find({name: {$regex: search , $options : 'i'}})
+        //  const catId = category.map(c=> c._id)
+        // const subcategory = await Subcategory.find({name: {$regex: search , $options : 'i'}})
+        //  const subcatId = category.map(c=> c._id)
          
-        filter.$or = [
-            { product_name : { $regex : search , $options : 'i'}},
-            { brand_id :{  $in : brandId} },
-             { category_id :{  $in : catId} },
-              { subcategory_id :{  $in : subcatId} }
-        ]
-        }
+        // filter.$or = [
+        //     { product_name : { $regex : search , $options : 'i'}},
+        //     { brand_id :{  $in : brandId} },
+        //      { category_id :{  $in : catId} },
+        //       { subcategory_id :{  $in : subcatId} }
+        // ]
+        //     categoryName = "search result for '"+search+"'";
+        //     console.log("catname" , categoryName);
+        // }
  
   let subcategoryProducts;
 

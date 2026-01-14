@@ -13,7 +13,7 @@ const search = async (req, res) => {
     const page = parseInt(req.query.page) || 1
     const sub = req.query.sub || '';
     const { price, sortOption } = req.query
-    console.log("form search" , price , sortOption , "sortoption\n\n")
+    
 
     const filter = { isDeleted: false, isBlocked: false, stock_status: true }
 
@@ -35,7 +35,7 @@ const search = async (req, res) => {
       ]
 
     }
-    const categoryName = 'Search = ' + search
+    const categoryName = "Search result for '" +search+"'";
 
     if (price) {
       if (price === "2000+") {

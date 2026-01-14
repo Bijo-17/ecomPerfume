@@ -10,7 +10,6 @@ const jwt = require('jsonwebtoken');
 const Coupon = require("../../models/couponSchema");
 const Cart = require("../../models/cartSchema");
 const Banner = require("../../models/bannerSchema");
-const { dash } = require("pdfkit");
 const Wallet = require("../../models/walletSchema");
 const Transaction = require("../../models/transactionSchema");
 
@@ -332,18 +331,6 @@ const loadHome = async (req,res)=>{
             return res.redirect("/home");
 
          } else { 
-          
-
-          let product = await Product.find({isDeleted:false , isBlocked : false}).populate('category_id brand_id subcategory_id varients_id').exec()
- 
-           product = product.filter(product=>{
-
-                                             const stock = !product.varients_id.inventory.every(s=> s.stock < 1) 
-                                             const brandStatus = product.brand_id.status === 'active' && product.brand_id.isDeleted === false;
-                                                                    
-                                        return stock && brandStatus
-                                         
-                             })
 
 
           const banner = await Banner.find({ 
@@ -360,7 +347,7 @@ const loadHome = async (req,res)=>{
                         
           const category = await Category.find({isDeleted:false , status: 'active'}) 
 
-          return res.render("landingPage",{product , banner , category })
+          return res.render("landingPage",{ banner , category })
 
       }
         
@@ -373,6 +360,8 @@ const loadHome = async (req,res)=>{
     }
 }
 
+
+
 const userHome = async (req,res)=>{
      try {
       
@@ -383,17 +372,7 @@ const userHome = async (req,res)=>{
               return res.redirect("/")
 
            } else { 
-
-          let product = await Product.find({isDeleted:false}).sort({createdAt:-1}).populate('category_id brand_id subcategory_id varients_id').exec()
-
-          product = product.filter(product=>{
-
-                                             const stock = !product.varients_id.inventory.every(s=> s.stock < 1) 
-                                             const brandStatus = product.brand_id.status === 'active' && product.brand_id.isDeleted === false;
-                                                                    
-                                        return stock && brandStatus
-                                         
-                             })
+  
 
           const banner = await Banner.find({ 
                                                 isDeleted:false , 
@@ -409,7 +388,7 @@ const userHome = async (req,res)=>{
         const category = await Category.find({isDeleted:false , status: 'active'})
         const userData = await User.findOne({_id:user});
         const cart = await Cart.findOne({user_id:user})
-        return res.render("landingPage",{user:userData ,product , cart , banner ,category})
+        return res.render("landingPage",{user:userData , cart , banner ,category})
 
       }
 
@@ -421,6 +400,33 @@ const userHome = async (req,res)=>{
       
      }
 
+}
+
+// load product after homepage is loaded
+
+const  loadProduct = async (req,res)=>{
+  
+    try{
+
+       let product = await Product.find({isDeleted:false , isBlocked : false}).populate('category_id brand_id subcategory_id varients_id').exec()
+ 
+           product = product.filter(product=>{
+
+                                             const stock = !product.varients_id.inventory.every(s=> s.stock < 1) 
+                                             const brandStatus = product.brand_id.status === 'active' && product.brand_id.isDeleted === false;
+                                                                    
+                                        return stock && brandStatus
+                                         
+                             })
+
+        const category = await Category.find({isDeleted:false , status: 'active'}).sort({createdAt: -1})
+
+       return res.json({product,category});
+
+    }
+    catch(error){
+       console.log("error in loading products to homepage",error);
+    }
 }
 
 
@@ -444,7 +450,8 @@ module.exports ={
     resendOtp,
     userHome,
     logout,
-    pageError
+    pageError,
+    loadProduct
 }
 
 

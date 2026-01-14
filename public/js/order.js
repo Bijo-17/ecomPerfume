@@ -21,7 +21,6 @@
          
           const res = await fetch("/orders/loadmore?page="+page);
           const data = await res.json();
-          const container = document.getElementById('ordersList')
           const orders = data.orders;
           
 
@@ -60,7 +59,7 @@
           
          for(let i =0 ; i< orders.length ; i++) {
                
-           orders[i].order_items.forEach((product, index)=> {
+           orders[i].order_items.forEach((product)=> {
          
           const orderItemsdiv = document.createElement('div');
          

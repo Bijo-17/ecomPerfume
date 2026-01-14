@@ -11,6 +11,29 @@
            font-size: 14px;
            font-weight: 600;
           }
+        
+          /* Initial hidden state */
+      .fade-up {
+         transform: translateY(60px); 
+         transition: 600ms ease;
+         opacity:0;
+
+        }
+
+    /* When visible */
+   .fade-up.show {
+        transform: translateY(0);
+        opacity: 1; 
+     }
+
+     
+
+  
+    .hideFooter{
+       opacity: 0;
+    }
+  
+
   </style>
  </head>
 
@@ -79,8 +102,6 @@
 
 
 
-      <!-- ejs -->
-
      
 </section>
 
@@ -98,65 +119,11 @@
 
 <!-- product section -->
 
- <section> 
+ <section id="productSection"> 
 
-    <!-- catgetory -->
-    
-    <% for(let i=0 ; i<category.length ; i++){ %> 
-    <div class="container py-5 ">
-     
-        <h3 class="text-center mb-4"><%=category[i].name%></h3>
-    
-        <div class="row g-4 justify-content-center">
-        <% let count = 0; %>
-         <% product.forEach((p) => { 
-          
-             if (p.category_id?.name?.toLowerCase() === category[i].name.toLowerCase() && count < 4) {
-               
-              count++;
-          %>
-          <!-- Single Product Card -->
-          <div class="col-6 col-sm-4 col-md-3">
-            <div class="card product-card p-3 shadow-sm">
-         <span class="wishlist-btn" data-id="<%= p._id %>">
-               <i class="fa-regular fa-heart wishlist-icon"></i>
-          </span>
-         <a href="/productDetails/<%=p._id%>"> <img src="<%=p.image[0]%>" alt="<%=p.product_name%>" class="product-image mx-auto">
-              <div class="card-body text-center">
-                <h6 class="card-title"><%=p.product_name%></h6>
-                <div class="mb-2">
-                <% for (let i = 0; i < 5; i++) { %>
-                  <% if (i < Math.floor(p.averageRating)) { %>
-                    <span class="text-warning">★</span>
-                  <% } else { %>
-                    <span class="text-secondary">☆</span>
-                  <% } %>
-                <% } %>
-                <small class="text-muted">(<%= p.ratingCount %>)</small>
-              </div>
-                <p class="mb-1 price">₹<%=p.final_price%><span class="original-price">₹<%=p.regular_price%></span>
-                      <span class="discount"><%= Math.round(parseFloat(1 - p.final_price/p.regular_price) * 100) %>% off</span>
-                 </p>               
-             </a>
-                <button class="btn btn-outline-dark btn-sm w-100 mt-2 addToCart-btn" data-id="<%=p._id%>" >Add to Cart</button>
-              </div>
-            </div>
-          </div>
-      
-           <% } })%>
-      
-     
-         <div class="text-center mt-4">
-            <a href="/product/<%=category[i].name%>"> <button class="btn btn-outline-dark px-5 py-2" style="border-radius: 0; width: 200px;">
-              View All
-            </button>
-          </a>
-          </div>
 
-      </div>
-       <% } %>
+    <div id="displayProduct" class="fade-up"></div>
 
-     
 
 </section>
 
@@ -167,8 +134,230 @@
 <script> 
 
 document.addEventListener('DOMContentLoaded',function(){ 
+
+   const observer1 = new IntersectionObserver((entries)=>{
+      if(entries[0].isIntersecting){
+    
+          fetchProduct();
+
+           observer1.unobserve(document.getElementById("productSection"))
+      }
+    } , { })
+
+  
+
+ const loadProduct = document.getElementById("productSection");
+     observer1.observe(loadProduct);
+
+  
+    
+   let product;
+   let category;
+   let displayedCategory = 1;
+   let isLoading = false;
+
+    const observer = new IntersectionObserver((entries)=>{
+
+      if(!entries[0].isIntersecting || isLoading) return    
+       
+       displayProduct();
+
+      
+         entries[0].target.classList.add("show");
+          
+
+       observer.unobserve(entries[0].target);
+
+
+
+      } , { threshold:0.3})
+
+      
+
+   const productElement = document.getElementById("displayProduct");
+   
+
+
+  async function fetchProduct(){
      
- document.querySelectorAll('.addToCart-btn').forEach(button => {
+    try{ 
+        const res = await fetch("/loadhomepageProduct");
+        const data = await res.json();   
+        product = data.product;
+        category = data.category;
+        observer.unobserve(loadProduct);
+
+        if(data){ 
+           observer.observe(productElement)
+        }
+
+    } catch(error){
+      
+       loadProduct.style.textAlign = 'center';
+       loadProduct.style.fontSize = "1.7rem";
+       loadProduct.style.color = 'red';
+       loadProduct.style.fontWeight = 'bold';
+       loadProduct.textContent = "Unable to load products, try again later";
+    }
+
+  }
+
+     async function displayProduct() {
+     
+     try{ 
+      
+        let catlength = parseInt(category.length);
+        const loadProduct = document.getElementById('loadProduct');
+  
+         if(displayedCategory <= catlength) { 
+                 
+            isLoading = true;
+
+              const maindiv = document.createElement('div');
+              maindiv.className = 'container pt-5 fade-up';
+            
+              
+               const catName = document.createElement('h3');
+               catName.classList.add('text-center');
+               catName.classList.add('mb-4');
+               catName.textContent = category[catlength-displayedCategory].name;
+
+               const productdiv = document.createElement('div');
+               productdiv.className = 'row g-4 justify-content-center';
+  
+        let plen = 1;
+        product.forEach((prd,i)=>{ 
+                
+                 if(plen < 5){ 
+                  if(prd.category_id?.name?.toLowerCase() === category[catlength-displayedCategory].name.toLowerCase()){ 
+            
+                  const productmaindiv = document.createElement('div');
+                   productmaindiv.className = 'col-6 col-sm-4 col-md-3';
+
+                    const productcardDiv = document.createElement('div');
+                     productcardDiv.className = 'card product-card p-3 shadow-sm';
+                      const wishlistSpan = document.createElement('span');
+                       const wishlisticon = document.createElement('i');
+                       wishlisticon.className = 'fa-regular fa-heart wishlist-icon wishlist-btn';
+                       wishlisticon.dataset.id = prd._id;
+                      wishlistSpan.appendChild(wishlisticon);
+
+                   const productLink = document.createElement('a');
+                    productLink.href = `/productDetails/${product[i]._id}`;
+                    
+                     const productImg = document.createElement('img');
+                      productImg.src = prd.image[0];
+                      productImg.alt = prd.product_name;
+                      productImg.className = 'product-image mx-auto'
+                      
+                     const productdetailsdiv = document.createElement('div');
+                      productdetailsdiv.className = 'card-body text-center';
+                       const productname = document.createElement('h6');
+                       productname.className = 'card-title';
+                       productname.textContent = prd.product_name;
+                      
+                       const productratingdiv = document.createElement('div');
+                         productratingdiv.classList.add('mb-2');
+                          
+                            for(let j = 0 ; j < 5 ; j++){
+                               if(j < Math.floor(product[i].averageRating)){
+                                  const filledstardiv = document.createElement('span');
+                                   filledstardiv.classList.add('text-warning');
+                                   filledstardiv.textContent = '★';
+                                 productratingdiv.appendChild(filledstardiv);
+                               } else {
+                                  const unfilledstardiv = document.createElement('span');
+                                   unfilledstardiv.classList.add('text-secondary');
+                                   unfilledstardiv.textContent = '☆';
+                                  productratingdiv.appendChild(unfilledstardiv);
+                               }
+                                  
+                            }
+                                
+                             const smallElement = document.createElement('small');
+                              smallElement.classList.add('text-muted');
+                              smallElement.textContent = '('+product[i].ratingCount+')';
+                             productratingdiv.appendChild(smallElement);
+                           
+                      
+                      const pricedetails = document.createElement('p');
+                       pricedetails.classList.add('mb-1');
+                       pricedetails.classList.add('price');
+                       pricedetails.textContent = ''+product[i].final_price;
+                         
+                         const originalPrice = document.createElement('span');
+                          originalPrice.classList.add('original-price');
+                          originalPrice.textContent = product[i].regular_price;
+                         const discountPrice = document.createElement('span');
+                          discountPrice.classList.add('discount');
+                          discountPrice.textContent = Math.round(parseFloat(1 - product[i].final_price/product[i].regular_price)*100) +'% off';
+
+                         pricedetails.appendChild(originalPrice);
+                         pricedetails.appendChild(discountPrice);
+
+
+                    productdetailsdiv.appendChild(productname);
+                    productdetailsdiv.appendChild(productratingdiv);
+                    productdetailsdiv.appendChild(pricedetails)
+
+                   productLink.appendChild(productImg);
+                   productLink.appendChild(productdetailsdiv); 
+                
+               const addtocartBtn = document.createElement('button');
+                addtocartBtn.className = 'btn btn-outline-dark btn-sm w-100 mt-2 addToCart-btn'
+                addtocartBtn.dataset.id = product[i]._id;
+                addtocartBtn.textContent = 'Add to Cart';
+           
+              productcardDiv.appendChild(wishlistSpan);
+              productcardDiv.appendChild(productLink);
+              productcardDiv.appendChild(addtocartBtn);
+
+              productmaindiv.appendChild(productcardDiv);
+              productdiv.appendChild(productmaindiv);
+
+                plen++
+               }
+               
+              }
+             })
+               
+            const viewAlldiv = document.createElement('div');
+              viewAlldiv.className = 'text-center mt-4';
+              const elementA = document.createElement('a');
+               elementA.href = `/product/${category[catlength-1].name}`
+               const viewAllbtn = document.createElement('button');
+                 viewAllbtn.className = 'btn btn-outline-dark px-5 py-2';
+                 viewAllbtn.style.borderRadius = 0;
+                 viewAllbtn.textContent = 'View All';
+                elementA.appendChild(viewAllbtn);
+                viewAlldiv.appendChild(elementA);
+                
+            maindiv.appendChild(catName);
+            maindiv.appendChild(productdiv);
+            maindiv.appendChild(viewAlldiv);
+            productElement.appendChild(maindiv);
+
+            const displayProductDiv = document.getElementById("displayProduct");
+            const lastSection = displayProductDiv.lastElementChild;
+             observer.observe(lastSection);
+
+         
+             displayedCategory++;
+             isLoading=false;
+
+
+
+         } else {
+            const footer = document.querySelector('footer');
+        
+            footer.classList.remove('hideFooter');
+            observer.disconnect();
+         }
+
+
+         // to add tocart and wishlist buttons
+
+         document.querySelectorAll('.addToCart-btn').forEach(button => {
     button.addEventListener('click', async function () {
       const productId = this.dataset.id;
 
@@ -188,9 +377,6 @@ document.addEventListener('DOMContentLoaded',function(){
           title: "Item added to Cart ",
           showConfirmButton: false,
             timer: 1200,
-             willClose: () => {
-                window.location.reload();
-             }
 
         })
     
@@ -200,9 +386,7 @@ document.addEventListener('DOMContentLoaded',function(){
             title: data.message || "something went wrong",
             showConfirmButton:false, 
             timer:1200, 
-             willClose: () => {
-              window.location.reload();
-             }
+            
         })
       }
 
@@ -231,9 +415,6 @@ document.addEventListener('DOMContentLoaded',function(){
           title: "Item added to wishlist ",
           showConfirmButton: false,
             timer: 1200,
-             willClose: () => {
-                window.location.reload();
-             }
 
         })
     
@@ -243,16 +424,23 @@ document.addEventListener('DOMContentLoaded',function(){
             title: data.message || "something went wrong",
             showConfirmButton:false, 
             timer:1200, 
-             willClose: () => {
-              window.location.reload();
-             }
+            
         })
       }
 
  })
  });
+            
+       
+         
+     
+    } catch(error){
+       console.log('error in loading products', error);
+    }
+    
+  }
 
-
+  
 
 
 })
